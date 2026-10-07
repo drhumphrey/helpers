@@ -33,13 +33,13 @@ People who are strong systems thinkers and creatives but are not natural typers,
 |---|---|
 | Licence | GPL-3.0 (already in the repo). All dependencies below are compatible. |
 | Runtime | C# on .NET 10 (LTS). Windows first, x64. macOS after v0.2. `Helpers.Core`, `Helpers.Speech` and `Helpers.Ai` must have no Windows dependencies, so the Mac version is a new shell, not a rewrite. |
-| UI | WPF with the Fluent theme that ships with .NET 9+, following the Windows light/dark setting. **Open question:** Avalonia instead, if Mac is wanted within the project's life. See Open questions. Must be settled before milestone 3. |
+| UI | Avalonia 11 (MIT) with its Fluent theme, following the OS light/dark setting and accent colour. Decided 7 October 2026 so one UI runs on Windows and macOS. There is no main window: the app lives in the tray and shows small overlays. See Surfaces. |
 | Speech | sherpa-onnx (NuGet `org.k2fsa.sherpa.onnx`, Apache-2.0) running Kokoro (Apache-2.0 weights). Fully offline. Runs on Windows and macOS. |
 | Default voice | A British Kokoro voice. Kokoro v1.0 includes bf_emma, bf_isabella, bf_alice, bf_lily, bm_george, bm_lewis, bm_daniel and bm_fable. Check the sherpa-onnx docs for the current model package and its speaker-ID mapping. Prefer the int8 build if quality is close. |
 | Audio | NAudio (MIT) on Windows, behind an `IAudioOutput` interface in Core. |
 | Reading the selection | UI Automation first (UIA3 via FlaUI.UIA3, MIT, or direct COM interop). Clipboard as fallback. Both behind `ISelectionSource`. |
 | Markdown | Markdig (BSD-2) in Core to parse Markdown into spoken text. No regex-only Markdown handling. |
-| Spelling | On Windows, the Windows spell-check engine. With WPF that is the built-in `SpellCheck.IsEnabled`; with Avalonia it is the `ISpellChecker` COM API called directly. Language en-GB. User dictionary supported. Free, offline, nothing to ship. |
+| Spelling | On Windows, the Windows spell-check engine through its `ISpellChecker` COM API, with the underlines drawn by our own Avalonia adorner. Language en-GB. User dictionary supported. Free, offline, nothing to ship. On Mac, `NSSpellChecker` behind the same interface. |
 | Grammar and rewriting | A language model behind one `IAssistant` interface. Local provider first, cloud provider second. See AI helpers. |
 | Local model | LLamaSharp (MIT) with the CPU backend. Default model: Qwen3-4B instruct, Q4_K_M GGUF (Apache-2.0), run with thinking off. Fallback for low-memory PCs: Qwen3-1.7B. Confirm the exact model at milestone 9 by testing on Dave's laptop. |
 | Cloud model | Optional, bring-your-own-key. First provider is Claude through the official Anthropic C# SDK (NuGet `Anthropic`). Default model ID `claude-haiku-4-5` because it is the cheapest and these are simple tasks. The model ID is a setting; `claude-sonnet-5-5` gives better rewrites at higher cost. |
@@ -47,22 +47,54 @@ People who are strong systems thinkers and creatives but are not natural typers,
 | Readable fonts | Bundle Lexend and Atkinson Hyperlegible (both SIL Open Font Licence). System font stays the default. |
 | Privacy | Offline by default. Cloud features are opt-in, per feature, and clearly labelled. No telemetry. |
 
-Prerequisites on the dev machine: the .NET 10 SDK (not yet installed on Dave's PC as of 7 October 2026; `winget install Microsoft.DotNet.SDK.10`). VS Code with the C# Dev Kit is enough. Inno Setup is needed for the packaging milestone.
+Prerequisites on the dev machine: the .NET 10 SDK (not yet installed on Dave's PC as of 7 October 2026; `winget install Microsoft.DotNet.SDK.10`) and the Avalonia templates (`dotnet new install Avalonia.Templates`). VS Code with the C# Dev Kit is enough. Inno Setup is needed for the packaging milestone.
 
 ## Open questions for Dave
 
 These are decided below so work can start. Overrule any of them.
 
 - **Product name.** "Helpers" is the working title and the solution name. The tray app needs a friendlier name before v0.1 ships.
-- **Mac, and therefore the UI toolkit.** Milestones 0 to 2 are the same either way. From milestone 3 the UI code is written once, so the choice has to be made then.
-  - *WPF* gives the smoothest Windows app and free spell check, but it is Windows-only. A Mac version would need its whole shell written again, probably in Avalonia or Swift.
-  - *Avalonia* (MIT) runs the same UI on Windows, macOS and Linux. Costs: we wire up the Windows spell checker ourselves (a few days), the toolkit is less familiar, and the Windows-only tricks still need platform code.
-  - **Recommendation:** if Mac is wanted within the project's life, choose Avalonia now. Rewriting a shell later costs more than the few days Avalonia adds up front. If Mac is a "maybe one day", keep WPF.
 - **Publish v0.1 early.** The plan releases the reading half on its own as v0.1 before Compose exists. I think that is right: it's useful on day one.
 - **Four AI actions.** Tidy, Make a request, Summarise and Explain simply. All are prompt templates behind the same plumbing, so each extra one costs little. Cut any you don't want.
 - **Dropbox.** The checkout lives inside Dropbox. Before milestone 0, either exclude the folder from Dropbox sync or move the checkout to a local path.
 
 ## User experience
+
+### Surfaces
+
+There is no main window. The app lives in the tray and shows a small surface only when it has something to do. Every surface shares one visual language (see Look and feel).
+
+| Surface | When it appears | Takes focus? | Goes away |
+|---|---|---|---|
+| **Read pill** | After a mouse selection | Never | After 3 s, or on any click, key or scroll elsewhere |
+| **Player** | When reading starts | Never | A few seconds after reading ends (setting), or Stop |
+| **Reading view** | Player expanded | Never | Collapse, or with the player |
+| **Toast** | Short confirmations and errors: "Copied", "Sent to Visual Studio Code", "Couldn't grab the text from this app", "Loading voice…", "Downloading model, 43%" | Never | 3 s for confirmations. Errors stay until clicked. Progress stays until done. |
+| **AI result card** | After Summarise or Explain simply from the pill or player | Never | Dismiss, or "Use this" |
+| **Compose** | From the tray, hotkey or pill | Yes, it has a text box | Close, or Send |
+| **Settings** | From the tray | Yes | Close |
+| **First run** | First launch only: pick a voice, hear it, done | Yes | Done |
+
+Rules for every surface:
+
+- Appears on the monitor where the cursor is. The pill and the AI result card appear near the cursor; toasts appear above the tray; the player remembers where it was left.
+- Esc dismisses whichever surface is on top.
+- A toast may carry one action button: "Copy instead", "Open Settings", "Retry". Never more than three toasts on screen; older ones collapse.
+- Toasts are the only place errors appear. No modal error dialogs, ever.
+- Overlays never steal focus from the app being read or written in. Only Compose, Settings and First run are normal windows.
+
+### Look and feel
+
+The aim is a modern, attractive app that feels native on Windows 11 and on Mac, and is calm to use.
+
+- **One visual language.** Rounded corners, a soft shadow, a translucent background where the OS supports it (Mica or acrylic on Windows 11, vibrancy on Mac) with a solid fallback. The OS accent colour marks the one primary action on each surface.
+- **Light and dark** follow the OS. No separate theme setting in v1.
+- **Type is large by default.** Readable-text settings (font, size, spacing, tint) apply to every surface that shows the user's text, not only the reading view.
+- **Big targets.** Nothing clickable is smaller than 32 px, because the pill is clicked mid-selection and the player is clicked without looking.
+- **Motion is short and quiet.** Fades of 150 ms or less, no bounces. Honour the OS reduced-motion setting.
+- **Icons** from Fluent UI System Icons (MIT). Looks native on Windows 11 and fine on Mac.
+- **No sounds** by default. A reading app shouldn't ding.
+- **Design doc.** Mockups of each surface, both themes, go in `docs/DESIGN.md` before milestone 3 starts.
 
 ### Read button (the main trigger)
 
@@ -212,7 +244,7 @@ Threading:
 - horizontal rules and HTML: skip
 - block quotes: read normally
 
-**Pronunciation dictionary.** User-editable, whole-word matching, optional case-sensitivity. Ship a starter list for things AI chats say a lot: `npm`, `JSON`, `async`, `regex`, `UIA`, `WPF`, `EVAR → ee-var`. Store it in settings.
+**Pronunciation dictionary.** User-editable, whole-word matching, optional case-sensitivity. Ship a starter list for things AI chats say a lot: `npm`, `JSON`, `async`, `regex`, `UIA`, `GGUF`, `EVAR → ee-var`. Store it in settings.
 
 **Sentence splitter.** It must cope with abbreviations ("Dr.", "et al.", "e.g.", "Fig. 2", decimals, version numbers like "v2.0", file names). Cap chunks at about 400 characters for the engine.
 
@@ -232,7 +264,7 @@ Threading:
 ### Compose: spell check
 
 - Behind `ISpellChecker` in Core so the Mac version can use the Mac's own checker.
-- On Windows with WPF: a `TextBox` with `SpellCheck.IsEnabled="True"` and `xml:lang="en-GB"`. With Avalonia: call the `ISpellChecker` COM API and draw the underlines ourselves.
+- On Windows: call the Windows `ISpellChecker` COM API from `Helpers.Windows`, check the paragraph around the caret on a short debounce, and draw red underlines with an Avalonia adorner over the `TextBox`. Right-click shows the suggestions and "Add to dictionary". Spike this first; it is the one piece of Compose with any technical doubt.
 - Windows needs the English (United Kingdom) language features installed for en-GB spelling. Detect the case where no checker is available and show a one-line hint with the Settings page to open.
 - The user dictionary is a file in `%APPDATA%\Helpers\`. "Add to dictionary" writes to it. The pronunciation dictionary and the spelling dictionary are separate things.
 
@@ -313,10 +345,10 @@ Measure and report these at the milestone where each first applies, then adjust:
 
 Demo each one before starting the next.
 
-0. **Scaffolding.** Install the .NET 10 SDK. Create the solution and empty projects. CI builds and runs an empty test. Sort out the Dropbox question.
+0. **Scaffolding.** Install the .NET 10 SDK and the Avalonia templates. Create the solution and empty projects. CI builds and runs an empty test. Sort out the Dropbox question.
 1. **Engine spike.** A console app that reads a paragraph aloud with Kokoro via sherpa-onnx, using two British voices at 1.0x and 1.5x. Report model load time, time to first audio and memory use. This is the voice-quality check: if the voices aren't good enough, stop here.
 2. **Text pipeline.** Plain-text clean-up, Markdown mode, pronunciation dictionary and sentence splitter in Core, with tests. Test input includes real Claude Code replies.
-3. **Player and tray.** Read clipboard text with the full player, sentence highlighting, the expanded reading view and Watch clipboard. The UI toolkit decision is made before this starts.
+3. **Player and tray.** Starts with a spike: a non-activating, translucent Avalonia overlay that never takes focus. Then read clipboard text with the full player, sentence highlighting, the expanded reading view, toasts and Watch clipboard. The design doc is done before this starts.
 4. **Selection capture.** UIA plus the clipboard fallback, tested against the checklist below.
 5. **Read button.** Mouse hook, show/hide rules, non-activating window, multiple monitors and DPI.
 6. **Settings.** Pronunciation dictionary, readable text, Start with Windows, excluded apps, hotkeys.
@@ -362,22 +394,21 @@ Demo each one before starting the next.
 
 ## Gotchas
 
-- **Non-activating WPF windows:**
-  - set `WS_EX_NOACTIVATE | WS_EX_TOOLWINDOW | WS_EX_TOPMOST` in `SourceInitialized`
-  - set `ShowActivated = false`
-  - return `MA_NOACTIVATE` for `WM_MOUSEACTIVATE`
+- **Non-activating windows in Avalonia:** there is no built-in flag. Get the Win32 handle with `TryGetPlatformHandle()` once the window is created, set `WS_EX_NOACTIVATE | WS_EX_TOOLWINDOW | WS_EX_TOPMOST`, set `ShowActivated = false`, and answer `WM_MOUSEACTIVATE` with `MA_NOACTIVATE` through a window-procedure hook. Prove this works for the pill and the player as the first task of milestone 3, before building anything on it.
+- **Avalonia tray icon:** use Avalonia's own `TrayIcon`. It works on Windows and macOS.
+- **Avalonia transparency:** set `TransparencyLevelHint` to a list (Mica, acrylic, then transparent, then none) so Windows 10 and Mac fall back cleanly. Test both themes on both.
 - **Low-level hooks:** Windows silently removes them if the callback is slow. Never do UIA or clipboard work inside the callback.
 - **UIPI:** a non-elevated app can't read from or send keys to elevated windows.
 - **Clipboard restore:** some formats are delayed-rendered or app-private and can't be restored. Restore what you can (text, Unicode text, RTF, HTML, images, file lists) and test with Office.
 - **DPI:** declare per-monitor v2 DPI awareness in the app manifest.
 - **Electron accessibility:** VS Code, Teams and the Claude desktop app expose a full UIA tree only when they detect assistive technology. Don't rely on UIA there. VS Code users can set `editor.accessibilitySupport` to `on` to help, but we must work without it.
-- **WPF spell check:** needs the en-GB language features installed in Windows. Without them `SpellCheck.IsEnabled` silently does nothing.
+- **Windows spell check:** needs the en-GB language features installed in Windows. Without them the checker reports no errors at all, which looks like perfect spelling. Detect it and say so.
 - **LLamaSharp backends:** reference exactly one backend package (`LLamaSharp.Backend.Cpu`). Mixing backends causes native load failures.
 - **Qwen3 thinking:** on by default and makes short tasks slow. Turn it off.
 
 ## macOS version (milestone 11, after v0.2)
 
-What carries over unchanged: `Helpers.Core`, `Helpers.Speech` and `Helpers.Ai`. sherpa-onnx, Kokoro, Markdig and LLamaSharp all run on macOS, including Apple Silicon. The UI carries over too if Avalonia was chosen.
+What carries over unchanged: `Helpers.Core`, `Helpers.Speech`, `Helpers.Ai` and the Avalonia UI in `Helpers.App`. sherpa-onnx, Kokoro, Markdig and LLamaSharp all run on macOS, including Apple Silicon.
 
 What needs a Mac implementation (`Helpers.Mac`):
 
@@ -405,7 +436,9 @@ What needs a Mac implementation (`Helpers.Mac`):
 ## What changed from brief 1.0
 
 - **Scope widened** from a read-aloud app to a three-job dyslexia companion: hear it, write it, shape it.
-- **macOS added as a stated goal** after v0.2, with the Mac work listed and the UI toolkit raised as an open question to settle before milestone 3.
+- **macOS added as a stated goal** after v0.2, with the Mac work listed.
+- **UI toolkit changed from WPF to Avalonia** (decided 7 October 2026) so one UI serves Windows and Mac. Spell check moves from WPF's built-in to the Windows `ISpellChecker` API with our own underlines.
+- **Surfaces and Look and feel sections added.** No main window; a small set of non-activating overlays with one visual language; errors only ever appear as toasts; a design doc with mockups comes before milestone 3.
 - **Markdown mode added** to text clean-up, using Markdig, because AI chat output is Markdown and reading it raw is painful.
 - **Expanded reading view** added to the player, with click-to-jump.
 - **Compose window added**, with system spell check, read back, send to chat and drafts.
