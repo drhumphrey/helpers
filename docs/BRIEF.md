@@ -47,7 +47,7 @@ People who are strong systems thinkers and creatives but are not natural typers,
 | Readable fonts | Bundle Lexend and Atkinson Hyperlegible (both SIL Open Font Licence). System font stays the default. |
 | Privacy | Offline by default. Cloud features are opt-in, per feature, and clearly labelled. No telemetry. |
 
-Prerequisites on the dev machine: the .NET 10 SDK (not yet installed on Dave's PC as of 7 October 2026; `winget install Microsoft.DotNet.SDK.10`) and the Avalonia templates (`dotnet new install Avalonia.Templates`). VS Code with the C# Dev Kit is enough. Inno Setup is needed for the packaging milestone.
+Prerequisites on the dev machine: the .NET 10 SDK (`winget install Microsoft.DotNet.SDK.10`, or the installer from dot.net if winget hangs) and the Avalonia templates (`dotnet new install Avalonia.Templates`). Both installed on Dave's PC on 7 October 2026. VS Code with the C# Dev Kit is enough. Inno Setup is needed for the packaging milestone.
 
 ## Open questions for Dave
 
