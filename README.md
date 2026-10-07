@@ -1,6 +1,6 @@
 # helpers
 
-Free, open-source Windows tools for people with dyslexia who work with AI chat assistants.
+Free, open-source tools for people with dyslexia who work with AI chat assistants. Windows first, with macOS planned.
 
 AI assistants are brilliant, but working with them means reading a lot of long text and typing a lot of precise requests. That is hard work if you have dyslexia, are not a natural typer, or find it easier to think than to put thoughts in order on the page. These tools take that strain off, and keep your text on your own PC.
 

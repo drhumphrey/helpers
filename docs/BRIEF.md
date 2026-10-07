@@ -1,43 +1,72 @@
-# Read Aloud for Windows: build brief
+# Helpers: build brief 2.0
 
-## What we're building
+Working title: **Helpers**. A small tray app for people with dyslexia who work with AI assistants such as Claude, Claude Code and ChatGPT. Windows 10/11 first; macOS is a stated goal (see below).
 
-A small Windows 10/11 tray app that reads selected text aloud from any app: Word, Outlook (classic and new), Teams, Chrome, Edge, PDFs, Notepad and so on.
+It does three jobs:
 
-- **No hotkey needed.** When you select text with the mouse, a small "Read" button appears next to the cursor. Click it and it reads. Nothing is copied or read until you click.
-- **A compact player** handles pause, skip and speed.
-- **Voices are open-source neural voices running entirely on the PC.** No account, no per-use cost, nothing leaves the machine.
-- **AI translation is optional** and off by default. When switched on, only the text you choose to translate is sent off the machine.
+1. **Hear it.** Select text in any app and a small Read button appears. Click it and a natural offline voice reads the text. It understands the Markdown that AI chats produce.
+2. **Write it.** A Compose window with spelling as you type, a button to hear your draft read back, and a Tidy button that fixes grammar and puts your thoughts in order without changing what you mean. One click sends the result to the chat.
+3. **Shape it.** Turn rough notes or a client's request into a clear instruction for the AI. Turn a long AI reply into a short summary or plain language for someone else.
 
-`prototype/ReadAloud.ahk` (AutoHotkey v2) is a working prototype. Use it as the reference for clipboard capture, clipboard restore and text clean-up behaviour. Don't port AutoHotkey itself.
+Everything runs on the user's own machine. Nothing leaves it unless the user switches on a clearly labelled cloud feature and supplies their own API key.
+
+This brief replaces brief 1.0, which covered reading only. The changes are listed at the end.
+
+`prototype/ReadAloud.ahk` (AutoHotkey v2) is a working prototype of the reading part. Use it as the reference for clipboard capture, clipboard restore and plain-text clean-up. Don't port AutoHotkey itself.
+
+## Who it is for
+
+People who are strong systems thinkers and creatives but are not natural typers, find long replies hard to read, and find it hard to put thoughts in order on the page. Many of them are the go-between for clients or a team and an AI chat. Dave is the first user and the reviewer.
 
 ## Working agreement
 
-- Build milestone by milestone (see below). At the end of each one, stop and show Dave what works, with a short note of anything that didn't go to plan.
+- Build milestone by milestone, in the order below. At the end of each one, stop and show Dave what works, with a short note of anything that didn't go to plan.
 - Ask before changing any decision in the next section, and before adding dependencies beyond those listed.
-- Unit-test everything in `ReadAloud.Core`.
-- Never commit API keys or put user text in logs.
-- Use UK English in all UI text.
+- Unit-test everything in `Helpers.Core`.
+- Never commit API keys. Never put user text in logs.
+- UK English in all UI text, comments and docs.
+- Keep the principles: free for everyone, no tiers, offline first, no telemetry.
 
 ## Decisions already made
 
 | Area | Decision |
 |---|---|
-| Runtime | C# on .NET 10 (LTS). Windows only, x64 first; add ARM64 later if it's cheap. |
-| UI | WPF with the Fluent theme that ships with .NET 9+ (switch to the WPF-UI library if that proves limiting). Follow the Windows light/dark setting. |
-| Speech | sherpa-onnx (NuGet `org.k2fsa.sherpa.onnx`) running Kokoro, whose weights are Apache-2.0, fully offline. |
-| Default voice | A British Kokoro voice. v1.0 includes bf_emma, bf_isabella, bf_alice, bf_lily, bm_george, bm_lewis, bm_daniel and bm_fable. Check the sherpa-onnx docs for the current Kokoro model package and its speaker-ID mapping. Prefer a quantised (int8) build if quality is close. |
-| Audio | NAudio. |
-| Reading the selection | UI Automation first (UIA3 via COM, e.g. FlaUI.UIA3 or direct interop). Clipboard as fallback. |
-| Privacy | Offline by default. Cloud features are opt-in, per feature, and clearly labelled. |
+| Licence | GPL-3.0 (already in the repo). All dependencies below are compatible. |
+| Runtime | C# on .NET 10 (LTS). Windows first, x64. macOS after v0.2. `Helpers.Core`, `Helpers.Speech` and `Helpers.Ai` must have no Windows dependencies, so the Mac version is a new shell, not a rewrite. |
+| UI | WPF with the Fluent theme that ships with .NET 9+, following the Windows light/dark setting. **Open question:** Avalonia instead, if Mac is wanted within the project's life. See Open questions. Must be settled before milestone 3. |
+| Speech | sherpa-onnx (NuGet `org.k2fsa.sherpa.onnx`, Apache-2.0) running Kokoro (Apache-2.0 weights). Fully offline. Runs on Windows and macOS. |
+| Default voice | A British Kokoro voice. Kokoro v1.0 includes bf_emma, bf_isabella, bf_alice, bf_lily, bm_george, bm_lewis, bm_daniel and bm_fable. Check the sherpa-onnx docs for the current model package and its speaker-ID mapping. Prefer the int8 build if quality is close. |
+| Audio | NAudio (MIT) on Windows, behind an `IAudioOutput` interface in Core. |
+| Reading the selection | UI Automation first (UIA3 via FlaUI.UIA3, MIT, or direct COM interop). Clipboard as fallback. Both behind `ISelectionSource`. |
+| Markdown | Markdig (BSD-2) in Core to parse Markdown into spoken text. No regex-only Markdown handling. |
+| Spelling | On Windows, the Windows spell-check engine. With WPF that is the built-in `SpellCheck.IsEnabled`; with Avalonia it is the `ISpellChecker` COM API called directly. Language en-GB. User dictionary supported. Free, offline, nothing to ship. |
+| Grammar and rewriting | A language model behind one `IAssistant` interface. Local provider first, cloud provider second. See AI helpers. |
+| Local model | LLamaSharp (MIT) with the CPU backend. Default model: Qwen3-4B instruct, Q4_K_M GGUF (Apache-2.0), run with thinking off. Fallback for low-memory PCs: Qwen3-1.7B. Confirm the exact model at milestone 9 by testing on Dave's laptop. |
+| Cloud model | Optional, bring-your-own-key. First provider is Claude through the official Anthropic C# SDK (NuGet `Anthropic`). Default model ID `claude-haiku-4-5` because it is the cheapest and these are simple tasks. The model ID is a setting; `claude-sonnet-5-5` gives better rewrites at higher cost. |
+| Dictation | Use the operating system's own voice typing (Win+H on Windows, the dictation key on Mac). It works in the Compose window already. Nothing to build in v1. |
+| Readable fonts | Bundle Lexend and Atkinson Hyperlegible (both SIL Open Font Licence). System font stays the default. |
+| Privacy | Offline by default. Cloud features are opt-in, per feature, and clearly labelled. No telemetry. |
 
-Prerequisites on the dev machine: the .NET 10 SDK (VS Code with the C# Dev Kit is enough). Inno Setup is needed for the installer milestone.
+Prerequisites on the dev machine: the .NET 10 SDK (not yet installed on Dave's PC as of 7 October 2026; `winget install Microsoft.DotNet.SDK.10`). VS Code with the C# Dev Kit is enough. Inno Setup is needed for the packaging milestone.
+
+## Open questions for Dave
+
+These are decided below so work can start. Overrule any of them.
+
+- **Product name.** "Helpers" is the working title and the solution name. The tray app needs a friendlier name before v0.1 ships.
+- **Mac, and therefore the UI toolkit.** Milestones 0 to 2 are the same either way. From milestone 3 the UI code is written once, so the choice has to be made then.
+  - *WPF* gives the smoothest Windows app and free spell check, but it is Windows-only. A Mac version would need its whole shell written again, probably in Avalonia or Swift.
+  - *Avalonia* (MIT) runs the same UI on Windows, macOS and Linux. Costs: we wire up the Windows spell checker ourselves (a few days), the toolkit is less familiar, and the Windows-only tricks still need platform code.
+  - **Recommendation:** if Mac is wanted within the project's life, choose Avalonia now. Rewriting a shell later costs more than the few days Avalonia adds up front. If Mac is a "maybe one day", keep WPF.
+- **Publish v0.1 early.** The plan releases the reading half on its own as v0.1 before Compose exists. I think that is right: it's useful on day one.
+- **Four AI actions.** Tidy, Make a request, Summarise and Explain simply. All are prompt templates behind the same plumbing, so each extra one costs little. Cut any you don't want.
+- **Dropbox.** The checkout lives inside Dropbox. Before milestone 0, either exclude the folder from Dropbox sync or move the checkout to a local path.
 
 ## User experience
 
 ### Read button (the main trigger)
 
-- **When it appears:** after a mouse text selection (drag-select, double-click or triple-click). It's a small pill near the cursor showing "Read" with a speaker icon, plus "Translate" when translation is enabled.
+- **When it appears:** after a mouse text selection (drag-select, double-click or triple-click). It's a small pill near the cursor showing "Read" with a speaker icon. When AI helpers are enabled it also shows "Summarise".
 - **Focus:** it must never steal focus. Use a non-activating window.
 - **When it must not appear:**
   - window drags, file drags and scrollbar drags
@@ -55,25 +84,60 @@ Prerequisites on the dev machine: the .NET 10 SDK (VS Code with the C# Dev Kit i
   - back/forward one sentence
   - speed slider: 0.5x to 2.0x in 0.1 steps, default 1.0x
   - voice picker
-- **Text:** shows the current sentence, highlighted as it's read.
+  - expand/collapse
+- **Compact mode** shows the current sentence, highlighted as it's read.
+- **Expanded mode (reading view)** shows the whole cleaned text in a readable font, the current sentence highlighted, and lets you click any sentence to jump there. This is the view for long AI replies.
 - **When it shows:** it appears when reading starts. It hides a few seconds after reading ends; this is a setting.
 - **Focus:** clicking its buttons must not take focus from the app being read.
+
+### Compose window
+
+A plain window for writing to the AI. Opened from the tray, the hotkey, or the pill.
+
+- **Target.** When Compose opens it remembers the window that had focus, and shows it in the title bar: "Sending to: Visual Studio Code". The user can change the target by clicking another window and pressing "Use this window".
+- **Editor.** A multi-line text box with spelling as you type (red underline, right-click suggestions, "Add to dictionary"). Readable-text settings apply. The operating system's voice typing works here with nothing extra.
+- **Buttons.**
+  - **Read back.** Reads the draft with the same voice and player.
+  - **Tidy.** Fixes spelling, grammar and order. Keeps the meaning. Needs an AI helper (see below). Greyed out with a hint if no model is set up.
+  - **Make a request.** Rewrites the draft as a clear instruction to a coding assistant. Needs an AI helper.
+  - **Send to chat.** Pastes the text into the target window. Never presses Enter. The user presses Enter themselves.
+  - **Copy.** Puts the text on the clipboard and says so.
+- **AI results** never replace the draft silently. They appear beside it with the changes marked, and buttons for "Use this", "Keep mine" and "Read it". Picking "Use this" keeps the old draft in an undo stack.
+- **Drafts** auto-save to settings every few seconds and come back when Compose reopens.
+
+### Readable text
+
+Applies to the reading view and the Compose editor. Lives in Settings.
+
+- font: system default, Lexend or Atkinson Hyperlegible
+- text size
+- line spacing
+- background tint: none, cream or grey
+- highlight colour for the current sentence
 
 ### Tray icon
 
 The menu has:
+
 - Read clipboard
+- Watch clipboard (toggle: when on, any new text copied is read straight away; handy with the Copy button on an AI reply)
 - Pause/Resume
 - Stop
 - Show player
+- Compose
 - Settings
 - Pause the Read button for 1 hour
 - Start with Windows
 - Exit
 
-### Optional hotkey
+### Hotkeys
 
-Off by default and configurable; suggest Ctrl+Alt+Space. It reads the current selection, or stops reading if already reading.
+Off by default and configurable. Suggested defaults:
+
+- Ctrl+Alt+Space: read the current selection, or stop if already reading.
+- Ctrl+Alt+C: open Compose, targeting the current window.
+
+Note that Ctrl+Alt is AltGr on many European keyboards, so these must be easy to change.
 
 ### Settings window
 
@@ -81,28 +145,32 @@ Off by default and configurable; suggest Ctrl+Alt+Space. It reads the current se
 - default speed
 - Read button on/off and its delay
 - excluded apps (by process name)
-- hotkey on/off and the key itself
+- hotkeys on/off and the keys themselves
 - pronunciation dictionary editor
+- readable text (above)
+- Markdown reading options (below)
+- AI helpers: provider choice, local model download and status, cloud key and model, cost so far, prompt templates
 - Start with Windows
-- the cloud features section (see AI integration)
 
 ## Architecture
 
-One solution, suggested projects:
+One solution, `Helpers.sln`, with these projects:
 
 | Project | Responsibility |
 |---|---|
-| `ReadAloud.App` | WPF: tray, pill, player and settings windows, composition root. |
-| `ReadAloud.Core` | Text clean-up, sentence splitter, pronunciation dictionary, settings model, cost estimates. Interfaces: `ISpeechEngine`, `ITranslator`, `ISelectionSource`. No Windows dependencies. |
-| `ReadAloud.Windows` | Mouse hook, UIA capture, clipboard capture/restore, non-activating window helpers, start-with-Windows registration. |
-| `ReadAloud.Speech` | sherpa-onnx Kokoro engine, NAudio playback queue. |
-| `ReadAloud.Tests` | Unit tests for Core. |
+| `Helpers.App` | The UI: tray, pill, player, Compose and Settings windows, composition root. |
+| `Helpers.Core` | Text clean-up (plain and Markdown), sentence splitter, pronunciation dictionary, settings model, prompt templates, diff for AI results, cost estimates. Interfaces: `ISpeechEngine`, `IAudioOutput`, `IAssistant`, `ISelectionSource`, `ITargetWindow`, `ISpellChecker`. No platform dependencies. |
+| `Helpers.Windows` | Mouse hook, UIA capture, clipboard capture and restore, paste-to-target, non-activating window helpers, Windows spell checker, start-with-Windows registration. A future `Helpers.Mac` implements the same interfaces. |
+| `Helpers.Speech` | sherpa-onnx Kokoro engine and the sentence-ahead synthesis queue. Platform-neutral. |
+| `Helpers.Ai` | `IAssistant` implementations: LLamaSharp local provider, Anthropic cloud provider. Model download with progress and SHA-256 check. Platform-neutral. |
+| `Helpers.Tests` | Unit tests for Core. |
 
 Threading:
 
 - **Mouse hook:** the low-level mouse hook (`WH_MOUSE_LL`) runs on its own thread with a message loop. The callback only queues the event and returns immediately.
 - **Speech worker:** one worker owns the sherpa-onnx `OfflineTts` instance. Create it once and reuse it; never call it from more than one thread.
 - **Look-ahead:** synthesis runs one or two sentences ahead of playback, so audio starts fast and never gaps between sentences.
+- **AI worker:** one worker owns the LLamaSharp model. Requests queue. Output streams token by token into the result view so it feels alive.
 
 ## Component details
 
@@ -110,119 +178,187 @@ Threading:
 
 1. **UIA first.** Get the focused element. If it supports TextPattern, read `GetSelection()`.
    - Never read password fields (`IsPassword`).
-   - Time-box UIA calls to about 150 ms. Chromium builds its accessibility tree lazily, so the first query in a Chrome, Edge, Teams or new Outlook window can be slow.
+   - Time-box UIA calls to about 150 ms. Chromium and Electron build their accessibility tree lazily, so the first query in Chrome, Edge, Teams, VS Code or new Outlook can be slow or empty. Expect the clipboard route to be the common path in VS Code and in chat panels.
 2. **Clipboard fallback.**
    - Save the clipboard (every format you can), then clear it.
-   - Send Ctrl+C, or Ctrl+Insert in Windows Terminal and console windows, where Ctrl+C with nothing selected means "cancel".
-   - Wait up to 1 s for text, then restore the original clipboard.
-   - The user's clipboard must never end up changed.
+   - Send **Ctrl+Insert**, not Ctrl+C. Ctrl+Insert copies in Win32, Office, Chromium, Electron and terminals, and never means "interrupt". In VS Code's built-in terminal and in Claude Code, a stray Ctrl+C can kill a running task.
+   - Wait up to 300 ms for text. If nothing arrives and the window is not a terminal-class window (Windows Terminal, console windows, VS Code, Cursor), send Ctrl+C and wait up to 1 s more.
+   - Restore the original clipboard. The user's clipboard must never end up changed.
 3. **Elevated windows.** When we're not elevated, don't attempt capture from admin windows (Windows blocks it anyway). Show a short hint instead.
 
 ### Text clean-up (Core, unit-tested)
 
-Port from `ReadAloud.ahk`:
+**Plain text rules**, ported from the prototype:
+
 - URLs become "link"
 - bullet characters are stripped
 - blank lines are collapsed
 - a line break with no punctuation before it becomes a pause (". ")
 
-Add:
-- **Email addresses** read as "email address" (a setting).
-- **Pronunciation dictionary.** User-editable, whole-word matching, optional case-sensitivity. Ship a small starter list in the style of `EVAR → ee-var`, and store it in settings.
-- **Sentence splitter.** It must cope with abbreviations ("Dr.", "et al.", "e.g.", "Fig. 2", decimals). Cap chunks at about 400 characters for the engine.
+**Added rules:**
+
+- Email addresses read as "email address" (a setting).
+- File paths such as `src/Helpers.Core/Splitter.cs` read as "file Splitter dot c s" (a setting: full path, file name only, or "file").
+
+**Markdown mode.** Detect Markdown (fences, headings, list markers, inline backticks, bold stars) and parse it with Markdig. Then speak it like this:
+
+- headings: read the text, then a longer pause
+- bold and italic: read the text only
+- inline code: read the text only, with the pronunciation dictionary applied
+- code blocks: say "code block, 12 lines" and skip the contents. Setting: skip, read first line, or read all.
+- lists: a short pause before each item; numbered lists say the number
+- tables: say "table, 3 columns, 5 rows" and read each row as "column name: value". Setting to skip tables.
+- links: read the link text; say "link" only if there is no text
+- horizontal rules and HTML: skip
+- block quotes: read normally
+
+**Pronunciation dictionary.** User-editable, whole-word matching, optional case-sensitivity. Ship a starter list for things AI chats say a lot: `npm`, `JSON`, `async`, `regex`, `UIA`, `WPF`, `EVAR → ee-var`. Store it in settings.
+
+**Sentence splitter.** It must cope with abbreviations ("Dr.", "et al.", "e.g.", "Fig. 2", decimals, version numbers like "v2.0", file names). Cap chunks at about 400 characters for the engine.
 
 ### Speech engine
 
 - **Loading:** load the model in the background at app start. If a read is requested before it's ready, show "Loading voice…" in the player.
 - **Speed:** use the engine's own speed parameter, not audio time-stretching.
 - **Preview:** the voice preview speaks a fixed sample sentence.
-- **Model files:** they live in `%LOCALAPPDATA%\ReadAloud\models\`. Either the first run downloads them (with progress and a SHA-256 check) or the installer ships them; decide at the packaging milestone. Make the path configurable for offline installs.
-- **Memory:** add an "Unload voice when idle for N minutes" setting in case memory use is high.
+- **Model files:** they live in `%LOCALAPPDATA%\Helpers\models\`. Either the first run downloads them (with progress and a SHA-256 check) or the installer ships them; decide at the packaging milestone. Make the path configurable for offline installs.
+- **Memory:** add an "Unload voice when idle for N minutes" setting.
 
 ### Playback
 
-- **Queue:** an NAudio streaming queue with pause/resume, skip back/forward a sentence, and stop.
-- **Output device:** use the Windows default output device, and cope with device changes (headphones plugged in mid-read) without crashing.
+- **Queue:** a streaming queue behind `IAudioOutput` with pause/resume, skip back/forward a sentence, and stop. NAudio on Windows.
+- **Output device:** use the system default output device, and cope with device changes (headphones plugged in mid-read) without crashing.
 
-## AI integration (optional, off by default)
+### Compose: spell check
 
-The principle: keep the voice local because it's free, private and fast. Use AI only where local models are weak, which is translation.
+- Behind `ISpellChecker` in Core so the Mac version can use the Mac's own checker.
+- On Windows with WPF: a `TextBox` with `SpellCheck.IsEnabled="True"` and `xml:lang="en-GB"`. With Avalonia: call the `ISpellChecker` COM API and draw the underlines ourselves.
+- Windows needs the English (United Kingdom) language features installed for en-GB spelling. Detect the case where no checker is available and show a one-line hint with the Settings page to open.
+- The user dictionary is a file in `%APPDATA%\Helpers\`. "Add to dictionary" writes to it. The pronunciation dictionary and the spelling dictionary are separate things.
 
-### Translation
+### Compose: send to chat
 
-- **Provider:** an `ITranslator` interface. The first implementation uses the Claude Messages API with the cheapest current model, which is `claude-haiku-5-5` at the time of writing. Make the model ID a setting, and check Anthropic's models page when building. Use Anthropic's official .NET SDK if one exists; otherwise use plain `HttpClient`.
-- **Token discipline:**
-  - Send only the selected text, plus a one-line system prompt: "Translate into {language}. Output only the translation. Keep medical terminology and abbreviations accurate."
-  - Send no history.
-  - Set `max_tokens` to about 1.5x the input tokens, with a minimum of 256.
-  - Cap input length at 4,000 characters by default (configurable), and warn above it.
-  - Cache results by a hash of (text, target language, model) for the session.
-- **Cost tracking:** record the `usage` token counts the API returns and show a running monthly cost estimate in Settings. At current Haiku list prices an email-length translation costs a tiny fraction of a penny.
-- **Reading the result:** read it with a Kokoro voice in the target language if the sherpa-onnx build supports that language; Kokoro covers several beyond English, so check which. Otherwise show the translation in the player and say no local voice is available for that language.
-- **API key:** store it with Windows Credential Manager or DPAPI, never in plain-text settings.
-- **Transparency:** make it obvious when text is about to leave the machine. Show a first-use confirmation, and put a small cloud icon on the Translate button.
-- **Other providers:** leave room for DeepL or Azure Translator behind the same interface. Offline translation models exist but are weaker, especially on medical terms; they're not in v1.
+- Remember the target window handle when Compose opens.
+- On Send: save the clipboard, put the text on it, activate the target window, send Ctrl+V (Shift+Insert for terminal-class windows), wait about 500 ms, restore the clipboard.
+- If the target window has gone, say so and offer Copy instead.
+- Never send Enter.
 
-### Cloud "premium" voice (not v1)
+### AI helpers
 
-A possible second `ISpeechEngine` implementation for a cloud voice (Azure neural, OpenAI and so on), built only if Dave asks for it. These are metered per character, roughly a penny or two per minute of audio, and the text leaves the machine.
+The principle: keep the voice local because it's free, private and fast. Use a language model only for what rules can't do: grammar, reordering, summarising, rephrasing.
+
+**Interface.** `IAssistant` in Core has one method: run a named action on some text and stream the result. Core holds the four prompt templates, editable in Settings and resettable to defaults.
+
+**The four actions.**
+
+| Action | Prompt intent | Where it appears |
+|---|---|---|
+| Tidy | Fix spelling, grammar and sentence order. Keep every fact and the user's voice. Don't add anything. Output only the text. | Compose |
+| Make a request | Rewrite notes as a clear instruction to a coding assistant. Keep every fact. Don't invent requirements. Use numbered steps if there are several asks. Mark anything unclear with [check]. | Compose |
+| Summarise | Give the main points in up to five short bullets, then one line saying what the reader needs to do, if anything. | Pill, player, Compose |
+| Explain simply | Rewrite for a non-technical reader. Short sentences. No jargon. Keep it accurate. | Player, Compose |
+
+**Local provider (LLamaSharp).**
+
+- Loads the GGUF model lazily on first use and unloads after N idle minutes (setting).
+- Run Qwen3 with thinking off (`/no_think` in the system prompt or the chat-template flag), or Tidy will take forever.
+- Context window 4,096 tokens is enough. Cap input at about 3,000 words and say so above that.
+- Model download from Hugging Face on first use, with progress, SHA-256 check and a cancel button. Model path configurable.
+- The CPU backend needs AVX2. Detect its absence and say so rather than crash.
+
+**Cloud provider (Anthropic).**
+
+- Use the official Anthropic C# SDK. Send only the action's system prompt and the text. No history. Stream the reply.
+- `max_tokens` about 1.5x the input tokens, minimum 256.
+- Cap input at 4,000 characters by default (configurable) and warn above it.
+- Cache results by a hash of (action, text, model) for the session.
+- Record the `usage` token counts the API returns and show a running monthly cost estimate in Settings.
+- API key stored with Windows Credential Manager or DPAPI (Keychain on Mac), never in plain-text settings.
+- Transparency: a cloud icon on every button that would send text off the machine, and a first-use confirmation that says exactly what will be sent.
+- Leave room for an OpenAI-compatible provider (which also covers Ollama and LM Studio) behind the same interface. Not v1.
+
+**Showing results.** Every AI result appears beside the original with changes marked (word-level diff from Core). Buttons: Use this, Keep mine, Read it. Nothing is replaced silently.
 
 ## Privacy and security
 
-- No telemetry. No selected text, translations or audio in logs or crash reports.
-- Settings live in `%APPDATA%\ReadAloud\settings.json`; secrets live in Credential Manager.
+- No telemetry. No selected text, drafts, AI results or audio in logs or crash reports.
+- Settings and drafts live in `%APPDATA%\Helpers\settings.json`. Secrets live in Credential Manager.
 - Never read password fields.
 - Skip excluded apps. The default list is common password managers (1Password, Bitwarden, KeePass) and `mstsc.exe`.
-- Cloud calls happen only when the user clicks Translate, over HTTPS, with no extra metadata.
+- Cloud calls happen only when the user clicks a button marked with the cloud icon, over HTTPS, with no extra metadata.
+- The local model never touches the network after download.
 
 ## Performance targets
 
-Measure and report these at milestone 1, then adjust:
+Measure and report these at the milestone where each first applies, then adjust:
 
 - **Idle CPU:** about 0%.
-- **Memory:** report it with the model loaded. Aim for under 400 MB; use the int8 model if that helps.
+- **Memory with the voice loaded:** aim for under 400 MB; use the int8 model if that helps.
+- **Memory with the local language model loaded:** report it. Expect about 3 GB for the 4B model. Unload when idle.
 - **Time to first audio:** under 1 s from clicking Read, on a typical work laptop, for a normal sentence.
 - **Pill delay:** the pill appears within 200 ms of mouse-up.
+- **Tidy on a 150-word paragraph, local model, CPU only:** first words within 3 s, finished within 20 s on a typical work laptop. If slower, default to the 1.7B model.
 
 ## Packaging
 
 - **Build:** `dotnet publish`, self-contained, win-x64.
-- **Native libraries:** make sure sherpa-onnx's native DLLs load correctly in a single-file publish (check `IncludeNativeLibrariesForSelfExtract`), or ship them next to the exe.
+- **Native libraries:** make sure sherpa-onnx's and llama.cpp's native DLLs load correctly in a single-file publish (check `IncludeNativeLibrariesForSelfExtract`), or ship them next to the exe.
 - **Outputs:** a zip, and an Inno Setup installer that installs per user and needs no admin rights.
+- **Models are never in the installer or the repo.** The voice is small enough to consider bundling; decide at milestone 7. The language model is always a download.
 - **Start with Windows:** use the HKCU Run key.
 - **Signing:** optional. Note in the README that unsigned builds trigger a SmartScreen prompt on first run.
+- **CI:** a GitHub Actions workflow on `windows-latest` that builds and runs the tests on every push, and attaches the zip to a release when a tag is pushed.
 
 ## Milestones
 
 Demo each one before starting the next.
 
-1. **Engine spike.** A console app that reads a paragraph aloud with Kokoro via sherpa-onnx, using two British voices at 1.0x and 1.5x. Report model load time, time to first audio and memory use. This milestone is also the voice-quality check: if the voices aren't good enough, stop here.
-2. **Player and tray.** Read clipboard text with the full player controls and sentence highlighting.
-3. **Selection capture.** UIA plus the clipboard fallback, tested against the checklist below.
-4. **Read button.** Mouse hook, show/hide rules, non-activating window, multiple monitors and DPI.
-5. **Settings.** Pronunciation dictionary, Start with Windows, excluded apps, optional hotkey.
-6. **Packaging.** Installer and model download.
-7. **Optional: Translate via Claude,** with cost tracking.
+0. **Scaffolding.** Install the .NET 10 SDK. Create the solution and empty projects. CI builds and runs an empty test. Sort out the Dropbox question.
+1. **Engine spike.** A console app that reads a paragraph aloud with Kokoro via sherpa-onnx, using two British voices at 1.0x and 1.5x. Report model load time, time to first audio and memory use. This is the voice-quality check: if the voices aren't good enough, stop here.
+2. **Text pipeline.** Plain-text clean-up, Markdown mode, pronunciation dictionary and sentence splitter in Core, with tests. Test input includes real Claude Code replies.
+3. **Player and tray.** Read clipboard text with the full player, sentence highlighting, the expanded reading view and Watch clipboard. The UI toolkit decision is made before this starts.
+4. **Selection capture.** UIA plus the clipboard fallback, tested against the checklist below.
+5. **Read button.** Mouse hook, show/hide rules, non-activating window, multiple monitors and DPI.
+6. **Settings.** Pronunciation dictionary, readable text, Start with Windows, excluded apps, hotkeys.
+7. **Packaging.** Installer, model download, CI release. **Ship v0.1: reading only.**
+8. **Compose.** Spell check, read back, send to chat, drafts. No AI yet.
+9. **AI helpers, local.** `IAssistant`, the LLamaSharp provider, model download, the four actions, the before/after view. Confirm the default model on Dave's laptop.
+10. **AI helpers, cloud.** The Anthropic provider, key storage, transparency and cost tracking. **Ship v0.2.**
+11. **macOS.** See "macOS version" below. Only after v0.2 and only if Dave still wants it.
 
 ## Acceptance checklist
 
-For each app: select text with the mouse, click Read, hear it, and confirm the clipboard is unchanged afterwards.
+**Reading.** For each app: select text with the mouse, click Read, hear it, and confirm the clipboard is unchanged afterwards.
 
-- **Apps:**
-  - Word
-  - Outlook (classic and new)
-  - Teams (new)
-  - Chrome and Edge
-  - a PDF in Edge and in Acrobat Reader
-  - Notepad
-  - File Explorer: renaming a file must not trigger the pill
-  - Windows Terminal: no Ctrl+C is sent when nothing's selected
-- **No pill:** when dragging a window by its title bar, dragging files or resizing windows.
-- **Double-click and dismiss:** double-clicking a word shows the pill, and clicking elsewhere removes it.
-- **Clipboard formats:** if the clipboard holds an image or rich text before a read, it's still intact afterwards.
-- **Multiple monitors:** with two monitors at different scaling, the pill appears next to the cursor on both.
-- **Interruptions:** the laptop sleeping or headphones being plugged in mid-read causes no crash.
-- **Password fields:** selecting text in one reads nothing.
+- Word
+- Outlook (classic and new)
+- Teams (new)
+- Chrome and Edge, including claude.ai and chat.openai.com
+- a PDF in Edge and in Acrobat Reader
+- Notepad
+- VS Code: the editor, the built-in terminal, and the Claude Code chat panel. Confirm Ctrl+Insert copies in the terminal and that no Ctrl+C is ever sent there.
+- Claude desktop app
+- File Explorer: renaming a file must not trigger the pill
+- Windows Terminal: no Ctrl+C is sent when nothing's selected
+
+**Markdown.** Copy a real Claude Code reply containing headings, a list, a code block and a table. Read it. Code is skipped with a count, the table is read row by row, no stars or hashes are spoken.
+
+**Reading view.** Expand the player on a long reply. Click a sentence in the middle. Reading jumps there.
+
+**Compose.** Type a sentence with three misspellings. Red underlines appear. Right-click fixes one. Read back works. Send to chat pastes into the VS Code chat box without submitting, and the clipboard is unchanged afterwards.
+
+**AI, local.** With no network, Tidy a messy paragraph. Changes are marked. Keep mine restores the original. Make a request turns three lines of notes into numbered steps.
+
+**AI, cloud.** With a key set, the cloud icon is visible, the first-use confirmation appears once, and the cost figure in Settings moves.
+
+**Also:**
+
+- No pill when dragging a window by its title bar, dragging files or resizing windows.
+- Double-clicking a word shows the pill, and clicking elsewhere removes it.
+- If the clipboard holds an image or rich text before a read, it's still intact afterwards.
+- With two monitors at different scaling, the pill appears next to the cursor on both.
+- The laptop sleeping or headphones being plugged in mid-read causes no crash.
+- Selecting text in a password field reads nothing.
 
 ## Gotchas
 
@@ -234,12 +370,51 @@ For each app: select text with the mouse, click Read, hear it, and confirm the c
 - **UIPI:** a non-elevated app can't read from or send keys to elevated windows.
 - **Clipboard restore:** some formats are delayed-rendered or app-private and can't be restored. Restore what you can (text, Unicode text, RTF, HTML, images, file lists) and test with Office.
 - **DPI:** declare per-monitor v2 DPI awareness in the app manifest.
+- **Electron accessibility:** VS Code, Teams and the Claude desktop app expose a full UIA tree only when they detect assistive technology. Don't rely on UIA there. VS Code users can set `editor.accessibilitySupport` to `on` to help, but we must work without it.
+- **WPF spell check:** needs the en-GB language features installed in Windows. Without them `SpellCheck.IsEnabled` silently does nothing.
+- **LLamaSharp backends:** reference exactly one backend package (`LLamaSharp.Backend.Cpu`). Mixing backends causes native load failures.
+- **Qwen3 thinking:** on by default and makes short tasks slow. Turn it off.
 
-## Out of scope for v1 (ideas for later)
+## macOS version (milestone 11, after v0.2)
 
+What carries over unchanged: `Helpers.Core`, `Helpers.Speech` and `Helpers.Ai`. sherpa-onnx, Kokoro, Markdig and LLamaSharp all run on macOS, including Apple Silicon. The UI carries over too if Avalonia was chosen.
+
+What needs a Mac implementation (`Helpers.Mac`):
+
+- **Selection capture:** the Accessibility API (`AXUIElement`), which needs the user to grant Accessibility permission in System Settings. Clipboard fallback sends Cmd+C.
+- **Mouse events:** a `CGEventTap`, which also needs Accessibility permission.
+- **Tray:** a menu bar item (`NSStatusItem`).
+- **Audio:** an `IAudioOutput` on Core Audio, or a cross-platform library such as PortAudio.
+- **Spell check:** `NSSpellChecker`.
+- **Send to chat:** Cmd+V to the target app.
+- **Secrets:** Keychain.
+- **Packaging:** a signed and notarised `.app` in a `.dmg`. Apple Developer membership is a yearly cost; without it the app shows a scary warning on first open.
+
+## Later (not in v1)
+
+- offline dictation with Whisper (Whisper.net, MIT) for better punctuation than the system's voice typing
+- an OpenAI-compatible cloud or local provider (covers Ollama and LM Studio)
 - reading text in images via the Windows OCR API
 - "Save as MP3"
 - per-app voice and speed
-- an ARM64 build
+- an ARM64 Windows build
 - a cloud premium voice
-- offline translation
+- language translation
+- Linux (Avalonia makes it plausible; nobody has asked)
+
+## What changed from brief 1.0
+
+- **Scope widened** from a read-aloud app to a three-job dyslexia companion: hear it, write it, shape it.
+- **macOS added as a stated goal** after v0.2, with the Mac work listed and the UI toolkit raised as an open question to settle before milestone 3.
+- **Markdown mode added** to text clean-up, using Markdig, because AI chat output is Markdown and reading it raw is painful.
+- **Expanded reading view** added to the player, with click-to-jump.
+- **Compose window added**, with system spell check, read back, send to chat and drafts.
+- **AI helpers added** behind one interface: four actions, local model first, cloud second. Results are always shown beside the original, never swapped in silently.
+- **Language translation removed** from v1. In 1.0 "Translate" meant English to another language. What Dave needs is "turn this into a clear request", which is now Make a request.
+- **Clipboard fallback now sends Ctrl+Insert first**, and never sends Ctrl+C to VS Code or terminals, because a stray Ctrl+C can kill a running Claude Code task.
+- **Model ID corrected.** 1.0 named a Haiku model that doesn't exist. The current one is `claude-haiku-4-5`. The official Anthropic C# SDK exists, so that open question is closed.
+- **Readable fonts and text settings added** (Lexend, Atkinson Hyperlegible, size, spacing, tint).
+- **Watch clipboard** added to the tray.
+- **Projects renamed** from `ReadAloud.*` to `Helpers.*`, plus a new `Helpers.Ai` project and platform-neutral interfaces for audio and spelling.
+- **Milestones reordered** with a scaffolding step first, a text-pipeline milestone with real test data, a v0.1 release of the reading half before Compose starts, and macOS last.
+- **Dropbox warning** added to the open questions.

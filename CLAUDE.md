@@ -5,7 +5,7 @@ Read `docs/BRIEF.md` before writing any code. Its "Decisions already made" table
 ## How we work
 
 - Build milestone by milestone, in the order the brief gives. Demo each one before starting the next, with a short note of anything that did not go to plan.
-- Unit-test everything in `ReadAloud.Core`.
+- Unit-test everything in `Helpers.Core`.
 - UK English in all UI text, comments and docs.
 - Never commit API keys. Never put user text in logs.
 
