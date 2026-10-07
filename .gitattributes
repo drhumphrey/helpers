@@ -1,0 +1,6 @@
+* text=auto
+*.ahk text eol=crlf
+*.png binary
+*.ico binary
+*.wav binary
+*.onnx binary

@@ -1,0 +1,32 @@
+# Build output
+bin/
+obj/
+out/
+publish/
+*.binlog
+
+# IDE and user files
+.vs/
+*.user
+*.suo
+*.swp
+*.DotSettings.user
+
+# Test results
+TestResults/
+*.trx
+
+# Machine-local files
+.remember/
+*.ini
+*.log
+.env
+
+# Speech models are downloaded at first run, never committed
+models/
+*.onnx
+*.onnx.data
+
+# Secrets
+*.pfx
+*.snk
