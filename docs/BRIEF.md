@@ -89,7 +89,8 @@ Rules for every surface:
 The aim is a modern, attractive app that feels native on Windows 11 and on Mac, and is calm to use.
 
 - **One visual language.** Rounded corners, a soft shadow, a translucent background where the OS supports it (Mica or acrylic on Windows 11, vibrancy on Mac) with a solid fallback. The OS accent colour marks the one primary action on each surface.
-- **Light and dark** follow the OS. No separate theme setting in v1.
+- **Vibes.** The shapes never change; the skin does. Neon is the default: gradient edges, a soft glow and flecks of bright colour, in the spirit of an RGB gaming keyboard. Custom lets the user pick the gradient. Calm is the quiet glass look with one flat OS accent, one click away in the tray menu for screen sharing. The gradient touches chrome only; reading text stays plain and high contrast in every vibe. Details and rules in `DESIGN.md`.
+- **Light and dark** follow the OS by default, with an override in Settings, because Neon wants dark.
 - **Type is large by default.** Readable-text settings (font, size, spacing, tint) apply to every surface that shows the user's text, not only the reading view.
 - **Big targets.** Nothing clickable is smaller than 32 px, because the pill is clicked mid-selection and the player is clicked without looking.
 - **Motion is short and quiet.** Fades of 150 ms or less, no bounces. Honour the OS reduced-motion setting.
@@ -160,6 +161,7 @@ The menu has:
 - Compose
 - Settings
 - Pause the Read button for 1 hour
+- Calm look (toggle)
 - Start with Windows
 - Exit
 
@@ -181,6 +183,7 @@ Note that Ctrl+Alt is AltGr on many European keyboards, so these must be easy to
 - hotkeys on/off and the keys themselves
 - pronunciation dictionary editor
 - readable text (above)
+- look: vibe (Neon, Custom, Calm), gradient colours or follow the OS accent, glow, flecks, theme override
 - Markdown reading options (below)
 - AI helpers: provider choice, local model download and status, cloud key and model, cost so far, prompt templates
 - Start with Windows

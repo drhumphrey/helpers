@@ -4,7 +4,7 @@ How the app looks and behaves on screen. Read this before milestone 3. The mocku
 
 ## The look in one line
 
-Quiet glass: one translucent surface style, one accent colour taken from the OS, large type, nothing clickable under 32 px, and nothing on screen that isn't doing a job right now.
+One set of shapes, three skins. The shapes: one translucent surface style, large type, nothing clickable under 32 px, nothing on screen that isn't doing a job right now. The skins, called vibes: Neon (gradient edges, glow, flecks of colour; the default), Custom (your own gradient), and Calm (the quiet glass look with one flat accent, one click away). See Vibes below.
 
 ## Decisions proposed here, for Dave to confirm
 
@@ -12,9 +12,9 @@ Quiet glass: one translucent surface style, one accent colour taken from the OS,
 |---|---|
 | UI font | Lexend, bundled, for the app's own controls and labels as well as for reading text. One family keeps the surfaces coherent. The Avalonia template's Inter package can be dropped. |
 | Reading font | The user's choice in Settings: system default, Lexend or Atkinson Hyperlegible. Default Lexend. |
-| Accent | The OS accent colour. The mockups use a stand-in blue. |
+| Accent | In Calm, the OS accent colour. In Neon and Custom, a two or three stop gradient; "Follow the OS accent" builds the gradient from that one colour. |
 | Surfaces | Translucent (Mica or acrylic on Windows 11, vibrancy on Mac) with a solid fallback on Windows 10. Radius 12 px, pill 999 px. One soft shadow. |
-| Theme | Follows the OS light/dark setting. No theme switch in v1. |
+| Theme | Follows the OS light/dark setting by default, with an override in Settings, because the Neon vibe wants dark. |
 | Errors | Only ever as toasts. No dialogs anywhere. |
 
 ## Tokens
@@ -117,3 +117,37 @@ Rules that apply to all of them:
 
 - The product name, and with it the tray icon. "Helpers" is the working title.
 - Whether the compact player should show the next sentence faintly under the current one. Try it at milestone 3.
+
+## Vibes
+
+Dave's steer on 8 October 2026: the layout and elements are right, but the default should be fun, in the spirit of an RGB gaming keyboard, with a way to mute it for professional settings. So the look is split into shapes, which never change, and a skin, which the user picks.
+
+| Vibe | Who it's for | Gradient | Glow | Flecks | Theme |
+|---|---|---|---|---|---|
+| **Neon** (default) | Anyone who likes their keyboard to light up | Cyan #19E6FF to magenta #FF2FD1 to yellow #FFE14D | On, 60% | On, 35% | Dark |
+| **Custom** | People who want their own colours | Two or three colours the user picks, or built from the OS accent | User's choice | User's choice | User's choice |
+| **Calm** | Offices, screen sharing, quieter days | None. One flat accent from the OS | Off | Off | Follows the OS |
+
+### What the gradient may touch
+
+Borders of surfaces and the pill (a one-pixel gradient border with a soft outer glow), primary buttons (gradient fill with near-black text, which passes 8:1 or better on every stop), progress bars, the list dots in the reading view, and the current-sentence highlight (the gradient at a quarter strength under white text).
+
+### What it may never touch
+
+Reading text, labels, hints, the Compose editor, the settings pages, toast text. These stay plain text on a plain surface in every vibe, at 7:1 or better. Flecks live on the ground and around surface edges, never over words. Misspelling underlines stay red in every vibe.
+
+### Flecks
+
+Small dots, 3 to 6 px, in the gradient colours plus lime #B6FF3B, with a soft glow, scattered on the ground behind surfaces and along their edges. They drift slowly. Density is a slider from 0 to 100. Reduced motion freezes them; Calm removes them.
+
+### Settings: Look page
+
+Vibe (Neon, Custom, Calm), gradient colours with "Follow the OS accent", glow slider, flecks slider, theme (Follow OS, Light, Dark). Changes apply live. The tray menu gains a "Calm look" toggle so the quiet skin is one click away before a screen share.
+
+### Mapping to Avalonia
+
+- Vibe tokens are a second `ResourceDictionary` layered over the theme one: `GradientBrush` (a `LinearGradientBrush` with the chosen stops), `GlowShadow` (a `BoxShadows` value), `FleckDensity` (a double), `HighlightBrush`.
+- Gradient borders: a `Border` with `BorderBrush` set to the gradient brush and `BorderThickness="1"`, around an inner `Border` with the surface brush and the same radius less one.
+- Glow: `BoxShadow` on the outer border, two shadows in the two end colours at low alpha. Zero in Calm.
+- Flecks: one `Canvas` per surface window behind the content, `Ellipse` children with a `DropShadowEffect`, positions seeded per window, drifting with a slow looping `Animation`; stopped when the OS reports reduced motion.
+- Switching vibe swaps the vibe dictionary at runtime; no restart.
