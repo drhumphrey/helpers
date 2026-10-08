@@ -35,7 +35,7 @@ People who are strong systems thinkers and creatives but are not natural typers,
 | Runtime | C# on .NET 10 (LTS). Windows first, x64. macOS after v0.2. `Helpers.Core`, `Helpers.Speech` and `Helpers.Ai` must have no Windows dependencies, so the Mac version is a new shell, not a rewrite. |
 | UI | Avalonia 12 (MIT) with its Fluent theme and the Inter UI font the template ships, following the OS light/dark setting and accent colour. Decided 7 October 2026 so one UI runs on Windows and macOS. There is no main window: the app lives in the tray and shows small overlays. See Surfaces. |
 | Speech | sherpa-onnx (NuGet `org.k2fsa.sherpa.onnx`, Apache-2.0) running Kokoro (Apache-2.0 weights). Fully offline. Runs on Windows and macOS. |
-| Default voice | A British Kokoro voice. Kokoro v1.0 includes bf_emma, bf_isabella, bf_alice, bf_lily, bm_george, bm_lewis, bm_daniel and bm_fable. Check the sherpa-onnx docs for the current model package and its speaker-ID mapping. Prefer the int8 build if quality is close. |
+| Default voice | A British Kokoro voice. Kokoro v1.0 includes bf_emma, bf_isabella, bf_alice, bf_lily, bm_george, bm_lewis, bm_daniel and bm_fable. The package is `kokoro-multi-lang-v1_0`; speaker IDs 20 to 27 are the British voices (bf_alice 20, bf_emma 21, bf_isabella 22, bf_lily 23, bm_daniel 24, bm_fable 25, bm_george 26, bm_lewis 27). No int8 build of it exists as of October 2026. |
 | Audio | NAudio (MIT) on Windows, behind an `IAudioOutput` interface in Core. |
 | Reading the selection | UI Automation first (UIA3 via FlaUI.UIA3, MIT, or direct COM interop). Clipboard as fallback. Both behind `ISelectionSource`. |
 | Markdown | Markdig (BSD-2) in Core to parse Markdown into spoken text. No regex-only Markdown handling. |
@@ -326,7 +326,7 @@ The principle: keep the voice local because it's free, private and fast. Use a l
 Measure and report these at the milestone where each first applies, then adjust:
 
 - **Idle CPU:** about 0%.
-- **Memory with the voice loaded:** aim for under 400 MB; use the int8 model if that helps.
+- **Memory with the voice loaded:** aim for under 400 MB. Measured at milestone 1: 450 MB after load, 700 MB after three paragraphs. See `MILESTONES.md` for the things to try.
 - **Memory with the local language model loaded:** report it. Expect about 3 GB for the 4B model. Unload when idle.
 - **Time to first audio:** under 1 s from clicking Read, on a typical work laptop, for a normal sentence.
 - **Pill delay:** the pill appears within 200 ms of mouse-up.

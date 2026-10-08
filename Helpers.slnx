@@ -9,4 +9,7 @@
   <Folder Name="/tests/">
     <Project Path="tests/Helpers.Tests/Helpers.Tests.csproj" />
   </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/EngineSpike/EngineSpike.csproj" />
+  </Folder>
 </Solution>

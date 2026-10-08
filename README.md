@@ -34,12 +34,15 @@ The prototype is an AutoHotkey script that uses the voices already on Windows.
 |---|---|
 | `docs/` | The build brief and design notes |
 | `prototype/` | The AutoHotkey v2 proof of concept |
-| `src/` | The .NET application (coming) |
-| `tests/` | Unit tests (coming) |
+| `src/` | The .NET application |
+| `tests/` | Unit tests |
+| `tools/` | Spikes and developer tools. `EngineSpike` is the milestone 1 voice check. |
 
 ## Building
 
 Install the .NET 10 SDK, then from the repo root run `dotnet build Helpers.slnx` and `dotnet test Helpers.slnx`. Nothing useful runs yet: the app window is a placeholder until milestone 3.
+
+To hear the voices, run `dotnet run --project tools/EngineSpike`. The first run downloads the Kokoro voice model (about 350 MB) into your local app data folder, then reads a paragraph aloud with two British voices and prints timing and memory figures. Add `--no-play` to skip playback, or `--runs bf_lily:1.2` to try other voices and speeds.
 
 ## Contributing
 
