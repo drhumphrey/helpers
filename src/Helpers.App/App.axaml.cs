@@ -51,7 +51,7 @@ public partial class App : Application
             _reading = new ReadingController(engine, new NAudioOutput(), _settings, _toasts);
 
             _clipboard = new ClipboardWatcher();
-            _clipboard.Changed += () => Dispatcher.UIThread.Post(() => _reading?.ReadClipboard());
+            _clipboard.Changed += () => Dispatcher.UIThread.Post(OfferToReadClipboard);
             if (settings.WatchClipboard)
             {
                 _clipboard.Start();
@@ -173,6 +173,26 @@ public partial class App : Application
 
     private Windows.SettingsWindow? _settingsWindow;
 
+    /// <summary>
+    /// Watch clipboard offers rather than reads: a copy during normal work must
+    /// never start the voice by itself. The offer fades if ignored.
+    /// </summary>
+    private void OfferToReadClipboard()
+    {
+        if (_reading is null || _toasts is null)
+        {
+            return;
+        }
+
+        var text = ClipboardText.TryGet();
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            return;
+        }
+
+        _toasts.Offer("Read what you just copied?", "Read", () => _reading.Read(text));
+    }
+
     /// <summary>The shortcut's handler. The clipboard watcher sleeps while capture borrows the clipboard.</summary>
     private async Task ReadSelectionAsync()
     {
@@ -257,7 +277,7 @@ public partial class App : Application
         if (on)
         {
             _clipboard.Start();
-            _toasts?.Info("Watching the clipboard. Copy anything and it will be read.");
+            _toasts?.Info("Watching the clipboard. Copy anything and you will be offered a Read button.");
         }
         else
         {

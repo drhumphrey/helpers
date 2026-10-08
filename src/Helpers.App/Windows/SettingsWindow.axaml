@@ -150,7 +150,7 @@
       <TextBlock Classes="label" Text="Watch clipboard" />
       <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
         <ToggleSwitch IsChecked="{Binding WatchClipboardOn}" OnContent="" OffContent="" />
-        <TextBlock Classes="label" Text="Read anything new that is copied" />
+        <TextBlock Classes="label" Text="Offer to read anything new that is copied" />
       </StackPanel>
     </Grid>
 

@@ -95,6 +95,10 @@ public sealed class ToastService
 
     public ToastItem Progress(string text) => Show(ToastKind.Progress, text, null, null, null);
 
+    /// <summary>A gentle offer with one button that fades if ignored.</summary>
+    public ToastItem Offer(string text, string actionLabel, Action action) =>
+        Show(ToastKind.Info, text, actionLabel, action, TimeSpan.FromSeconds(6));
+
     public void Dismiss(ToastItem item) => Dispatcher.UIThread.Post(() => Remove(item));
 
     private ToastItem Show(ToastKind kind, string text, string? actionLabel, Action? action, TimeSpan? life)
