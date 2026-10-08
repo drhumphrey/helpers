@@ -158,10 +158,10 @@ public sealed class ReadingController : IDisposable
                 await StopCurrentAsync();
                 break;
             case Helpers.Core.Capture.SelectionOutcome.Nothing:
-                _toasts.Error("Nothing selected, or this app wouldn't hand it over", "Read clipboard", ReadClipboard);
+                _toasts.Offer("Nothing selected. Read the clipboard instead?", "Read", ReadClipboard);
                 break;
             case Helpers.Core.Capture.SelectionOutcome.Elevated:
-                _toasts.Error("Can't read from a window running as administrator", "Read clipboard", ReadClipboard);
+                _toasts.Offer("That window runs as administrator, so it can't be read. Read the clipboard instead?", "Read", ReadClipboard);
                 break;
             case Helpers.Core.Capture.SelectionOutcome.Password:
                 _toasts.Info("That's a password field, so nothing was read");
