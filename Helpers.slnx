@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Helpers.Ai/Helpers.Ai.csproj" />
+    <Project Path="src/Helpers.App/Helpers.App.csproj" />
+    <Project Path="src/Helpers.Core/Helpers.Core.csproj" />
+    <Project Path="src/Helpers.Speech/Helpers.Speech.csproj" />
+    <Project Path="src/Helpers.Windows/Helpers.Windows.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Helpers.Tests/Helpers.Tests.csproj" />
+  </Folder>
+</Solution>

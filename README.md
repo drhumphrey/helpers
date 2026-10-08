@@ -39,7 +39,7 @@ The prototype is an AutoHotkey script that uses the voices already on Windows.
 
 ## Building
 
-The .NET app will need the .NET 10 SDK. Build instructions will appear here once the first milestone lands.
+Install the .NET 10 SDK, then from the repo root run `dotnet build Helpers.slnx` and `dotnet test Helpers.slnx`. Nothing useful runs yet: the app window is a placeholder until milestone 3.
 
 ## Contributing
 

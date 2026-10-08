@@ -33,7 +33,7 @@ People who are strong systems thinkers and creatives but are not natural typers,
 |---|---|
 | Licence | GPL-3.0 (already in the repo). All dependencies below are compatible. |
 | Runtime | C# on .NET 10 (LTS). Windows first, x64. macOS after v0.2. `Helpers.Core`, `Helpers.Speech` and `Helpers.Ai` must have no Windows dependencies, so the Mac version is a new shell, not a rewrite. |
-| UI | Avalonia 11 (MIT) with its Fluent theme, following the OS light/dark setting and accent colour. Decided 7 October 2026 so one UI runs on Windows and macOS. There is no main window: the app lives in the tray and shows small overlays. See Surfaces. |
+| UI | Avalonia 12 (MIT) with its Fluent theme and the Inter UI font the template ships, following the OS light/dark setting and accent colour. Decided 7 October 2026 so one UI runs on Windows and macOS. There is no main window: the app lives in the tray and shows small overlays. See Surfaces. |
 | Speech | sherpa-onnx (NuGet `org.k2fsa.sherpa.onnx`, Apache-2.0) running Kokoro (Apache-2.0 weights). Fully offline. Runs on Windows and macOS. |
 | Default voice | A British Kokoro voice. Kokoro v1.0 includes bf_emma, bf_isabella, bf_alice, bf_lily, bm_george, bm_lewis, bm_daniel and bm_fable. Check the sherpa-onnx docs for the current model package and its speaker-ID mapping. Prefer the int8 build if quality is close. |
 | Audio | NAudio (MIT) on Windows, behind an `IAudioOutput` interface in Core. |
@@ -46,6 +46,7 @@ People who are strong systems thinkers and creatives but are not natural typers,
 | Dictation | Use the operating system's own voice typing (Win+H on Windows, the dictation key on Mac). It works in the Compose window already. Nothing to build in v1. |
 | Readable fonts | Bundle Lexend and Atkinson Hyperlegible (both SIL Open Font Licence). System font stays the default. |
 | Privacy | Offline by default. Cloud features are opt-in, per feature, and clearly labelled. No telemetry. |
+| Tests | xUnit, the `dotnet new xunit` default, in `Helpers.Tests`. |
 
 Prerequisites on the dev machine: the .NET 10 SDK (`winget install Microsoft.DotNet.SDK.10`, or the installer from dot.net if winget hangs) and the Avalonia templates (`dotnet new install Avalonia.Templates`). Both installed on Dave's PC on 7 October 2026. VS Code with the C# Dev Kit is enough. Inno Setup is needed for the packaging milestone.
 
@@ -186,7 +187,7 @@ Note that Ctrl+Alt is AltGr on many European keyboards, so these must be easy to
 
 ## Architecture
 
-One solution, `Helpers.sln`, with these projects:
+One solution, `Helpers.slnx` (the .NET 10 solution format), with these projects:
 
 | Project | Responsibility |
 |---|---|
