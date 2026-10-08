@@ -18,6 +18,12 @@
       <SolidColorBrush x:Key="AccentTextBrush" Color="#0F6CBD" />
       <SolidColorBrush x:Key="SuccessBrush" Color="#1B7F4B" />
       <SolidColorBrush x:Key="ErrorBrush" Color="#B42318" />
+      <SolidColorBrush x:Key="SliderTrackValueFill" Color="#0F6CBD" />
+      <SolidColorBrush x:Key="SliderTrackValueFillPointerOver" Color="#0F6CBD" />
+      <SolidColorBrush x:Key="SliderTrackValueFillPressed" Color="#0B4F8A" />
+      <SolidColorBrush x:Key="SliderThumbBackground" Color="#0F6CBD" />
+      <SolidColorBrush x:Key="SliderThumbBackgroundPointerOver" Color="#2F86D6" />
+      <SolidColorBrush x:Key="SliderThumbBackgroundPressed" Color="#0B4F8A" />
     </ResourceDictionary>
     <ResourceDictionary x:Key="Dark">
       <SolidColorBrush x:Key="OverlaySurfaceBrush" Color="#F522252C" />
@@ -35,6 +41,12 @@
       <SolidColorBrush x:Key="AccentTextBrush" Color="#6BB2FF" />
       <SolidColorBrush x:Key="SuccessBrush" Color="#6EDFA3" />
       <SolidColorBrush x:Key="ErrorBrush" Color="#FF8A80" />
+      <SolidColorBrush x:Key="SliderTrackValueFill" Color="#6BB2FF" />
+      <SolidColorBrush x:Key="SliderTrackValueFillPointerOver" Color="#6BB2FF" />
+      <SolidColorBrush x:Key="SliderTrackValueFillPressed" Color="#4A9BF0" />
+      <SolidColorBrush x:Key="SliderThumbBackground" Color="#6BB2FF" />
+      <SolidColorBrush x:Key="SliderThumbBackgroundPointerOver" Color="#8FC5FF" />
+      <SolidColorBrush x:Key="SliderThumbBackgroundPressed" Color="#4A9BF0" />
     </ResourceDictionary>
   </ResourceDictionary.ThemeDictionaries>
 </ResourceDictionary>

@@ -36,6 +36,7 @@ public sealed class SettingsViewModel : ObservableObject
     private bool _useThirdColour;
     private bool _loadingPalette;
     private bool _animate;
+    private int _fleckDensity;
     private int _hideAfterSeconds;
     private bool _watchClipboardOn;
 
@@ -82,6 +83,7 @@ public sealed class SettingsViewModel : ObservableObject
         _colour3 = colours.Length > 2 ? colours[2] : Color.Parse("#FFE14D");
 
         _animate = settings.AnimateWhileReading;
+        _fleckDensity = settings.FleckDensity;
         _hideAfterSeconds = settings.PlayerHideAfterSeconds;
         _watchClipboardOn = settings.WatchClipboard;
     }
@@ -172,6 +174,7 @@ public sealed class SettingsViewModel : ObservableObject
                 _store.Update(s => s.Vibe = value.Value);
                 Raise(nameof(IsCalm));
                 Raise(nameof(IsCustom));
+                Raise(nameof(IsGradientVibe));
                 _applyLook();
             }
         }
@@ -180,6 +183,8 @@ public sealed class SettingsViewModel : ObservableObject
     public bool IsCalm => _vibe.Value == Vibe.Calm;
 
     public bool IsCustom => _vibe.Value == Vibe.Custom;
+
+    public bool IsGradientVibe => _vibe.Value != Vibe.Calm;
 
     public Choice<ThemeChoice> ThemeChoiceValue
     {
@@ -316,6 +321,20 @@ public sealed class SettingsViewModel : ObservableObject
             {
                 _store.Update(s => s.AnimateWhileReading = value);
                 _reading.SetAnimate(value);
+            }
+        }
+    }
+
+    public int FleckDensity
+    {
+        get => _fleckDensity;
+        set
+        {
+            var clamped = Math.Clamp(value, 0, 100);
+            if (Set(ref _fleckDensity, clamped))
+            {
+                _store.Update(s => s.FleckDensity = clamped);
+                _reading.SetFleckDensity(clamped);
             }
         }
     }

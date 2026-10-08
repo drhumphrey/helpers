@@ -82,6 +82,14 @@ public sealed class ReadingController : IDisposable
         }
     }
 
+    public void SetFleckDensity(int density)
+    {
+        if (_window is not null)
+        {
+            _window.FleckDensity = density;
+        }
+    }
+
     /// <summary>Loads the voice in the background, with a progress toast if a download is needed.</summary>
     public async Task WarmUpAsync()
     {
@@ -174,6 +182,7 @@ public sealed class ReadingController : IDisposable
             _window = new PlayerWindow(_player)
             {
                 AnimateWhileReading = current.AnimateWhileReading,
+                FleckDensity = current.FleckDensity,
                 ExpandedSize = current.ReadingViewWidth is { } w && current.ReadingViewHeight is { } h ? new Size(w, h) : null,
             };
             _window.Moved += point => _settings.Update(s => s.PlayerPlacement = new WindowPlacement(point.X, point.Y));

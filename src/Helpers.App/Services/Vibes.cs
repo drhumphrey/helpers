@@ -98,6 +98,12 @@ public static class Vibes
             ["AccentTextBrush"] = new SolidColorBrush(first),
             ["SuccessBrush"] = new SolidColorBrush(Color.Parse("#6EDFA3")),
             ["ErrorBrush"] = new SolidColorBrush(Color.Parse("#FF8A80")),
+            ["SliderTrackValueFill"] = Gradient([first, second], 255, diagonal: false),
+            ["SliderTrackValueFillPointerOver"] = Gradient([first, second], 255, diagonal: false),
+            ["SliderTrackValueFillPressed"] = Gradient([first, second], 255, diagonal: false),
+            ["SliderThumbBackground"] = new SolidColorBrush(first),
+            ["SliderThumbBackgroundPointerOver"] = new SolidColorBrush(first),
+            ["SliderThumbBackgroundPressed"] = new SolidColorBrush(second),
         };
     }
 

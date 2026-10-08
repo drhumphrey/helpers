@@ -71,7 +71,9 @@
   </overlays:OverlayWindow.Styles>
 
   <LayoutTransformControl x:Name="Scaler">
-    <Border x:Name="Card" Margin="24" CornerRadius="14" BorderThickness="1"
+    <Panel x:Name="Stage">
+    <Canvas x:Name="FleckLayer" IsHitTestVisible="False" ClipToBounds="False" />
+    <Border x:Name="Card" Margin="32" CornerRadius="14" BorderThickness="1"
             BorderBrush="{DynamicResource OverlayBorderBrush}"
             Background="{DynamicResource OverlaySurfaceBrush}"
             BoxShadow="{DynamicResource OverlayGlow}"
@@ -160,5 +162,6 @@
 
       </DockPanel>
     </Border>
+    </Panel>
   </LayoutTransformControl>
 </overlays:OverlayWindow>

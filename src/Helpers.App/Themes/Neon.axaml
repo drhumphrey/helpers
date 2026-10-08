@@ -26,4 +26,20 @@
   <SolidColorBrush x:Key="AccentTextBrush" Color="#19E6FF" />
   <SolidColorBrush x:Key="SuccessBrush" Color="#6EDFA3" />
   <SolidColorBrush x:Key="ErrorBrush" Color="#FF8A80" />
+  <!-- Sliders follow the vibe instead of the theme accent. -->
+  <LinearGradientBrush x:Key="SliderTrackValueFill" StartPoint="0%,0%" EndPoint="100%,0%">
+    <GradientStop Offset="0" Color="#19E6FF" />
+    <GradientStop Offset="1" Color="#FF7AE0" />
+  </LinearGradientBrush>
+  <LinearGradientBrush x:Key="SliderTrackValueFillPointerOver" StartPoint="0%,0%" EndPoint="100%,0%">
+    <GradientStop Offset="0" Color="#19E6FF" />
+    <GradientStop Offset="1" Color="#FF7AE0" />
+  </LinearGradientBrush>
+  <LinearGradientBrush x:Key="SliderTrackValueFillPressed" StartPoint="0%,0%" EndPoint="100%,0%">
+    <GradientStop Offset="0" Color="#19E6FF" />
+    <GradientStop Offset="1" Color="#FF7AE0" />
+  </LinearGradientBrush>
+  <SolidColorBrush x:Key="SliderThumbBackground" Color="#19E6FF" />
+  <SolidColorBrush x:Key="SliderThumbBackgroundPointerOver" Color="#8FF0FF" />
+  <SolidColorBrush x:Key="SliderThumbBackgroundPressed" Color="#FF7AE0" />
 </ResourceDictionary>

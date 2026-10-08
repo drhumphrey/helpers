@@ -105,6 +105,11 @@
       <TextBlock Classes="label" Text="Size" />
       <ComboBox Grid.Column="1" ItemsSource="{Binding Scales}" SelectedItem="{Binding ScaleChoice}" HorizontalAlignment="Stretch" />
     </Grid>
+    <Grid Classes="row" ColumnDefinitions="160,*,52" IsVisible="{Binding IsGradientVibe}">
+      <TextBlock Classes="label" Text="Flecks" />
+      <Slider Grid.Column="1" Minimum="0" Maximum="100" TickFrequency="5" IsSnapToTickEnabled="True" Value="{Binding FleckDensity}" />
+      <TextBlock Grid.Column="2" Classes="label" Text="{Binding FleckDensity}" HorizontalAlignment="Right" />
+    </Grid>
     <Grid Classes="row" ColumnDefinitions="160,*">
       <TextBlock Classes="label" Text="Move while reading" />
       <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">

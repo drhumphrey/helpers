@@ -43,6 +43,9 @@ public sealed class AppSettings
     /// <summary>Let the gradient and highlight drift while reading.</summary>
     public bool AnimateWhileReading { get; set; } = true;
 
+    /// <summary>How many flecks of colour drift around the player, 0 to 100. Calm ignores it.</summary>
+    public int FleckDensity { get; set; } = 35;
+
     /// <summary>Scale for every overlay. 1.0 is the designed size.</summary>
     public double UiScale { get; set; } = 0.9;
 

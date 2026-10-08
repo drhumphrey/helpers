@@ -154,7 +154,7 @@ public partial class App : Application
 
         var tray = new TrayIcon
         {
-            Icon = new WindowIcon(AssetLoader.Open(new Uri("avares://Helpers.App/Assets/tray.png"))),
+            Icon = new WindowIcon(AssetLoader.Open(new Uri("avares://Helpers.App/Assets/app.ico"))),
             ToolTipText = "Helpers",
             Menu = menu,
             IsVisible = true,

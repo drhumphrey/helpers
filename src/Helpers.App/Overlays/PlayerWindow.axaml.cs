@@ -29,6 +29,11 @@ public partial class PlayerWindow : OverlayWindow
     private Point _resizeStart;
     private Size _resizeFrom;
     private int _renderedListIndex = -1;
+    private readonly List<Fleck> _flecks = [];
+    private readonly Random _random = new();
+    private Color[] _fleckColours = [];
+    private int _fleckDensity = 35;
+    private bool _reducedMotion;
 
     public PlayerWindow(PlayerViewModel viewModel)
     {
@@ -57,7 +62,15 @@ public partial class PlayerWindow : OverlayWindow
         {
             _borderMotion = CloneGradient(value);
             Card.BorderBrush = _borderMotion ?? value as IBrush;
+
+            // Flecks take their colours from the gradient. A flat brush (Calm) means none.
+            _fleckColours = value is LinearGradientBrush gradient
+                ? [.. gradient.GradientStops.Select(s => s.Color), Color.Parse("#B6FF3B")]
+                : [];
+            BuildFlecks();
         }));
+        Stage.SizeChanged += (_, _) => PlaceFlecks();
+        _reducedMotion = OperatingSystem.IsWindows() && Helpers.Windows.SystemPreferences.ReducedMotion;
         this.GetResourceObservable("HighlightBrush").Subscribe(new AnonymousObserver<object?>(value =>
         {
             _highlightMotion = CloneGradient(value);
@@ -82,6 +95,17 @@ public partial class PlayerWindow : OverlayWindow
     public event Action<bool>? ExpandedChanged;
 
     public bool AnimateWhileReading { get; set; } = true;
+
+    /// <summary>0 to 100: how many flecks drift around the card.</summary>
+    public int FleckDensity
+    {
+        get => _fleckDensity;
+        set
+        {
+            _fleckDensity = Math.Clamp(value, 0, 100);
+            BuildFlecks();
+        }
+    }
 
     /// <summary>The size to use for the reading view, or null for the default.</summary>
     public Size? ExpandedSize { get; set; }
@@ -355,10 +379,122 @@ public partial class PlayerWindow : OverlayWindow
         return inlines;
     }
 
-    /// <summary>Moves the gradients a little each tick while reading. Still when paused, stopped or switched off.</summary>
+    /// <summary>One fleck of colour on the ground around the card.</summary>
+    private sealed class Fleck
+    {
+        public required Border Visual { get; init; }
+
+        public double X { get; set; }
+
+        public double Y { get; set; }
+
+        public double Phase { get; init; }
+
+        public double Speed { get; init; }
+    }
+
+    /// <summary>Creates the flecks for the current colours and density. Nothing in Calm or at zero.</summary>
+    private void BuildFlecks()
+    {
+        FleckLayer.Children.Clear();
+        _flecks.Clear();
+        if (_fleckColours.Length == 0 || _fleckDensity <= 0)
+        {
+            return;
+        }
+
+        var count = (int)Math.Round(_fleckDensity / 100.0 * 28);
+        for (var i = 0; i < count; i++)
+        {
+            var size = _random.Next(3, 7);
+            var colour = _fleckColours[i % _fleckColours.Length];
+            var visual = new Border
+            {
+                Width = size,
+                Height = size,
+                CornerRadius = new CornerRadius(size),
+                Background = new SolidColorBrush(colour),
+                BoxShadow = BoxShadows.Parse($"0 0 {size * 2} 0 #99{colour.R:X2}{colour.G:X2}{colour.B:X2}"),
+                Opacity = 0.85,
+                IsHitTestVisible = false,
+            };
+
+            FleckLayer.Children.Add(visual);
+            _flecks.Add(new Fleck
+            {
+                Visual = visual,
+                Phase = _random.NextDouble() * Math.Tau,
+                Speed = 0.3 + _random.NextDouble() * 0.7,
+            });
+        }
+
+        PlaceFlecks();
+    }
+
+    /// <summary>Scatters the flecks in the band of ground around the card, where they can be seen.</summary>
+    private void PlaceFlecks()
+    {
+        var bounds = Stage.Bounds;
+        if (bounds.Width <= 0 || bounds.Height <= 0)
+        {
+            return;
+        }
+
+        var band = Card.Margin.Left;
+        foreach (var fleck in _flecks)
+        {
+            var along = _random.NextDouble();
+            var depth = _random.NextDouble() * band;
+            switch (_random.Next(4))
+            {
+                case 0: // top
+                    fleck.X = along * bounds.Width;
+                    fleck.Y = depth;
+                    break;
+                case 1: // bottom
+                    fleck.X = along * bounds.Width;
+                    fleck.Y = bounds.Height - depth;
+                    break;
+                case 2: // left
+                    fleck.X = depth;
+                    fleck.Y = along * bounds.Height;
+                    break;
+                default: // right
+                    fleck.X = bounds.Width - depth;
+                    fleck.Y = along * bounds.Height;
+                    break;
+            }
+
+            Canvas.SetLeft(fleck.Visual, fleck.X);
+            Canvas.SetTop(fleck.Visual, fleck.Y);
+        }
+    }
+
+    /// <summary>Moves the gradients a little each tick while reading, and the flecks whenever the window shows.</summary>
     private void Drift()
     {
-        if (!AnimateWhileReading || !_viewModel.ShowPause || !IsVisible)
+        if (!IsVisible)
+        {
+            return;
+        }
+
+        if (!_reducedMotion && _flecks.Count > 0)
+        {
+            var bounds = Stage.Bounds;
+            var t = Environment.TickCount64 / 1000.0;
+            foreach (var fleck in _flecks)
+            {
+                // A slow wander that never leaves the stage; the card hides any that cross it.
+                fleck.X += Math.Cos(fleck.Phase + t * fleck.Speed) * 0.2;
+                fleck.Y += Math.Sin(fleck.Phase * 1.3 + t * fleck.Speed * 0.8) * 0.15;
+                fleck.X = Math.Clamp(fleck.X, 0, bounds.Width);
+                fleck.Y = Math.Clamp(fleck.Y, 0, bounds.Height);
+                Canvas.SetLeft(fleck.Visual, fleck.X);
+                Canvas.SetTop(fleck.Visual, fleck.Y);
+            }
+        }
+
+        if (!AnimateWhileReading || _reducedMotion || !_viewModel.ShowPause)
         {
             return;
         }
