@@ -57,7 +57,7 @@ These are decided below so work can start. Overrule any of them.
 - **Product name.** "Helpers" is the working title and the solution name. The tray app needs a friendlier name before v0.1 ships.
 - **Publish v0.1 early.** The plan releases the reading half on its own as v0.1 before Compose exists. I think that is right: it's useful on day one.
 - **Four AI actions.** Tidy, Make a request, Summarise and Explain simply. All are prompt templates behind the same plumbing, so each extra one costs little. Cut any you don't want.
-- **Dropbox.** The checkout lives inside Dropbox. Before milestone 0, either exclude the folder from Dropbox sync or move the checkout to a local path.
+- **Dropbox.** Resolved 8 October 2026: the checkout stays in Dropbox, but `.git` and every `bin` and `obj` folder are marked as Dropbox-ignored, so Dropbox never touches git internals or build output. See Gotchas for the command to run when a project is added.
 
 ## User experience
 
@@ -406,6 +406,7 @@ Demo each one before starting the next.
 - **Windows spell check:** needs the en-GB language features installed in Windows. Without them the checker reports no errors at all, which looks like perfect spelling. Detect it and say so.
 - **LLamaSharp backends:** reference exactly one backend package (`LLamaSharp.Backend.Cpu`). Mixing backends causes native load failures.
 - **Qwen3 thinking:** on by default and makes short tasks slow. Turn it off.
+- **Dropbox:** the checkout lives in Dropbox. Git internals and build output are excluded with an NTFS stream Dropbox honours. When a new project is added, build it once, then mark its folders: `Set-Content -Path <folder> -Stream com.dropbox.ignored -Value 1` for its `bin` and `obj`. Dropbox shows a grey minus badge on ignored folders.
 
 ## macOS version (milestone 11, after v0.2)
 
