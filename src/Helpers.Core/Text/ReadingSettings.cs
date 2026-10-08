@@ -44,6 +44,9 @@ public sealed class ReadingSettings
     /// <summary>Say only "table, 3 columns, 5 rows" and skip the rows.</summary>
     public bool SkipTables { get; set; }
 
+    /// <summary>Say years the way people do: "nineteen ninety-five", not "one thousand nine hundred and ninety-five".</summary>
+    public bool SayYearsNaturally { get; set; } = true;
+
     /// <summary>The longest piece of text handed to the engine in one go.</summary>
     public int MaxChunkLength { get; set; } = 400;
 

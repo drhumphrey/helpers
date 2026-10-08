@@ -29,6 +29,11 @@ public static partial class SpokenTextRules
         }
 
         text = ReplaceFilePaths(text, settings.FilePaths);
+        if (settings.SayYearsNaturally)
+        {
+            text = NumberSpeech.YearsAsSpeech(text);
+        }
+
         text = settings.Pronunciations.Apply(text);
         return CollapseWhitespace(text);
     }

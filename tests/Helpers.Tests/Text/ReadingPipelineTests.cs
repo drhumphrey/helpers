@@ -72,7 +72,7 @@ public class ReadingPipelineTests
         Assert.Contains("Build the reading half first.", spoken);
         Assert.Contains(spoken, s => s.Contains("See link for details.", StringComparison.Ordinal));
         Assert.Contains(spoken, s => s.Contains("email address with questions", StringComparison.Ordinal));
-        Assert.Contains(spoken, s => s.StartsWith("Version 2.0 shipped on 7 Oct. 2026, e.g. after the Dr. Patel review of Fig. 3.", StringComparison.Ordinal));
+        Assert.Contains(spoken, s => s.StartsWith("Version 2.0 shipped on 7 Oct. twenty twenty-six, e.g. after the Dr. Patel review of Fig. 3.", StringComparison.Ordinal));
         Assert.Contains("code block, 1 line", spoken);
     }
 
