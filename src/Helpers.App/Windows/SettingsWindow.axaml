@@ -1,0 +1,95 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Helpers.App.ViewModels"
+        x:Class="Helpers.App.Windows.SettingsWindow"
+        x:DataType="vm:SettingsViewModel"
+        Title="Helpers settings"
+        Width="600" SizeToContent="Height" CanResize="False"
+        WindowStartupLocation="CenterScreen">
+
+  <Window.Styles>
+    <Style Selector="TextBlock.label">
+      <Setter Property="FontSize" Value="15" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="TextBlock.hint">
+      <Setter Property="FontSize" Value="13" />
+      <Setter Property="Opacity" Value="0.7" />
+      <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+    <Style Selector="TextBlock.section">
+      <Setter Property="FontSize" Value="13" />
+      <Setter Property="Opacity" Value="0.7" />
+      <Setter Property="Margin" Value="0,14,0,2" />
+    </Style>
+    <Style Selector="Grid.row">
+      <Setter Property="Margin" Value="0,6" />
+    </Style>
+  </Window.Styles>
+
+  <StackPanel Margin="24,18,24,22" Spacing="2">
+
+    <TextBlock Classes="section" Text="VOICE" />
+    <Grid Classes="row" ColumnDefinitions="160,*,Auto">
+      <TextBlock Classes="label" Text="Voice" />
+      <ComboBox Grid.Column="1" ItemsSource="{Binding Voices}" SelectedItem="{Binding Voice}" HorizontalAlignment="Stretch">
+        <ComboBox.ItemTemplate>
+          <DataTemplate>
+            <TextBlock Text="{Binding DisplayName}" />
+          </DataTemplate>
+        </ComboBox.ItemTemplate>
+      </ComboBox>
+      <Button Grid.Column="2" Content="Preview" Click="OnPreview" Margin="10,0,0,0" MinHeight="34" />
+    </Grid>
+    <Grid Classes="row" ColumnDefinitions="160,*,52">
+      <TextBlock Classes="label" Text="Speed" />
+      <Slider Grid.Column="1" Minimum="0.5" Maximum="2.0" TickFrequency="0.1" IsSnapToTickEnabled="True" Value="{Binding Speed}" />
+      <TextBlock Grid.Column="2" Classes="label" Text="{Binding SpeedText}" HorizontalAlignment="Right" />
+    </Grid>
+    <Grid Classes="row" ColumnDefinitions="160,*,52">
+      <TextBlock Classes="label" Text="Volume" />
+      <Slider Grid.Column="1" Minimum="0" Maximum="100" TickFrequency="5" IsSnapToTickEnabled="True" Value="{Binding VolumePercent}" />
+      <TextBlock Grid.Column="2" Classes="label" Text="{Binding VolumeText}" HorizontalAlignment="Right" />
+    </Grid>
+    <Grid Classes="row" ColumnDefinitions="160,*">
+      <TextBlock Classes="label" Text="Output device" />
+      <ComboBox Grid.Column="1" ItemsSource="{Binding OutputDevices}" SelectedItem="{Binding OutputDevice}" HorizontalAlignment="Stretch">
+        <ComboBox.ItemTemplate>
+          <DataTemplate>
+            <TextBlock Text="{Binding Name}" />
+          </DataTemplate>
+        </ComboBox.ItemTemplate>
+      </ComboBox>
+    </Grid>
+    <TextBlock Classes="hint" Text="A microphone choice arrives with dictation, in a later milestone." Margin="160,0,0,0" />
+
+    <TextBlock Classes="section" Text="LOOK" />
+    <Grid Classes="row" ColumnDefinitions="160,*">
+      <TextBlock Classes="label" Text="Vibe" />
+      <ComboBox Grid.Column="1" ItemsSource="{Binding Vibes}" SelectedItem="{Binding VibeChoice}" HorizontalAlignment="Stretch" />
+    </Grid>
+    <Grid Classes="row" ColumnDefinitions="160,*" IsEnabled="{Binding IsCalm}">
+      <TextBlock Classes="label" Text="Light or dark" />
+      <ComboBox Grid.Column="1" ItemsSource="{Binding Themes}" SelectedItem="{Binding ThemeChoiceValue}" HorizontalAlignment="Stretch" />
+    </Grid>
+    <TextBlock Classes="hint" Text="Neon is always dark. Calm can follow Windows or be set." Margin="160,0,0,0" />
+
+    <TextBlock Classes="section" Text="PLAYER" />
+    <Grid Classes="row" ColumnDefinitions="160,*">
+      <TextBlock Classes="label" Text="Hide after reading" />
+      <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
+        <NumericUpDown Minimum="0" Maximum="60" Increment="1" Value="{Binding HideAfterSeconds}" Width="120" FormatString="0" />
+        <TextBlock Classes="label" Text="seconds. 0 keeps it open." />
+      </StackPanel>
+    </Grid>
+    <Grid Classes="row" ColumnDefinitions="160,*">
+      <TextBlock Classes="label" Text="Watch clipboard" />
+      <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
+        <ToggleSwitch IsChecked="{Binding WatchClipboardOn}" OnContent="" OffContent="" />
+        <TextBlock Classes="label" Text="Read anything new that is copied" />
+      </StackPanel>
+    </Grid>
+
+    <TextBlock Classes="hint" Text="{Binding SettingsFile}" Margin="0,16,0,0" />
+  </StackPanel>
+</Window>

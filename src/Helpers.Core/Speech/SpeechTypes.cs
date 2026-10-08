@@ -27,6 +27,16 @@ public sealed class AudioClip
 /// <summary>What to say and how.</summary>
 public sealed record SynthesisRequest(string Text, SpeechVoice Voice, float Speed);
 
+/// <summary>An audio output device the user can pick. Id "default" means whatever the OS routes to.</summary>
+public sealed record AudioDevice(string Id, string Name)
+{
+    public const string DefaultId = "default";
+
+    public static AudioDevice Default { get; } = new(DefaultId, "Default output");
+
+    public bool IsDefault => Id == DefaultId;
+}
+
 /// <summary>Progress while the engine downloads or loads its model.</summary>
 /// <param name="Stage">Short text for the user, such as "Downloading the voice".</param>
 /// <param name="Fraction">0 to 1 when known, otherwise null.</param>

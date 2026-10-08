@@ -31,26 +31,29 @@ public partial class PlayerWindow : OverlayWindow
     /// <summary>Raised when the user drags the window somewhere else, so the place can be remembered.</summary>
     public event Action<PixelPoint>? Moved;
 
-    /// <summary>Puts the window at a remembered place, or bottom-right of the primary screen.</summary>
+    /// <summary>Raised by the cog button.</summary>
+    public event Action? SettingsRequested;
+
+    /// <summary>Puts the window at a remembered place if that place is still on a screen, else bottom-right of the mouse's screen.</summary>
     public void PlaceAt(PixelPoint? remembered)
     {
         if (remembered is { } place && Screens.ScreenFromPoint(place) is not null)
         {
             Position = place;
+            KeepOnScreen();
             return;
         }
 
-        if (Screens.Primary is { } screen)
+        if (TargetScreen() is { } screen)
         {
-            var area = screen.WorkingArea;
-            var size = PixelSize.FromSize(ClientSize, screen.Scaling);
-            Position = new PixelPoint(area.Right - size.Width - 8, area.Bottom - size.Height - 120);
+            PlaceBottomRight(screen, 8, 120);
         }
     }
 
     protected override void OnOpened(EventArgs e)
     {
         base.OnOpened(e);
+        FitReadingViewToScreen();
         PositionChanged += (_, args) => Moved?.Invoke(args.Point);
     }
 
@@ -62,8 +65,11 @@ public partial class PlayerWindow : OverlayWindow
 
     private void OnStop(object? sender, RoutedEventArgs e) => _viewModel.Stop();
 
+    private void OnSettings(object? sender, RoutedEventArgs e) => SettingsRequested?.Invoke();
+
     private void OnToggleExpand(object? sender, RoutedEventArgs e)
     {
+        FitReadingViewToScreen();
         _viewModel.IsExpanded = !_viewModel.IsExpanded;
         if (_viewModel.IsExpanded)
         {
@@ -96,6 +102,16 @@ public partial class PlayerWindow : OverlayWindow
         }
 
         BeginMoveDrag(e);
+    }
+
+    /// <summary>The reading view may use just over half the height of the screen the player is on.</summary>
+    private void FitReadingViewToScreen()
+    {
+        if (CurrentScreen() is { } screen)
+        {
+            var usable = screen.WorkingArea.Height / screen.Scaling;
+            Scroller.MaxHeight = Math.Max(240, usable * 0.55 - 120);
+        }
     }
 
     private void BringCurrentIntoView()

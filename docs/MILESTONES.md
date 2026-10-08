@@ -71,3 +71,19 @@ One entry per milestone: what was built, what was measured, what didn't go to pl
 
 - Avalonia 12 renamed `SystemDecorations` to `WindowDecorations`. Expect more renames like it; the online docs mostly describe 11.
 - `Helpers.App` and `Helpers.Windows` now target `net10.0-windows` rather than plain `net10.0`, because NAudio's playback classes only ship for Windows frameworks and a plain project can't reference a Windows one. The Mac build will need its own target later; Core, Speech and Ai stay platform-neutral.
+
+**Step 2, the player (8 October 2026, evening).** Reading works end to end: text goes through the pipeline, `ReadingSession` synthesises one sentence ahead and plays through NAudio, the player shows the current sentence and expands into the reading view with click-to-jump, toasts stack above the tray, and the tray menu has Read clipboard, Watch clipboard, Pause, Stop, Show player, Settings, Calm look, Memory in use and Exit. Settings persist in `%APPDATA%\Helpers\settings.json`. Neon and Calm are resource dictionaries swapped at runtime.
+
+**Dave's first test:** every voice, play, stop, replay and speed all fine. He asked for volume, an output device choice, a settings cog, and a settings area, and reported that the player could grow off the edge of his monitor and that toasts could straddle two monitors.
+
+**Step 3, from that feedback.** A first Settings window, pulled forward from milestone 6: voice with preview, speed, volume, output device, vibe, light or dark, hide delay, watch clipboard. A cog on the player and a Settings item in the tray open it. Overlays now open on the monitor the mouse is on and nudge themselves back inside that screen whenever their size changes; the reading view's height scales to the screen. A microphone choice waits for dictation.
+
+**Not to plan in steps 2 and 3:**
+
+- Acrylic blur applies to the whole window rectangle on Windows, so the transparent shadow margin became a frosted box. Overlays now use plain transparency with a near-solid card instead; the glow fades properly, the blur-through is gone.
+- Play on a finished reading did nothing. Now it restarts; clicking a sentence after the end starts from there.
+- NAudio 3 again: `DesiredLatency` is gone; use `BufferMilliseconds` and `NumberOfBuffers`. Avalonia 12: `NativeMenuItemToggleType` is now `MenuItemToggleType`.
+- A build interrupted by a file lock left a truncated DLL in `obj`, which then failed every later build with "Image is too small" from the app-host step. `dotnet clean` on the project fixes it.
+- Output devices come from the old WinMM API, whose names are cut at 31 characters. WASAPI gives full names and device-change events; worth switching when device hot-plugging is handled.
+
+**Still to do in milestone 3:** the drifting flecks, the speed slider in the gradient rather than the default blue, the memory figure in the log once measured in the real app, and an app icon once the product has a name.

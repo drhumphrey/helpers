@@ -27,6 +27,12 @@ public sealed class AppSettings
     /// <summary>0.5 to 2.0.</summary>
     public float Speed { get; set; } = 1.0f;
 
+    /// <summary>0 to 1.</summary>
+    public float Volume { get; set; } = 1.0f;
+
+    /// <summary>The output device's name, or null for the OS default. Stored by name because device numbers change.</summary>
+    public string? OutputDeviceName { get; set; }
+
     public Vibe Vibe { get; set; } = Vibe.Neon;
 
     public ThemeChoice Theme { get; set; } = ThemeChoice.FollowOS;

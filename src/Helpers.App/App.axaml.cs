@@ -54,6 +54,8 @@ public partial class App : Application
                 _clipboard.Start();
             }
 
+            _reading.SettingsRequested += ShowSettings;
+
             _tray = BuildTrayIcon(desktop, settings);
             TrayIcon.SetIcons(this, [_tray]);
 
@@ -89,6 +91,10 @@ public partial class App : Application
             {
                 _reading.ReadClipboard();
             }
+            else if (args[i] == "--settings")
+            {
+                ShowSettings();
+            }
         }
     }
 
@@ -111,6 +117,9 @@ public partial class App : Application
         var showPlayer = new NativeMenuItem("Show player");
         showPlayer.Click += (_, _) => _reading?.ShowPlayer();
 
+        var settingsItem = new NativeMenuItem("Settings…");
+        settingsItem.Click += (_, _) => ShowSettings();
+
         _calmItem = new NativeMenuItem("Calm look") { ToggleType = MenuItemToggleType.CheckBox, IsChecked = settings.Vibe == Vibe.Calm };
         _calmItem.Click += (_, _) => ToggleCalm();
 
@@ -131,6 +140,7 @@ public partial class App : Application
         menu.Items.Add(pause);
         menu.Items.Add(stop);
         menu.Items.Add(showPlayer);
+        menu.Items.Add(settingsItem);
         menu.Items.Add(new NativeMenuItemSeparator());
         menu.Items.Add(_calmItem);
         menu.Items.Add(memory);
@@ -148,16 +158,52 @@ public partial class App : Application
         return tray;
     }
 
+    private Windows.SettingsWindow? _settingsWindow;
+
+    private void ShowSettings()
+    {
+        if (_settings is null || _reading is null)
+        {
+            return;
+        }
+
+        if (_settingsWindow is null)
+        {
+            var viewModel = new ViewModels.SettingsViewModel(_settings, _reading, SetWatchClipboard, ApplyLook);
+            _settingsWindow = new Windows.SettingsWindow(viewModel);
+            _settingsWindow.Closed += (_, _) => _settingsWindow = null;
+            _settingsWindow.Show();
+        }
+        else
+        {
+            _settingsWindow.Activate();
+        }
+    }
+
     private void ToggleWatchClipboard()
     {
-        if (_settings is null || _clipboard is null || _watchItem is null)
+        if (_settings is null)
         {
             return;
         }
 
         var on = !_settings.Current.WatchClipboard;
         _settings.Update(s => s.WatchClipboard = on);
-        _watchItem.IsChecked = on;
+        SetWatchClipboard(on);
+    }
+
+    private void SetWatchClipboard(bool on)
+    {
+        if (_clipboard is null)
+        {
+            return;
+        }
+
+        if (_watchItem is not null)
+        {
+            _watchItem.IsChecked = on;
+        }
+
         if (on)
         {
             _clipboard.Start();
@@ -172,14 +218,28 @@ public partial class App : Application
 
     private void ToggleCalm()
     {
-        if (_settings is null || _calmItem is null)
+        if (_settings is null)
         {
             return;
         }
 
         var calm = _settings.Current.Vibe != Vibe.Calm;
         _settings.Update(s => s.Vibe = calm ? Vibe.Calm : Vibe.Neon);
-        _calmItem.IsChecked = calm;
+        ApplyLook();
+    }
+
+    private void ApplyLook()
+    {
+        if (_settings is null)
+        {
+            return;
+        }
+
+        if (_calmItem is not null)
+        {
+            _calmItem.IsChecked = _settings.Current.Vibe == Vibe.Calm;
+        }
+
         Vibes.Apply(this, _settings.Current.Vibe, _settings.Current.Theme);
     }
 }

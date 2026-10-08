@@ -34,16 +34,15 @@ public partial class ToastWindow : OverlayWindow
             return;
         }
 
+        var screen = IsVisible ? CurrentScreen() : TargetScreen();
         if (!IsVisible)
         {
             Show();
         }
 
-        if (Screens.Primary is { } screen)
+        if (screen is not null)
         {
-            var area = screen.WorkingArea;
-            var size = PixelSize.FromSize(ClientSize, screen.Scaling);
-            Position = new PixelPoint(area.Right - size.Width, area.Bottom - size.Height);
+            PlaceBottomRight(screen, 0, 0);
         }
     }
 

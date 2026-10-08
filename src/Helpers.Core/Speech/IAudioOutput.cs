@@ -8,6 +8,15 @@ public interface IAudioOutput : IDisposable
 {
     bool IsPaused { get; }
 
+    /// <summary>0 to 1. Applies to the open device at once and to every device opened later.</summary>
+    float Volume { get; set; }
+
+    /// <summary>The devices available right now, with the default first.</summary>
+    IReadOnlyList<AudioDevice> ListDevices();
+
+    /// <summary>Chooses a device by name. Null or the default id means the OS default. Takes effect from the next clip.</summary>
+    void SelectDevice(string? name);
+
     /// <summary>Opens the device for the given sample rate. Calling it again with the same rate is a no-op.</summary>
     void Start(int sampleRate);
 

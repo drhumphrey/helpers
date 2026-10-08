@@ -4,7 +4,7 @@ using NAudio.Wave;
 namespace Helpers.Windows;
 
 /// <summary>
-/// Plays clips through the default Windows output device with NAudio.
+/// Plays clips through a Windows output device with NAudio.
 /// One streaming buffer; a clip is "played" once the buffer has drained.
 /// </summary>
 public sealed class NAudioOutput : IAudioOutput
@@ -15,8 +15,58 @@ public sealed class NAudioOutput : IAudioOutput
     private WaveOut? _device;
     private BufferedWaveProvider? _buffer;
     private int _sampleRate;
+    private float _volume = 1.0f;
+    private string? _deviceName;
 
     public bool IsPaused { get; private set; }
+
+    public float Volume
+    {
+        get => _volume;
+        set
+        {
+            _volume = Math.Clamp(value, 0f, 1f);
+            lock (_sync)
+            {
+                if (_device is not null)
+                {
+                    _device.Volume = _volume;
+                }
+            }
+        }
+    }
+
+    public IReadOnlyList<AudioDevice> ListDevices()
+    {
+        var devices = new List<AudioDevice> { AudioDevice.Default };
+        for (var i = 0; i < WaveOut.DeviceCount; i++)
+        {
+            var name = WaveOut.GetCapabilities(i).ProductName;
+            if (!string.IsNullOrWhiteSpace(name))
+            {
+                devices.Add(new AudioDevice(i.ToString(), name));
+            }
+        }
+
+        return devices;
+    }
+
+    public void SelectDevice(string? name)
+    {
+        lock (_sync)
+        {
+            var wanted = string.IsNullOrWhiteSpace(name) || name == AudioDevice.DefaultId ? null : name;
+            if (wanted == _deviceName)
+            {
+                return;
+            }
+
+            _deviceName = wanted;
+
+            // Close the current device; the next clip opens the new one.
+            StopCore();
+        }
+    }
 
     public void Start(int sampleRate)
     {
@@ -35,7 +85,13 @@ public sealed class NAudioOutput : IAudioOutput
                 ReadFully = true,
             };
 
-            _device = new WaveOut { BufferMilliseconds = LatencyMs / 2, NumberOfBuffers = 2 };
+            _device = new WaveOut
+            {
+                DeviceNumber = ResolveDeviceNumber(),
+                BufferMilliseconds = LatencyMs / 2,
+                NumberOfBuffers = 2,
+                Volume = _volume,
+            };
             _device.Init(_buffer);
             _device.Play();
             IsPaused = false;
@@ -53,7 +109,7 @@ public sealed class NAudioOutput : IAudioOutput
         BufferedWaveProvider buffer;
         lock (_sync)
         {
-            if (_buffer is null || _device is null)
+            if (_buffer is null || _device is null || _sampleRate != clip.SampleRate)
             {
                 Start(clip.SampleRate);
             }
@@ -104,6 +160,24 @@ public sealed class NAudioOutput : IAudioOutput
     }
 
     public void Dispose() => Stop();
+
+    private int ResolveDeviceNumber()
+    {
+        if (_deviceName is null)
+        {
+            return -1;
+        }
+
+        for (var i = 0; i < WaveOut.DeviceCount; i++)
+        {
+            if (string.Equals(WaveOut.GetCapabilities(i).ProductName, _deviceName, StringComparison.Ordinal))
+            {
+                return i;
+            }
+        }
+
+        return -1;
+    }
 
     private void StopCore()
     {

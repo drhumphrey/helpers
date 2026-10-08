@@ -35,6 +35,9 @@ public sealed class ReadingController : IDisposable
             Speed = settings.Current.Speed,
             Voice = engine.Voices.FirstOrDefault(v => v.Id == settings.Current.VoiceId) ?? engine.Voices[0],
         };
+        _output.Volume = settings.Current.Volume;
+        _output.SelectDevice(settings.Current.OutputDeviceName);
+
         _player.SpeedChanged += speed => _settings.Update(s => s.Speed = speed);
         _player.VoiceChanged += voice => _settings.Update(s => s.VoiceId = voice.Id);
         _player.RestartRequested += index =>
@@ -49,6 +52,21 @@ public sealed class ReadingController : IDisposable
     private IReadOnlyList<SpeechSegment>? _lastSegments;
 
     public bool IsReading => _session is { State: ReadingState.Playing or ReadingState.Paused or ReadingState.Loading };
+
+    /// <summary>Raised by the player's cog button.</summary>
+    public event Action? SettingsRequested;
+
+    public IReadOnlyList<SpeechVoice> Voices => _engine.Voices;
+
+    public IReadOnlyList<AudioDevice> ListOutputDevices() => _output.ListDevices();
+
+    public void SelectOutputDevice(string? name) => _output.SelectDevice(name);
+
+    public void SetVolume(float volume) => _output.Volume = volume;
+
+    public void SetSpeed(float speed) => _player.Speed = speed;
+
+    public void SetVoice(SpeechVoice voice) => _player.Voice = voice;
 
     /// <summary>Loads the voice in the background, with a progress toast if a download is needed.</summary>
     public async Task WarmUpAsync()
@@ -140,6 +158,7 @@ public sealed class ReadingController : IDisposable
         {
             _window = new PlayerWindow(_player);
             _window.Moved += point => _settings.Update(s => s.PlayerPlacement = new WindowPlacement(point.X, point.Y));
+            _window.SettingsRequested += () => SettingsRequested?.Invoke();
             _window.Closed += (_, _) => _window = null;
             _window.Show();
             var remembered = _settings.Current.PlayerPlacement;
