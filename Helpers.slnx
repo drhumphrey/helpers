@@ -11,5 +11,6 @@
   </Folder>
   <Folder Name="/tools/">
     <Project Path="tools/EngineSpike/EngineSpike.csproj" />
+    <Project Path="tools/ReadingDump/ReadingDump.csproj" />
   </Folder>
 </Solution>

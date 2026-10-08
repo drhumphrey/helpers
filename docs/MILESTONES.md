@@ -38,3 +38,25 @@ One entry per milestone: what was built, what was measured, what didn't go to pl
 - **No int8 British model** exists ready-made, so the brief's "prefer int8" can't be followed yet.
 - **NAudio 3 renamed things.** `WaveOutEvent` is now `WaveOut`, and the buffer size is set in the constructor. Worth knowing before milestone 3.
 - **The spike targets `net10.0-windows`** because NAudio's playback classes only ship for Windows frameworks. The real `IAudioOutput` for Windows will need the same.
+
+## Milestone 2: text pipeline (8 October 2026)
+
+**Built:** the reading pipeline in `Helpers.Core.Text`, with 80-plus unit tests. Captured text goes in; a list of segments comes out, each with the text to show, the text to speak, and a pause to leave afterwards.
+
+- `MarkdownDetector` decides whether text is Markdown (AI chat) or plain (email, documents).
+- `PlainTextSegmenter` ports the prototype rules: bullets stripped, blank lines dropped, one segment per line.
+- `MarkdownSegmenter` uses Markdig: headings and bold-only lines pause longer, bold and inline code keep their words, code blocks become "code block, 12 lines", lists go one item at a time with numbers spoken, tables get a caption then one row per segment as "column: value; column: value".
+- `SentenceSplitter` splits on full stops, question and exclamation marks but not after Dr., e.g., et al., Fig. 2, initials, list numbers, decimals, version numbers or file names, and chunks anything over 400 characters at a clause boundary.
+- `SpokenTextRules` turns web addresses into "link", email addresses into "email address", and file paths into "file name.ext", all switchable.
+- `PronunciationDictionary` does whole-word replacement with optional case sensitivity and ships a starter list.
+- `ReadingPipeline` strings them together.
+
+**Test data:** two real Claude Code replies from this project, saved under `tests/Helpers.Tests/Fixtures`. The acceptance checks from the brief run against them: no stars, hashes, backticks or pipes are ever spoken, code is skipped with a count, tables read row by row, nothing handed to the engine is over the limit.
+
+**Tool:** `tools/ReadingDump` prints the pipeline's output for any file, so a reply can be checked by eye before it is heard.
+
+**Not to plan:**
+
+- Markdig is at version 1.4, not the 0.x series the docs online mostly describe. The API was the same.
+- Two things only showed up when reading real output rather than unit tests: a quoted abbreviation such as "e.g." wrongly ended a sentence, and table rows joined with commas were hard to follow. Both fixed and now covered by tests.
+- Bold-only lines were added as headings. The brief didn't ask for it, but every Claude Code reply uses them that way.

@@ -36,7 +36,7 @@ The prototype is an AutoHotkey script that uses the voices already on Windows.
 | `prototype/` | The AutoHotkey v2 proof of concept |
 | `src/` | The .NET application |
 | `tests/` | Unit tests |
-| `tools/` | Spikes and developer tools. `EngineSpike` is the milestone 1 voice check. |
+| `tools/` | Spikes and developer tools. `EngineSpike` is the milestone 1 voice check; `ReadingDump` prints what the reading pipeline would say for a file. |
 
 ## Building
 
