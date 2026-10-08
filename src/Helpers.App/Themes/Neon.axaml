@@ -18,6 +18,7 @@
     <GradientStop Offset="1" Color="#3DFF2FD1" />
   </LinearGradientBrush>
   <SolidColorBrush x:Key="HighlightForegroundBrush" Color="#FFFFFF" />
+  <SolidColorBrush x:Key="WordBrush" Color="#4DFFFFFF" />
   <SolidColorBrush x:Key="TextBrush" Color="#F2F4F8" />
   <SolidColorBrush x:Key="MutedBrush" Color="#A9B1BD" />
   <SolidColorBrush x:Key="DoneBrush" Color="#7E8794" />

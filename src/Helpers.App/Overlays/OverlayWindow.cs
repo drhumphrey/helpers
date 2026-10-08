@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Platform;
 using Avalonia.Win32;
+using Helpers.App.Services;
 using Helpers.Windows;
 
 namespace Helpers.App.Overlays;
@@ -11,7 +12,8 @@ namespace Helpers.App.Overlays;
 /// The base for every surface that must never take focus: the pill, the
 /// player, toasts and the AI result card. Borderless, topmost, transparent
 /// outside its card, kept off the taskbar, told by Windows not to activate
-/// when clicked, and always kept inside the screen it is on.
+/// when clicked, always kept inside the screen it is on, and scaled by the
+/// user's size setting through a LayoutTransformControl named "Scaler".
 /// </summary>
 public class OverlayWindow : Window
 {
@@ -38,6 +40,8 @@ public class OverlayWindow : Window
         }
 
         SizeChanged += (_, _) => KeepOnScreen();
+        UiScale.Changed += ApplyScale;
+        Closed += (_, _) => UiScale.Changed -= ApplyScale;
     }
 
     /// <summary>The screen the mouse is on, falling back to the primary one.</summary>
@@ -56,8 +60,13 @@ public class OverlayWindow : Window
         return Screens.Primary;
     }
 
-    /// <summary>The screen this window is on, falling back to the primary one.</summary>
-    public Screen? CurrentScreen() => Screens.ScreenFromWindow(this) ?? Screens.Primary;
+    /// <summary>
+    /// The screen this window belongs to: the one holding its top-left corner.
+    /// Growing to the right or down never changes it, so a window that grows
+    /// across a monitor edge is pulled back rather than pushed over.
+    /// </summary>
+    public Screen? HomeScreen() =>
+        Screens.ScreenFromPoint(Position) ?? Screens.ScreenFromWindow(this) ?? Screens.Primary;
 
     /// <summary>The window's size in screen pixels on a given screen.</summary>
     public PixelSize PixelSizeOn(Screen screen) => PixelSize.FromSize(ClientSize, screen.Scaling);
@@ -70,10 +79,10 @@ public class OverlayWindow : Window
         Position = new PixelPoint(area.Right - size.Width - marginRight, area.Bottom - size.Height - marginBottom);
     }
 
-    /// <summary>Nudges the window back inside its screen's working area if any edge has drifted off.</summary>
+    /// <summary>Nudges the window back inside its home screen's working area if any edge has drifted off.</summary>
     public void KeepOnScreen()
     {
-        if (!IsVisible || CurrentScreen() is not { } screen)
+        if (!IsVisible || HomeScreen() is not { } screen)
         {
             return;
         }
@@ -95,6 +104,16 @@ public class OverlayWindow : Window
         if (OperatingSystem.IsWindows() && TryGetPlatformHandle() is { } handle)
         {
             NonActivatingWindows.Apply(handle.Handle);
+        }
+
+        ApplyScale(UiScale.Current);
+    }
+
+    private void ApplyScale(double scale)
+    {
+        if (this.FindControl<LayoutTransformControl>("Scaler") is { } scaler)
+        {
+            scaler.LayoutTransform = new ScaleTransform(scale, scale);
         }
     }
 

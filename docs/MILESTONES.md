@@ -87,3 +87,7 @@ One entry per milestone: what was built, what was measured, what didn't go to pl
 - Output devices come from the old WinMM API, whose names are cut at 31 characters. WASAPI gives full names and device-change events; worth switching when device hot-plugging is handled.
 
 **Still to do in milestone 3:** the drifting flecks, the speed slider in the gradient rather than the default blue, the memory figure in the log once measured in the real app, and an app icon once the product has a name.
+
+**Step 4, from Dave's second round (8 October 2026, evening).** Overlays now clamp to the screen that holds their top-left corner, so growing across a monitor edge pulls them back instead of pushing them over. The reading view is resizable by a grip in its corner and remembers its size. A Size setting scales every overlay from 60% to 125%, default 90%. The Custom vibe takes two or three hex colours, with six named palettes to start from. The border gradient and the sentence highlight drift while the voice is speaking, with a switch to stop it. The compact bar no longer cuts sentences off: it renders the sentence word by word, marks the word being spoken, and scrolls so that word's line is visible. Kokoro gives no word timings, so the word is estimated from the clip's length and the words' lengths, with extra weight for punctuation.
+
+**Not done from that round:** the tray menu is a native Windows menu and can't take the vibe styling; a styled quick menu comes with the Read button in milestone 4, along with the hotkey and send-to-reader Dave asked for.

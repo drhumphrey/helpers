@@ -68,6 +68,14 @@ public sealed class ReadingController : IDisposable
 
     public void SetVoice(SpeechVoice voice) => _player.Voice = voice;
 
+    public void SetAnimate(bool on)
+    {
+        if (_window is not null)
+        {
+            _window.AnimateWhileReading = on;
+        }
+    }
+
     /// <summary>Loads the voice in the background, with a progress toast if a download is needed.</summary>
     public async Task WarmUpAsync()
     {
@@ -156,8 +164,18 @@ public sealed class ReadingController : IDisposable
         _hideTimer?.Stop();
         if (_window is null)
         {
-            _window = new PlayerWindow(_player);
+            var current = _settings.Current;
+            _window = new PlayerWindow(_player)
+            {
+                AnimateWhileReading = current.AnimateWhileReading,
+                ExpandedSize = current.ReadingViewWidth is { } w && current.ReadingViewHeight is { } h ? new Size(w, h) : null,
+            };
             _window.Moved += point => _settings.Update(s => s.PlayerPlacement = new WindowPlacement(point.X, point.Y));
+            _window.ReadingViewResized += (w, h) => _settings.Update(s =>
+            {
+                s.ReadingViewWidth = w;
+                s.ReadingViewHeight = h;
+            });
             _window.SettingsRequested += () => SettingsRequested?.Invoke();
             _window.Closed += (_, _) => _window = null;
             _window.Show();

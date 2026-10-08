@@ -37,6 +37,7 @@
     </Style>
   </overlays:OverlayWindow.Styles>
 
+  <LayoutTransformControl x:Name="Scaler">
   <ItemsControl ItemsSource="{Binding Items}" Margin="24,24,24,14">
     <ItemsControl.ItemTemplate>
       <DataTemplate x:DataType="services:ToastItem">
@@ -61,4 +62,5 @@
       </DataTemplate>
     </ItemsControl.ItemTemplate>
   </ItemsControl>
+  </LayoutTransformControl>
 </overlays:OverlayWindow>

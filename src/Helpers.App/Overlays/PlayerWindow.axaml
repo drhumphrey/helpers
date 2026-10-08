@@ -70,83 +70,92 @@
     </Style>
   </overlays:OverlayWindow.Styles>
 
-  <Border x:Name="Card" Margin="24" CornerRadius="14" BorderThickness="1"
-          BorderBrush="{DynamicResource OverlayBorderBrush}"
-          Background="{DynamicResource OverlaySurfaceBrush}"
-          BoxShadow="{DynamicResource OverlayGlow}"
-          PointerPressed="OnCardPressed">
-    <StackPanel>
+  <LayoutTransformControl x:Name="Scaler">
+    <Border x:Name="Card" Margin="24" CornerRadius="14" BorderThickness="1"
+            BorderBrush="{DynamicResource OverlayBorderBrush}"
+            Background="{DynamicResource OverlaySurfaceBrush}"
+            BoxShadow="{DynamicResource OverlayGlow}"
+            PointerPressed="OnCardPressed">
+      <DockPanel LastChildFill="True">
 
-      <!-- Compact bar -->
-      <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,*,Auto,Auto,Auto,Auto,Auto,Auto" Margin="12,10" MinWidth="700">
-        <Button Grid.Column="0" Classes="icon primary" Click="OnPlayPause" ToolTip.Tip="Play or pause">
-          <Panel>
-            <PathIcon Data="M6 5h4v14H6zM14 5h4v14h-4z" IsVisible="{Binding ShowPause}" />
-            <PathIcon Data="M7 5v14l12-7z" IsVisible="{Binding ShowPlay}" />
-          </Panel>
-        </Button>
-        <Button Grid.Column="1" Classes="icon" Click="OnBack" ToolTip.Tip="Back one sentence" Margin="6,0,0,0">
-          <PathIcon Data="M6 5h2v14H6zM20 5v14l-11-7z" />
-        </Button>
-        <Button Grid.Column="2" Classes="icon" Click="OnForward" ToolTip.Tip="Forward one sentence">
-          <PathIcon Data="M16 5h2v14h-2zM4 5v14l11-7z" />
-        </Button>
-        <Button Grid.Column="3" Classes="icon" Click="OnStop" ToolTip.Tip="Stop">
-          <PathIcon Data="M5 5h14v14H5z" Width="16" Height="16" />
-        </Button>
+        <!-- Compact bar -->
+        <Grid DockPanel.Dock="Top" ColumnDefinitions="Auto,Auto,Auto,Auto,*,Auto,Auto,Auto,Auto,Auto,Auto" Margin="12,10" MinWidth="700">
+          <Button Grid.Column="0" Classes="icon primary" Click="OnPlayPause" ToolTip.Tip="Play or pause">
+            <Panel>
+              <PathIcon Data="M6 5h4v14H6zM14 5h4v14h-4z" IsVisible="{Binding ShowPause}" />
+              <PathIcon Data="M7 5v14l12-7z" IsVisible="{Binding ShowPlay}" />
+            </Panel>
+          </Button>
+          <Button Grid.Column="1" Classes="icon" Click="OnBack" ToolTip.Tip="Back one sentence" Margin="6,0,0,0">
+            <PathIcon Data="M6 5h2v14H6zM20 5v14l-11-7z" />
+          </Button>
+          <Button Grid.Column="2" Classes="icon" Click="OnForward" ToolTip.Tip="Forward one sentence">
+            <PathIcon Data="M16 5h2v14h-2zM4 5v14l11-7z" />
+          </Button>
+          <Button Grid.Column="3" Classes="icon" Click="OnStop" ToolTip.Tip="Stop">
+            <PathIcon Data="M5 5h14v14H5z" Width="16" Height="16" />
+          </Button>
 
-        <Border Grid.Column="4" Margin="10,0" VerticalAlignment="Center" CornerRadius="6" Padding="8,3"
-                Background="{DynamicResource HighlightBrush}" Width="480" MinHeight="58">
-          <TextBlock Text="{Binding CurrentText}" FontSize="18" LineHeight="26" TextWrapping="Wrap" MaxLines="2"
-                     TextTrimming="CharacterEllipsis" Foreground="{DynamicResource HighlightForegroundBrush}" />
+          <Border x:Name="Highlight" Grid.Column="4" Margin="10,0" VerticalAlignment="Center" CornerRadius="6" Padding="8,3"
+                  Background="{DynamicResource HighlightBrush}" Width="480" MinHeight="58">
+            <ScrollViewer x:Name="SentenceScroller" Height="52" VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Disabled">
+              <TextBlock x:Name="Sentence" FontSize="18" LineHeight="26" TextWrapping="Wrap"
+                         Foreground="{DynamicResource HighlightForegroundBrush}" />
+            </ScrollViewer>
+          </Border>
+
+          <Slider Grid.Column="5" Width="110" Minimum="0.5" Maximum="2.0" TickFrequency="0.1" IsSnapToTickEnabled="True"
+                  Value="{Binding Speed}" VerticalAlignment="Center" ToolTip.Tip="Speed" />
+          <TextBlock Grid.Column="6" Text="{Binding SpeedText}" VerticalAlignment="Center" Margin="8,0" MinWidth="40"
+                     Foreground="{DynamicResource TextBrush}" />
+
+          <ComboBox Grid.Column="7" ItemsSource="{Binding Voices}" SelectedItem="{Binding Voice}" MinWidth="110"
+                    VerticalAlignment="Center" ToolTip.Tip="Voice">
+            <ComboBox.ItemTemplate>
+              <DataTemplate>
+                <TextBlock Text="{Binding DisplayName}" />
+              </DataTemplate>
+            </ComboBox.ItemTemplate>
+          </ComboBox>
+
+          <Button Grid.Column="8" Classes="icon" Click="OnToggleExpand" ToolTip.Tip="Reading view" Margin="6,0,0,0">
+            <PathIcon Data="M3 3h8v2H5v6H3zM13 19h8v-8h-2v6h-6z" />
+          </Button>
+          <Button Grid.Column="9" Classes="icon" Click="OnSettings" ToolTip.Tip="Settings">
+            <PathIcon Data="M19.4 13a7.5 7.5 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.6 7.6 0 0 0-1.7-1L15 3H9l-.3 2.9a7.6 7.6 0 0 0-1.7 1l-2.5-1-2 3.5L4.6 11a7.5 7.5 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1a7.6 7.6 0 0 0 1.7 1L9 21h6l.3-2.9a7.6 7.6 0 0 0 1.7-1l2.5 1 2-3.5zM12 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z" />
+          </Button>
+          <Button Grid.Column="10" Classes="icon" Click="OnHide" ToolTip.Tip="Hide">
+            <PathIcon Data="M6.3 5 12 10.7 17.7 5 19 6.3 13.3 12 19 17.7 17.7 19 12 13.3 6.3 19 5 17.7 10.7 12 5 6.3z" />
+          </Button>
+        </Grid>
+
+        <!-- Reading view: fills whatever height the window has when expanded -->
+        <Border x:Name="ReadingView" IsVisible="{Binding IsExpanded}" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource LineBrush}">
+          <Grid RowDefinitions="Auto,*,Auto">
+            <TextBlock Grid.Row="0" Text="{Binding StatusText}" Margin="20,10,20,0" FontSize="14"
+                       Foreground="{DynamicResource MutedBrush}" />
+            <ScrollViewer Grid.Row="1" x:Name="Scroller" Padding="14,6,14,6" HorizontalScrollBarVisibility="Disabled">
+              <ItemsControl x:Name="SegmentList" ItemsSource="{Binding Segments}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:SegmentItem">
+                    <Border Classes="seg" Classes.current="{Binding IsCurrent}" PointerPressed="OnSegmentPressed" Margin="0,2">
+                      <TextBlock Classes="seg" Classes.current="{Binding IsCurrent}" Classes.done="{Binding IsDone}"
+                                 Classes.heading="{Binding IsHeading}" Classes.listitem="{Binding IsListItem}"
+                                 Text="{Binding Display}" />
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </ScrollViewer>
+            <Border Grid.Row="2" x:Name="Grip" Width="22" Height="22" HorizontalAlignment="Right" Margin="0,0,6,6"
+                    Background="Transparent" Cursor="BottomRightCorner" ToolTip.Tip="Drag to resize"
+                    PointerPressed="OnGripPressed" PointerMoved="OnGripMoved" PointerReleased="OnGripReleased">
+              <Path Stroke="{DynamicResource MutedBrush}" StrokeThickness="1.5" Data="M4 18 18 4 M10 18 18 10 M16 18 18 16" />
+            </Border>
+          </Grid>
         </Border>
 
-        <Slider Grid.Column="5" Width="110" Minimum="0.5" Maximum="2.0" TickFrequency="0.1" IsSnapToTickEnabled="True"
-                Value="{Binding Speed}" VerticalAlignment="Center" ToolTip.Tip="Speed" />
-        <TextBlock Grid.Column="6" Text="{Binding SpeedText}" VerticalAlignment="Center" Margin="8,0" MinWidth="40"
-                   Foreground="{DynamicResource TextBrush}" />
-
-        <ComboBox Grid.Column="7" ItemsSource="{Binding Voices}" SelectedItem="{Binding Voice}" MinWidth="110"
-                  VerticalAlignment="Center" ToolTip.Tip="Voice">
-          <ComboBox.ItemTemplate>
-            <DataTemplate>
-              <TextBlock Text="{Binding DisplayName}" />
-            </DataTemplate>
-          </ComboBox.ItemTemplate>
-        </ComboBox>
-
-        <Button Grid.Column="8" Classes="icon" Click="OnToggleExpand" ToolTip.Tip="Reading view" Margin="6,0,0,0">
-          <PathIcon Data="M3 3h8v2H5v6H3zM13 19h8v-8h-2v6h-6z" />
-        </Button>
-        <Button Grid.Column="9" Classes="icon" Click="OnSettings" ToolTip.Tip="Settings">
-          <PathIcon Data="M19.4 13a7.5 7.5 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.6 7.6 0 0 0-1.7-1L15 3H9l-.3 2.9a7.6 7.6 0 0 0-1.7 1l-2.5-1-2 3.5L4.6 11a7.5 7.5 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1a7.6 7.6 0 0 0 1.7 1L9 21h6l.3-2.9a7.6 7.6 0 0 0 1.7-1l2.5 1 2-3.5zM12 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z" />
-        </Button>
-        <Button Grid.Column="10" Classes="icon" Click="OnHide" ToolTip.Tip="Hide">
-          <PathIcon Data="M6.3 5 12 10.7 17.7 5 19 6.3 13.3 12 19 17.7 17.7 19 12 13.3 6.3 19 5 17.7 10.7 12 5 6.3z" />
-        </Button>
-      </Grid>
-
-      <!-- Reading view -->
-      <Border IsVisible="{Binding IsExpanded}" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource LineBrush}">
-        <DockPanel>
-          <TextBlock DockPanel.Dock="Top" Text="{Binding StatusText}" Margin="20,10,20,0" FontSize="14"
-                     Foreground="{DynamicResource MutedBrush}" />
-          <ScrollViewer x:Name="Scroller" MaxHeight="520" Width="820" Padding="14,6,14,14">
-            <ItemsControl x:Name="SegmentList" ItemsSource="{Binding Segments}">
-              <ItemsControl.ItemTemplate>
-                <DataTemplate x:DataType="vm:SegmentItem">
-                  <Border Classes="seg" Classes.current="{Binding IsCurrent}" PointerPressed="OnSegmentPressed" Margin="0,2">
-                    <TextBlock Classes="seg" Classes.current="{Binding IsCurrent}" Classes.done="{Binding IsDone}"
-                               Classes.heading="{Binding IsHeading}" Classes.listitem="{Binding IsListItem}"
-                               Text="{Binding Display}" />
-                  </Border>
-                </DataTemplate>
-              </ItemsControl.ItemTemplate>
-            </ItemsControl>
-          </ScrollViewer>
-        </DockPanel>
-      </Border>
-
-    </StackPanel>
-  </Border>
+      </DockPanel>
+    </Border>
+  </LayoutTransformControl>
 </overlays:OverlayWindow>

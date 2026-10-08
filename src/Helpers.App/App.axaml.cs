@@ -38,7 +38,8 @@ public partial class App : Application
 
             _settings = new SettingsStore();
             var settings = _settings.Load();
-            Vibes.Apply(this, settings.Vibe, settings.Theme);
+            Vibes.Apply(this, settings);
+            UiScale.Set(settings.UiScale);
 
             _toasts = new ToastService();
             _toastWindow = new ToastWindow(_toasts);
@@ -240,6 +241,6 @@ public partial class App : Application
             _calmItem.IsChecked = _settings.Current.Vibe == Vibe.Calm;
         }
 
-        Vibes.Apply(this, _settings.Current.Vibe, _settings.Current.Theme);
+        Vibes.Apply(this, _settings.Current);
     }
 }

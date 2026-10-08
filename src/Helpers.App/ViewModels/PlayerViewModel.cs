@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using Avalonia.Threading;
 using Helpers.Core.Speech;
 using Helpers.Core.Text;
@@ -35,10 +36,16 @@ public sealed class SegmentItem(int index, SpeechSegment segment) : ObservableOb
 /// <summary>What the player shows. Driven by a <see cref="ReadingSession"/>; all updates land on the UI thread.</summary>
 public sealed class PlayerViewModel : ObservableObject
 {
+    private readonly DispatcherTimer _wordClock;
+    private readonly Stopwatch _elapsed = new();
     private ReadingSession? _session;
     private ReadingState _state = ReadingState.Idle;
     private int _currentIndex = -1;
     private string _currentText = string.Empty;
+    private string[] _words = [];
+    private double[] _wordEnds = [];
+    private TimeSpan _clipDuration;
+    private int _currentWordIndex = -1;
     private float _speed = 1.0f;
     private SpeechVoice? _voice;
     private bool _isExpanded;
@@ -47,11 +54,15 @@ public sealed class PlayerViewModel : ObservableObject
     {
         Voices = voices;
         _voice = voices.Count > 0 ? voices[0] : null;
+        _wordClock = new DispatcherTimer(TimeSpan.FromMilliseconds(50), DispatcherPriority.Background, (_, _) => TickWord());
     }
 
     public event Action<float>? SpeedChanged;
 
     public event Action<SpeechVoice>? VoiceChanged;
+
+    /// <summary>Raised when the user wants to play again after the reading ended, with the segment to start from.</summary>
+    public event Action<int>? RestartRequested;
 
     public IReadOnlyList<SpeechVoice> Voices { get; }
 
@@ -71,6 +82,15 @@ public sealed class PlayerViewModel : ObservableObject
                 if (value == ReadingState.Loading)
                 {
                     CurrentText = "Loading voice…";
+                }
+
+                if (value == ReadingState.Playing)
+                {
+                    _elapsed.Start();
+                }
+                else
+                {
+                    _elapsed.Stop();
                 }
             }
         }
@@ -97,7 +117,25 @@ public sealed class PlayerViewModel : ObservableObject
     public string CurrentText
     {
         get => _currentText;
-        private set => Set(ref _currentText, value);
+        private set
+        {
+            if (Set(ref _currentText, value))
+            {
+                _words = value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                _wordEnds = WordEnds(_words);
+                CurrentWordIndex = -1;
+            }
+        }
+    }
+
+    /// <summary>The words of the current sentence, split on spaces.</summary>
+    public IReadOnlyList<string> Words => _words;
+
+    /// <summary>Which word the voice is estimated to be on, or -1 before the audio starts.</summary>
+    public int CurrentWordIndex
+    {
+        get => _currentWordIndex;
+        private set => Set(ref _currentWordIndex, value);
     }
 
     public string StatusText =>
@@ -171,10 +209,14 @@ public sealed class PlayerViewModel : ObservableObject
 
         session.StateChanged += OnStateChanged;
         session.SegmentChanged += OnSegmentChanged;
+        session.PlaybackStarted += OnPlaybackStarted;
+        _wordClock.Start();
     }
 
     public void Detach()
     {
+        _wordClock.Stop();
+        _elapsed.Reset();
         if (_session is null)
         {
             return;
@@ -182,11 +224,9 @@ public sealed class PlayerViewModel : ObservableObject
 
         _session.StateChanged -= OnStateChanged;
         _session.SegmentChanged -= OnSegmentChanged;
+        _session.PlaybackStarted -= OnPlaybackStarted;
         _session = null;
     }
-
-    /// <summary>Raised when the user wants to play again after the reading ended, with the segment to start from.</summary>
-    public event Action<int>? RestartRequested;
 
     private bool IsOver => _session is null || _session.IsOver;
 
@@ -252,6 +292,8 @@ public sealed class PlayerViewModel : ObservableObject
                     item.IsCurrent = false;
                     item.IsDone = true;
                 }
+
+                CurrentWordIndex = -1;
             }
         });
 
@@ -270,4 +312,69 @@ public sealed class PlayerViewModel : ObservableObject
                 CurrentText = Segments[index].Display;
             }
         });
+
+    private void OnPlaybackStarted(int index, TimeSpan duration) =>
+        Dispatcher.UIThread.Post(() =>
+        {
+            _clipDuration = duration;
+            _elapsed.Restart();
+            if (State != ReadingState.Playing)
+            {
+                _elapsed.Stop();
+            }
+
+            CurrentWordIndex = _words.Length > 0 ? 0 : -1;
+        });
+
+    /// <summary>Estimates the word being spoken from time elapsed, weighting words by length and punctuation.</summary>
+    private void TickWord()
+    {
+        if (_words.Length == 0 || _clipDuration <= TimeSpan.Zero || !_elapsed.IsRunning)
+        {
+            return;
+        }
+
+        var fraction = Math.Clamp(_elapsed.Elapsed.TotalSeconds / _clipDuration.TotalSeconds, 0, 1);
+        var index = Array.FindIndex(_wordEnds, end => fraction < end);
+        if (index < 0)
+        {
+            index = _words.Length - 1;
+        }
+
+        if (index != _currentWordIndex)
+        {
+            CurrentWordIndex = index;
+        }
+    }
+
+    /// <summary>Cumulative fraction of the clip at which each word is expected to end.</summary>
+    private static double[] WordEnds(string[] words)
+    {
+        if (words.Length == 0)
+        {
+            return [];
+        }
+
+        var weights = new double[words.Length];
+        for (var i = 0; i < words.Length; i++)
+        {
+            var word = words[i];
+            var letters = word.Count(char.IsLetterOrDigit);
+            var pause = word.EndsWith('.') || word.EndsWith('!') || word.EndsWith('?') || word.EndsWith(':') ? 4
+                : word.EndsWith(',') || word.EndsWith(';') ? 2
+                : 0;
+            weights[i] = Math.Max(1, letters) + 1 + pause;
+        }
+
+        var total = weights.Sum();
+        var ends = new double[words.Length];
+        var running = 0.0;
+        for (var i = 0; i < words.Length; i++)
+        {
+            running += weights[i];
+            ends[i] = running / total;
+        }
+
+        return ends;
+    }
 }

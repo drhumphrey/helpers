@@ -4,7 +4,7 @@
         x:Class="Helpers.App.Windows.SettingsWindow"
         x:DataType="vm:SettingsViewModel"
         Title="Helpers settings"
-        Width="600" SizeToContent="Height" CanResize="False"
+        Width="620" SizeToContent="Height" CanResize="False"
         WindowStartupLocation="CenterScreen">
 
   <Window.Styles>
@@ -24,6 +24,18 @@
     </Style>
     <Style Selector="Grid.row">
       <Setter Property="Margin" Value="0,6" />
+    </Style>
+    <Style Selector="Border.swatch">
+      <Setter Property="Width" Value="26" />
+      <Setter Property="Height" Value="26" />
+      <Setter Property="CornerRadius" Value="7" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="BorderBrush" Value="#40FFFFFF" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="TextBox.hex">
+      <Setter Property="Width" Value="96" />
+      <Setter Property="MinHeight" Value="32" />
     </Style>
   </Window.Styles>
 
@@ -68,11 +80,41 @@
       <TextBlock Classes="label" Text="Vibe" />
       <ComboBox Grid.Column="1" ItemsSource="{Binding Vibes}" SelectedItem="{Binding VibeChoice}" HorizontalAlignment="Stretch" />
     </Grid>
+    <StackPanel IsVisible="{Binding IsCustom}" Spacing="6" Margin="0,2,0,4">
+      <Grid Classes="row" ColumnDefinitions="160,*">
+        <TextBlock Classes="label" Text="Start from" />
+        <ComboBox Grid.Column="1" ItemsSource="{Binding Palettes}" SelectedItem="{Binding Palette}" PlaceholderText="Pick a palette" HorizontalAlignment="Stretch" />
+      </Grid>
+      <Grid Classes="row" ColumnDefinitions="160,*">
+        <TextBlock Classes="label" Text="Gradient colours" />
+        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+          <Border Classes="swatch" Background="{Binding Preview1}" />
+          <TextBox Classes="hex" Text="{Binding Colour1}" Watermark="#19E6FF" />
+          <Border Classes="swatch" Background="{Binding Preview2}" />
+          <TextBox Classes="hex" Text="{Binding Colour2}" Watermark="#FF2FD1" />
+          <Border Classes="swatch" Background="{Binding Preview3}" />
+          <TextBox Classes="hex" Text="{Binding Colour3}" Watermark="optional" />
+          <Button Content="Apply" Click="OnApplyColours" MinHeight="32" />
+        </StackPanel>
+      </Grid>
+      <TextBlock Classes="hint" Text="Two or three colours as hex, like #19E6FF. The third is optional." Margin="160,0,0,0" />
+    </StackPanel>
     <Grid Classes="row" ColumnDefinitions="160,*" IsEnabled="{Binding IsCalm}">
       <TextBlock Classes="label" Text="Light or dark" />
       <ComboBox Grid.Column="1" ItemsSource="{Binding Themes}" SelectedItem="{Binding ThemeChoiceValue}" HorizontalAlignment="Stretch" />
     </Grid>
-    <TextBlock Classes="hint" Text="Neon is always dark. Calm can follow Windows or be set." Margin="160,0,0,0" />
+    <TextBlock Classes="hint" Text="Neon and Custom are always dark. Calm can follow Windows or be set." Margin="160,0,0,0" />
+    <Grid Classes="row" ColumnDefinitions="160,*">
+      <TextBlock Classes="label" Text="Size" />
+      <ComboBox Grid.Column="1" ItemsSource="{Binding Scales}" SelectedItem="{Binding ScaleChoice}" HorizontalAlignment="Stretch" />
+    </Grid>
+    <Grid Classes="row" ColumnDefinitions="160,*">
+      <TextBlock Classes="label" Text="Move while reading" />
+      <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
+        <ToggleSwitch IsChecked="{Binding AnimateWhileReading}" OnContent="" OffContent="" />
+        <TextBlock Classes="label" Text="Let the colours drift while the voice is speaking" />
+      </StackPanel>
+    </Grid>
 
     <TextBlock Classes="section" Text="PLAYER" />
     <Grid Classes="row" ColumnDefinitions="160,*">

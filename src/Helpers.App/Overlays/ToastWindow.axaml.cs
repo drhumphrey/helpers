@@ -34,7 +34,7 @@ public partial class ToastWindow : OverlayWindow
             return;
         }
 
-        var screen = IsVisible ? CurrentScreen() : TargetScreen();
+        var screen = IsVisible ? HomeScreen() : TargetScreen();
         if (!IsVisible)
         {
             Show();

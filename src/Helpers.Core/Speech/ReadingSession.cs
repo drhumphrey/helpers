@@ -57,6 +57,9 @@ public sealed class ReadingSession : IDisposable
     /// <summary>Raised with the index of the segment about to be spoken.</summary>
     public event Action<int>? SegmentChanged;
 
+    /// <summary>Raised when a segment's audio starts playing, with how long it lasts. Lets the UI pace a word highlight.</summary>
+    public event Action<int, TimeSpan>? PlaybackStarted;
+
     public event Action<string>? Failed;
 
     public IReadOnlyList<SpeechSegment> Segments => _segments;
@@ -173,6 +176,7 @@ public sealed class ReadingSession : IDisposable
                 try
                 {
                     await WaitWhilePausedAsync(itemToken).ConfigureAwait(false);
+                    PlaybackStarted?.Invoke(index, clip.Duration);
                     await _output.PlayAsync(clip, itemToken).ConfigureAwait(false);
                     await WaitWhilePausedAsync(itemToken).ConfigureAwait(false);
                     await Task.Delay(_segments[index].PauseAfterMs, itemToken).ConfigureAwait(false);

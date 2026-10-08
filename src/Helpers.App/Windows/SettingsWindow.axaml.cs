@@ -17,4 +17,6 @@ public partial class SettingsWindow : Window
     }
 
     private void OnPreview(object? sender, RoutedEventArgs e) => _viewModel.PreviewVoice();
+
+    private void OnApplyColours(object? sender, RoutedEventArgs e) => _viewModel.ApplyColours();
 }

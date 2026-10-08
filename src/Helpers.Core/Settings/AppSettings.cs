@@ -37,6 +37,20 @@ public sealed class AppSettings
 
     public ThemeChoice Theme { get; set; } = ThemeChoice.FollowOS;
 
+    /// <summary>Two or three hex colours for the Custom vibe's gradient.</summary>
+    public List<string> GradientColours { get; set; } = ["#19E6FF", "#FF2FD1", "#FFE14D"];
+
+    /// <summary>Let the gradient and highlight drift while reading.</summary>
+    public bool AnimateWhileReading { get; set; } = true;
+
+    /// <summary>Scale for every overlay. 1.0 is the designed size.</summary>
+    public double UiScale { get; set; } = 0.9;
+
+    /// <summary>The reading view's last size, in device-independent pixels. Null means the default.</summary>
+    public double? ReadingViewWidth { get; set; }
+
+    public double? ReadingViewHeight { get; set; }
+
     /// <summary>Read any new text that lands on the clipboard.</summary>
     public bool WatchClipboard { get; set; }
 

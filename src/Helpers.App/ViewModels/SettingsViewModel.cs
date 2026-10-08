@@ -1,3 +1,4 @@
+using Avalonia.Media;
 using Helpers.App.Services;
 using Helpers.Core.Settings;
 using Helpers.Core.Speech;
@@ -27,6 +28,12 @@ public sealed class SettingsViewModel : ObservableObject
     private AudioDevice _outputDevice;
     private Choice<Vibe> _vibe;
     private Choice<ThemeChoice> _theme;
+    private Choice<double> _scale;
+    private Choice<string[]>? _palette;
+    private string _colour1 = string.Empty;
+    private string _colour2 = string.Empty;
+    private string _colour3 = string.Empty;
+    private bool _animate;
     private int _hideAfterSeconds;
     private bool _watchClipboardOn;
 
@@ -49,9 +56,10 @@ public sealed class SettingsViewModel : ObservableObject
         Vibes =
         [
             new Choice<Vibe>(Vibe.Neon, "Neon"),
+            new Choice<Vibe>(Vibe.Custom, "Custom colours"),
             new Choice<Vibe>(Vibe.Calm, "Calm"),
         ];
-        _vibe = Vibes.First(v => v.Value == (settings.Vibe == Vibe.Calm ? Vibe.Calm : Vibe.Neon));
+        _vibe = Vibes.FirstOrDefault(v => v.Value == settings.Vibe) ?? Vibes[0];
 
         Themes =
         [
@@ -61,6 +69,16 @@ public sealed class SettingsViewModel : ObservableObject
         ];
         _theme = Themes.First(t => t.Value == settings.Theme);
 
+        Scales = UiScale.Choices.Select(s => new Choice<double>(s, $"{s:P0}")).ToList();
+        _scale = Scales.OrderBy(s => Math.Abs(s.Value - settings.UiScale)).First();
+
+        Palettes = Services.Vibes.Palettes.Select(p => new Choice<string[]>(p.Colours, p.Name)).ToList();
+        var colours = settings.GradientColours;
+        _colour1 = colours.ElementAtOrDefault(0) ?? string.Empty;
+        _colour2 = colours.ElementAtOrDefault(1) ?? string.Empty;
+        _colour3 = colours.ElementAtOrDefault(2) ?? string.Empty;
+
+        _animate = settings.AnimateWhileReading;
         _hideAfterSeconds = settings.PlayerHideAfterSeconds;
         _watchClipboardOn = settings.WatchClipboard;
     }
@@ -72,6 +90,10 @@ public sealed class SettingsViewModel : ObservableObject
     public IReadOnlyList<Choice<Vibe>> Vibes { get; }
 
     public IReadOnlyList<Choice<ThemeChoice>> Themes { get; }
+
+    public IReadOnlyList<Choice<double>> Scales { get; }
+
+    public IReadOnlyList<Choice<string[]>> Palettes { get; }
 
     public string SettingsFile => _store.FilePath;
 
@@ -146,12 +168,15 @@ public sealed class SettingsViewModel : ObservableObject
             {
                 _store.Update(s => s.Vibe = value.Value);
                 Raise(nameof(IsCalm));
+                Raise(nameof(IsCustom));
                 _applyLook();
             }
         }
     }
 
     public bool IsCalm => _vibe.Value == Vibe.Calm;
+
+    public bool IsCustom => _vibe.Value == Vibe.Custom;
 
     public Choice<ThemeChoice> ThemeChoiceValue
     {
@@ -162,6 +187,104 @@ public sealed class SettingsViewModel : ObservableObject
             {
                 _store.Update(s => s.Theme = value.Value);
                 _applyLook();
+            }
+        }
+    }
+
+    public Choice<double> ScaleChoice
+    {
+        get => _scale;
+        set
+        {
+            if (value is not null && Set(ref _scale, value))
+            {
+                _store.Update(s => s.UiScale = value.Value);
+                UiScale.Set(value.Value);
+            }
+        }
+    }
+
+    public Choice<string[]>? Palette
+    {
+        get => _palette;
+        set
+        {
+            if (value is not null && Set(ref _palette, value))
+            {
+                Colour1 = value.Value.ElementAtOrDefault(0) ?? string.Empty;
+                Colour2 = value.Value.ElementAtOrDefault(1) ?? string.Empty;
+                Colour3 = value.Value.ElementAtOrDefault(2) ?? string.Empty;
+                ApplyColours();
+            }
+        }
+    }
+
+    public string Colour1
+    {
+        get => _colour1;
+        set
+        {
+            if (Set(ref _colour1, value ?? string.Empty))
+            {
+                Raise(nameof(Preview1));
+            }
+        }
+    }
+
+    public string Colour2
+    {
+        get => _colour2;
+        set
+        {
+            if (Set(ref _colour2, value ?? string.Empty))
+            {
+                Raise(nameof(Preview2));
+            }
+        }
+    }
+
+    public string Colour3
+    {
+        get => _colour3;
+        set
+        {
+            if (Set(ref _colour3, value ?? string.Empty))
+            {
+                Raise(nameof(Preview3));
+            }
+        }
+    }
+
+    public IBrush Preview1 => PreviewBrush(_colour1);
+
+    public IBrush Preview2 => PreviewBrush(_colour2);
+
+    public IBrush Preview3 => PreviewBrush(_colour3);
+
+    /// <summary>Saves the three colours and re-skins the app. Blank third colour means a two-stop gradient.</summary>
+    public void ApplyColours()
+    {
+        var colours = new[] { _colour1, _colour2, _colour3 }
+            .Select(c => c.Trim())
+            .Where(c => c.Length > 0)
+            .ToList();
+
+        _store.Update(s => s.GradientColours = colours);
+        if (IsCustom)
+        {
+            _applyLook();
+        }
+    }
+
+    public bool AnimateWhileReading
+    {
+        get => _animate;
+        set
+        {
+            if (Set(ref _animate, value))
+            {
+                _store.Update(s => s.AnimateWhileReading = value);
+                _reading.SetAnimate(value);
             }
         }
     }
@@ -193,4 +316,7 @@ public sealed class SettingsViewModel : ObservableObject
     }
 
     public void PreviewVoice() => _reading.Read("Hello, this is how I sound. Select some text anywhere and I will read it to you.");
+
+    private static IBrush PreviewBrush(string hex) =>
+        Color.TryParse(hex.Trim(), out var colour) ? new SolidColorBrush(colour) : Brushes.Transparent;
 }

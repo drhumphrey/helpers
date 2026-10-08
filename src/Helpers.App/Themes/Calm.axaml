@@ -10,6 +10,7 @@
       <SolidColorBrush x:Key="PrimaryForegroundBrush" Color="#FFFFFF" />
       <SolidColorBrush x:Key="HighlightBrush" Color="#FFE89A" />
       <SolidColorBrush x:Key="HighlightForegroundBrush" Color="#1B1F24" />
+      <SolidColorBrush x:Key="WordBrush" Color="#2E1B1F24" />
       <SolidColorBrush x:Key="TextBrush" Color="#1B1F24" />
       <SolidColorBrush x:Key="MutedBrush" Color="#5B6572" />
       <SolidColorBrush x:Key="DoneBrush" Color="#6B7480" />
@@ -26,6 +27,7 @@
       <SolidColorBrush x:Key="PrimaryForegroundBrush" Color="#0B1C33" />
       <SolidColorBrush x:Key="HighlightBrush" Color="#42FFD666" />
       <SolidColorBrush x:Key="HighlightForegroundBrush" Color="#FFE9A8" />
+      <SolidColorBrush x:Key="WordBrush" Color="#40FFFFFF" />
       <SolidColorBrush x:Key="TextBrush" Color="#ECEFF3" />
       <SolidColorBrush x:Key="MutedBrush" Color="#A2ABB6" />
       <SolidColorBrush x:Key="DoneBrush" Color="#8A939E" />
