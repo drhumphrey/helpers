@@ -19,6 +19,20 @@ public enum ThemeChoice
 /// <summary>Where a window was last left, in screen pixels.</summary>
 public sealed record WindowPlacement(int X, int Y);
 
+public enum ReadingFont
+{
+    System,
+    Lexend,
+    AtkinsonHyperlegible,
+}
+
+public enum ReadingTint
+{
+    None,
+    Cream,
+    Grey,
+}
+
 public enum MessageScreen
 {
     /// <summary>Always the main monitor, like Windows' own notifications.</summary>
@@ -98,4 +112,18 @@ public sealed class AppSettings
     public int UnloadVoiceAfterMinutes { get; set; } = 15;
 
     public ReadingSettings Reading { get; set; } = new();
+
+    /// <summary>Font for the user's own text: the reading view, the sentence bar, Compose.</summary>
+    public ReadingFont ReadingFontChoice { get; set; } = ReadingFont.Lexend;
+
+    /// <summary>Reading text size in device-independent pixels. 20 is the designed size.</summary>
+    public double ReadingFontSize { get; set; } = 20;
+
+    /// <summary>Line height as a multiple of the font size.</summary>
+    public double ReadingLineSpacing { get; set; } = 1.6;
+
+    public ReadingTint ReadingTintChoice { get; set; } = ReadingTint.None;
+
+    /// <summary>Mirrors the Windows Run key so the setting shows correctly; the key is the truth.</summary>
+    public bool StartWithWindows { get; set; }
 }

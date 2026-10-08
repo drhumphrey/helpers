@@ -46,6 +46,7 @@ public partial class App : Application
             _settings = new SettingsStore();
             var settings = _settings.Load();
             Vibes.Apply(this, settings);
+            ReadableText.Apply(this, settings);
             UiScale.Set(settings.UiScale);
 
             _toasts = new ToastService();
@@ -168,6 +169,9 @@ public partial class App : Application
         _calmItem = new NativeMenuItem("Calm look") { ToggleType = MenuItemToggleType.CheckBox, IsChecked = settings.Vibe == Vibe.Calm };
         _calmItem.Click += (_, _) => ToggleCalm();
 
+        _startupItem = new NativeMenuItem("Start with Windows") { ToggleType = MenuItemToggleType.CheckBox, IsChecked = StartupRegistration.IsEnabled() };
+        _startupItem.Click += (_, _) => SetStartWithWindows(!StartupRegistration.IsEnabled());
+
         var memory = new NativeMenuItem("Memory in use");
         memory.Click += (_, _) => ShowMemory();
 
@@ -184,6 +188,7 @@ public partial class App : Application
         menu.Items.Add(new NativeMenuItemSeparator());
         menu.Items.Add(_pausePillItem);
         menu.Items.Add(_calmItem);
+        menu.Items.Add(_startupItem);
         menu.Items.Add(memory);
         menu.Items.Add(new NativeMenuItemSeparator());
         menu.Items.Add(exit);
@@ -218,6 +223,7 @@ public partial class App : Application
             new QuickMenuItem("Watch clipboard", ToggleWatchClipboard, () => _settings.Current.WatchClipboard),
             new QuickMenuItem("Pause the Read button for 1 hour", TogglePillPause, () => _readButton?.IsPaused ?? false),
             new QuickMenuItem("Calm look", ToggleCalm, () => _settings.Current.Vibe == Vibe.Calm),
+            new QuickMenuItem("Start with Windows", () => SetStartWithWindows(!StartupRegistration.IsEnabled()), StartupRegistration.IsEnabled),
             QuickMenuItem.Separator,
             new QuickMenuItem("Settings…", ShowSettings),
             new QuickMenuItem("Memory in use", ShowMemory),
@@ -226,6 +232,31 @@ public partial class App : Application
 
         var (x, y) = CursorPosition.Get();
         _quickMenu.ShowNear(new PixelPoint(x, y));
+    }
+
+    private NativeMenuItem? _startupItem;
+
+    /// <summary>Registers or removes the Run key entry and keeps the menus and settings in step. Returns false if Windows refused.</summary>
+    private bool SetStartWithWindows(bool enabled)
+    {
+        var ok = StartupRegistration.SetEnabled(enabled);
+        var now = StartupRegistration.IsEnabled();
+        _settings?.Update(s => s.StartWithWindows = now);
+        if (_startupItem is not null)
+        {
+            _startupItem.IsChecked = now;
+        }
+
+        if (!ok)
+        {
+            _toasts?.Error("Windows wouldn't let the app change its start-up entry.");
+        }
+        else
+        {
+            _toasts?.Info(now ? "Helpers will start with Windows" : "Helpers will no longer start with Windows");
+        }
+
+        return ok;
     }
 
     private void ShowMemory()
@@ -325,7 +356,15 @@ public partial class App : Application
 
         if (_settingsWindow is null)
         {
-            var viewModel = new ViewModels.SettingsViewModel(_settings, _reading, SetWatchClipboard, ApplyLook, () => ApplyHotkey(_settings.Current))
+            var viewModel = new ViewModels.SettingsViewModel(
+                _settings,
+                _reading,
+                SetWatchClipboard,
+                ApplyLook,
+                () => ApplyHotkey(_settings.Current),
+                () => ReadableText.Apply(this, _settings.Current),
+                SetStartWithWindows,
+                StartupRegistration.IsEnabled())
             {
                 MessagesFollowFocusChanged = follow =>
                 {

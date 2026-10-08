@@ -1,10 +1,11 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:Helpers.App.ViewModels"
+        xmlns:text="using:Helpers.Core.Text"
         x:Class="Helpers.App.Windows.SettingsWindow"
         x:DataType="vm:SettingsViewModel"
         Title="Helpers settings"
-        Width="620" SizeToContent="Height" CanResize="False"
+        Width="680" Height="720" MinWidth="600" MinHeight="520"
         WindowStartupLocation="CenterScreen">
 
   <Window.Styles>
@@ -16,6 +17,7 @@
       <Setter Property="FontSize" Value="13" />
       <Setter Property="Opacity" Value="0.7" />
       <Setter Property="TextWrapping" Value="Wrap" />
+      <Setter Property="Margin" Value="170,0,0,0" />
     </Style>
     <Style Selector="TextBlock.section">
       <Setter Property="FontSize" Value="13" />
@@ -25,160 +27,280 @@
     <Style Selector="Grid.row">
       <Setter Property="Margin" Value="0,6" />
     </Style>
-    <Style Selector="Border.swatch">
-      <Setter Property="Width" Value="26" />
-      <Setter Property="Height" Value="26" />
-      <Setter Property="CornerRadius" Value="7" />
-      <Setter Property="BorderThickness" Value="1" />
-      <Setter Property="BorderBrush" Value="#40FFFFFF" />
-      <Setter Property="VerticalAlignment" Value="Center" />
+    <Style Selector="TabItem">
+      <Setter Property="FontSize" Value="15" />
+      <Setter Property="Padding" Value="14,6" />
     </Style>
-    <Style Selector="TextBox.hex">
-      <Setter Property="Width" Value="96" />
-      <Setter Property="MinHeight" Value="32" />
+    <Style Selector="ScrollViewer.page">
+      <Setter Property="Padding" Value="20,4,20,20" />
     </Style>
   </Window.Styles>
 
-  <StackPanel Margin="24,18,24,22" Spacing="2">
+  <TabControl Margin="12,8,12,12">
 
-    <TextBlock Classes="section" Text="VOICE" />
-    <Grid Classes="row" ColumnDefinitions="160,*,Auto">
-      <TextBlock Classes="label" Text="Voice" />
-      <ComboBox Grid.Column="1" ItemsSource="{Binding Voices}" SelectedItem="{Binding Voice}" HorizontalAlignment="Stretch">
-        <ComboBox.ItemTemplate>
-          <DataTemplate>
-            <TextBlock Text="{Binding DisplayName}" />
-          </DataTemplate>
-        </ComboBox.ItemTemplate>
-      </ComboBox>
-      <Button Grid.Column="2" Content="Preview" Click="OnPreview" Margin="10,0,0,0" MinHeight="34" />
-    </Grid>
-    <Grid Classes="row" ColumnDefinitions="160,*,52">
-      <TextBlock Classes="label" Text="Speed" />
-      <Slider Grid.Column="1" Minimum="0.5" Maximum="2.0" TickFrequency="0.1" IsSnapToTickEnabled="True" Value="{Binding Speed}" />
-      <TextBlock Grid.Column="2" Classes="label" Text="{Binding SpeedText}" HorizontalAlignment="Right" />
-    </Grid>
-    <Grid Classes="row" ColumnDefinitions="160,*,52">
-      <TextBlock Classes="label" Text="Volume" />
-      <Slider Grid.Column="1" Minimum="0" Maximum="100" TickFrequency="5" IsSnapToTickEnabled="True" Value="{Binding VolumePercent}" />
-      <TextBlock Grid.Column="2" Classes="label" Text="{Binding VolumeText}" HorizontalAlignment="Right" />
-    </Grid>
-    <Grid Classes="row" ColumnDefinitions="160,*">
-      <TextBlock Classes="label" Text="Output device" />
-      <ComboBox Grid.Column="1" ItemsSource="{Binding OutputDevices}" SelectedItem="{Binding OutputDevice}" HorizontalAlignment="Stretch">
-        <ComboBox.ItemTemplate>
-          <DataTemplate>
-            <TextBlock Text="{Binding Name}" />
-          </DataTemplate>
-        </ComboBox.ItemTemplate>
-      </ComboBox>
-    </Grid>
-    <TextBlock Classes="hint" Text="A microphone choice arrives with dictation, in a later milestone." Margin="160,0,0,0" />
-    <Grid Classes="row" ColumnDefinitions="160,*">
-      <TextBlock Classes="label" Text="Unload when idle" />
-      <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
-        <NumericUpDown Minimum="0" Maximum="240" Increment="5" Value="{Binding UnloadAfterMinutes}" Width="120" FormatString="0" />
-        <TextBlock Classes="label" Text="minutes. Frees about 450 MB; loads again in a second. 0 keeps it loaded." TextWrapping="Wrap" MaxWidth="300" />
-      </StackPanel>
-    </Grid>
-
-    <TextBlock Classes="section" Text="LOOK" />
-    <Grid Classes="row" ColumnDefinitions="160,*">
-      <TextBlock Classes="label" Text="Vibe" />
-      <ComboBox Grid.Column="1" ItemsSource="{Binding Vibes}" SelectedItem="{Binding VibeChoice}" HorizontalAlignment="Stretch" />
-    </Grid>
-    <StackPanel IsVisible="{Binding IsCustom}" Spacing="6" Margin="0,2,0,4">
-      <Grid Classes="row" ColumnDefinitions="160,*">
-        <TextBlock Classes="label" Text="Start from" />
-        <ComboBox Grid.Column="1" ItemsSource="{Binding Palettes}" SelectedItem="{Binding Palette}" PlaceholderText="Pick a palette" HorizontalAlignment="Stretch" />
-      </Grid>
-      <Grid Classes="row" ColumnDefinitions="160,*">
-        <TextBlock Classes="label" Text="Gradient colours" />
-        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
-          <ColorPicker Color="{Binding Colour1}" ColorSpectrumShape="Ring" IsAlphaEnabled="False" Width="120" />
-          <ColorPicker Color="{Binding Colour2}" ColorSpectrumShape="Ring" IsAlphaEnabled="False" Width="120" />
-          <ColorPicker Color="{Binding Colour3}" ColorSpectrumShape="Ring" IsAlphaEnabled="False" Width="120" IsEnabled="{Binding UseThirdColour}" />
-          <ToggleSwitch IsChecked="{Binding UseThirdColour}" OnContent="" OffContent="" ToolTip.Tip="Use a third colour" VerticalAlignment="Center" />
+    <TabItem Header="Voice">
+      <ScrollViewer Classes="page">
+        <StackPanel Spacing="2">
+          <Grid Classes="row" ColumnDefinitions="170,*,Auto">
+            <TextBlock Classes="label" Text="Voice" />
+            <ComboBox Grid.Column="1" ItemsSource="{Binding Voices}" SelectedItem="{Binding Voice}" HorizontalAlignment="Stretch">
+              <ComboBox.ItemTemplate>
+                <DataTemplate>
+                  <TextBlock Text="{Binding DisplayName}" />
+                </DataTemplate>
+              </ComboBox.ItemTemplate>
+            </ComboBox>
+            <Button Grid.Column="2" Content="Preview" Click="OnPreview" Margin="10,0,0,0" MinHeight="34" />
+          </Grid>
+          <Grid Classes="row" ColumnDefinitions="170,*,52">
+            <TextBlock Classes="label" Text="Speed" />
+            <Slider Grid.Column="1" Minimum="0.5" Maximum="2.0" TickFrequency="0.1" IsSnapToTickEnabled="True" Value="{Binding Speed}" />
+            <TextBlock Grid.Column="2" Classes="label" Text="{Binding SpeedText}" HorizontalAlignment="Right" />
+          </Grid>
+          <Grid Classes="row" ColumnDefinitions="170,*,52">
+            <TextBlock Classes="label" Text="Volume" />
+            <Slider Grid.Column="1" Minimum="0" Maximum="100" TickFrequency="5" IsSnapToTickEnabled="True" Value="{Binding VolumePercent}" />
+            <TextBlock Grid.Column="2" Classes="label" Text="{Binding VolumeText}" HorizontalAlignment="Right" />
+          </Grid>
+          <Grid Classes="row" ColumnDefinitions="170,*">
+            <TextBlock Classes="label" Text="Output device" />
+            <ComboBox Grid.Column="1" ItemsSource="{Binding OutputDevices}" SelectedItem="{Binding OutputDevice}" HorizontalAlignment="Stretch">
+              <ComboBox.ItemTemplate>
+                <DataTemplate>
+                  <TextBlock Text="{Binding Name}" />
+                </DataTemplate>
+              </ComboBox.ItemTemplate>
+            </ComboBox>
+          </Grid>
+          <TextBlock Classes="hint" Text="A microphone choice arrives with dictation, in a later milestone." />
+          <Grid Classes="row" ColumnDefinitions="170,*">
+            <TextBlock Classes="label" Text="Unload when idle" />
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
+              <NumericUpDown Minimum="0" Maximum="240" Increment="5" Value="{Binding UnloadAfterMinutes}" Width="120" FormatString="0" />
+              <TextBlock Classes="label" Text="minutes. 0 keeps the voice loaded." />
+            </StackPanel>
+          </Grid>
+          <TextBlock Classes="hint" Text="Unloading frees about 450 MB. The next read loads the voice again in about a second." />
         </StackPanel>
-      </Grid>
-      <TextBlock Classes="hint" Text="Click a colour to open the wheel. Changes apply straight away. The switch adds a third colour." Margin="160,0,0,0" />
-    </StackPanel>
-    <Grid Classes="row" ColumnDefinitions="160,*" IsEnabled="{Binding IsCalm}">
-      <TextBlock Classes="label" Text="Light or dark" />
-      <ComboBox Grid.Column="1" ItemsSource="{Binding Themes}" SelectedItem="{Binding ThemeChoiceValue}" HorizontalAlignment="Stretch" />
-    </Grid>
-    <TextBlock Classes="hint" Text="Neon and Custom are always dark. Calm can follow Windows or be set." Margin="160,0,0,0" />
-    <Grid Classes="row" ColumnDefinitions="160,*">
-      <TextBlock Classes="label" Text="Size" />
-      <ComboBox Grid.Column="1" ItemsSource="{Binding Scales}" SelectedItem="{Binding ScaleChoice}" HorizontalAlignment="Stretch" />
-    </Grid>
-    <Grid Classes="row" ColumnDefinitions="160,*,52" IsVisible="{Binding IsGradientVibe}">
-      <TextBlock Classes="label" Text="Flecks" />
-      <Slider Grid.Column="1" Minimum="0" Maximum="100" TickFrequency="5" IsSnapToTickEnabled="True" Value="{Binding FleckDensity}" />
-      <TextBlock Grid.Column="2" Classes="label" Text="{Binding FleckDensity}" HorizontalAlignment="Right" />
-    </Grid>
-    <Grid Classes="row" ColumnDefinitions="160,*">
-      <TextBlock Classes="label" Text="Move while reading" />
-      <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
-        <ToggleSwitch IsChecked="{Binding AnimateWhileReading}" OnContent="" OffContent="" />
-        <TextBlock Classes="label" Text="Let the colours drift while the voice is speaking" />
-      </StackPanel>
-    </Grid>
+      </ScrollViewer>
+    </TabItem>
 
-    <TextBlock Classes="section" Text="READ BUTTON" />
-    <Grid Classes="row" ColumnDefinitions="160,*">
-      <TextBlock Classes="label" Text="Show after a selection" />
-      <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
-        <ToggleSwitch IsChecked="{Binding ReadButtonEnabled}" OnContent="" OffContent="" />
-        <TextBlock Classes="label" Text="A small Read button appears next to the mouse" />
-      </StackPanel>
-    </Grid>
-    <Grid Classes="row" ColumnDefinitions="160,*">
-      <TextBlock Classes="label" Text="Delay" />
-      <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
-        <NumericUpDown Minimum="0" Maximum="1000" Increment="20" Value="{Binding ReadButtonDelayMs}" Width="130" FormatString="0" />
-        <TextBlock Classes="label" Text="milliseconds after you let go of the mouse" />
-      </StackPanel>
-    </Grid>
-    <Grid Classes="row" ColumnDefinitions="160,*">
-      <TextBlock Classes="label" Text="Never in these apps" />
-      <TextBox Grid.Column="1" Text="{Binding ExcludedApps}" MinHeight="32" Watermark="1Password, Bitwarden, KeePass, mstsc" />
-    </Grid>
-    <TextBlock Classes="hint" Text="Program names separated by commas. Password managers and remote desktop are excluded to start with." Margin="160,0,0,0" />
+    <TabItem Header="Reading">
+      <ScrollViewer Classes="page">
+        <StackPanel Spacing="2">
+          <TextBlock Classes="section" Text="READABLE TEXT" />
+          <Grid Classes="row" ColumnDefinitions="170,*">
+            <TextBlock Classes="label" Text="Font" />
+            <ComboBox Grid.Column="1" ItemsSource="{Binding ReadingFonts}" SelectedItem="{Binding ReadingFontChoice}" HorizontalAlignment="Stretch" />
+          </Grid>
+          <Grid Classes="row" ColumnDefinitions="170,*,52">
+            <TextBlock Classes="label" Text="Text size" />
+            <Slider Grid.Column="1" Minimum="14" Maximum="32" TickFrequency="1" IsSnapToTickEnabled="True" Value="{Binding ReadingFontSize}" />
+            <TextBlock Grid.Column="2" Classes="label" Text="{Binding ReadingFontSize}" HorizontalAlignment="Right" />
+          </Grid>
+          <Grid Classes="row" ColumnDefinitions="170,*,52">
+            <TextBlock Classes="label" Text="Line spacing" />
+            <Slider Grid.Column="1" Minimum="1.1" Maximum="2.2" TickFrequency="0.1" IsSnapToTickEnabled="True" Value="{Binding ReadingLineSpacing}" />
+            <TextBlock Grid.Column="2" Classes="label" Text="{Binding ReadingLineSpacing}" HorizontalAlignment="Right" />
+          </Grid>
+          <Grid Classes="row" ColumnDefinitions="170,*">
+            <TextBlock Classes="label" Text="Background tint" />
+            <ComboBox Grid.Column="1" ItemsSource="{Binding ReadingTints}" SelectedItem="{Binding ReadingTintChoice}" HorizontalAlignment="Stretch" />
+          </Grid>
+          <TextBlock Classes="hint" Text="These apply to the reading view and the sentence in the player. Lexend and Atkinson Hyperlegible are designed for easy reading." />
 
-    <TextBlock Classes="section" Text="SHORTCUT" />
-    <Grid Classes="row" ColumnDefinitions="160,*">
-      <TextBlock Classes="label" Text="Read the selection" />
-      <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
-        <ToggleSwitch IsChecked="{Binding HotkeyEnabled}" OnContent="" OffContent="" />
-        <TextBox x:Name="HotkeyBox" Text="{Binding HotkeyText, Mode=OneWay}" Width="220" MinHeight="32" IsReadOnly="True"
-                 KeyDown="OnHotkeyKeyDown" Watermark="Click, then press keys" ToolTip.Tip="Click here and press the keys you want" />
-      </StackPanel>
-    </Grid>
-    <TextBlock Classes="hint" Text="Select text in any app and press it to hear it. Press it again to stop. Click the box and press new keys to change it." Margin="160,0,0,0" />
-    <TextBlock Classes="hint" Text="{Binding HotkeyStatus}" Margin="160,0,0,0" IsVisible="{Binding HotkeyStatus, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
-    <TextBlock Classes="hint" Text="Ctrl+Alt is AltGr on some keyboards. If the shortcut types a character instead, pick another." Margin="160,0,0,0" />
+          <TextBlock Classes="section" Text="WHAT GETS SAID" />
+          <Grid Classes="row" ColumnDefinitions="170,*">
+            <TextBlock Classes="label" Text="Code blocks" />
+            <ComboBox Grid.Column="1" ItemsSource="{Binding CodeBlockChoices}" SelectedItem="{Binding CodeBlocks}" HorizontalAlignment="Stretch" />
+          </Grid>
+          <Grid Classes="row" ColumnDefinitions="170,*">
+            <TextBlock Classes="label" Text="File paths" />
+            <ComboBox Grid.Column="1" ItemsSource="{Binding FilePathChoices}" SelectedItem="{Binding FilePaths}" HorizontalAlignment="Stretch" />
+          </Grid>
+          <Grid Classes="row" ColumnDefinitions="170,*">
+            <TextBlock Classes="label" Text="Tables" />
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
+              <ToggleSwitch IsChecked="{Binding SkipTables}" OnContent="" OffContent="" />
+              <TextBlock Classes="label" Text="Say only how big the table is, skip the rows" />
+            </StackPanel>
+          </Grid>
+          <Grid Classes="row" ColumnDefinitions="170,*">
+            <TextBlock Classes="label" Text="Web addresses" />
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
+              <ToggleSwitch IsChecked="{Binding SayLinks}" OnContent="" OffContent="" />
+              <TextBlock Classes="label" Text="Say &quot;link&quot; instead of reading them out" />
+            </StackPanel>
+          </Grid>
+          <Grid Classes="row" ColumnDefinitions="170,*">
+            <TextBlock Classes="label" Text="Email addresses" />
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
+              <ToggleSwitch IsChecked="{Binding SayEmails}" OnContent="" OffContent="" />
+              <TextBlock Classes="label" Text="Say &quot;email address&quot; instead of reading them out" />
+            </StackPanel>
+          </Grid>
+          <Grid Classes="row" ColumnDefinitions="170,*">
+            <TextBlock Classes="label" Text="Numbers" />
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
+              <ToggleSwitch IsChecked="{Binding SayNumbers}" OnContent="" OffContent="" />
+              <TextBlock Classes="label" Text="Years, money, times and percentages the way people say them" />
+            </StackPanel>
+          </Grid>
 
-    <TextBlock Classes="section" Text="PLAYER" />
-    <Grid Classes="row" ColumnDefinitions="160,*">
-      <TextBlock Classes="label" Text="Hide after reading" />
-      <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
-        <NumericUpDown Minimum="0" Maximum="60" Increment="1" Value="{Binding HideAfterSeconds}" Width="120" FormatString="0" />
-        <TextBlock Classes="label" Text="seconds. 0 keeps it open." />
-      </StackPanel>
-    </Grid>
-    <Grid Classes="row" ColumnDefinitions="160,*">
-      <TextBlock Classes="label" Text="Messages appear on" />
-      <ComboBox Grid.Column="1" ItemsSource="{Binding MessageScreens}" SelectedItem="{Binding MessagesOn}" HorizontalAlignment="Stretch" />
-    </Grid>
-    <Grid Classes="row" ColumnDefinitions="160,*">
-      <TextBlock Classes="label" Text="Watch clipboard" />
-      <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
-        <ToggleSwitch IsChecked="{Binding WatchClipboardOn}" OnContent="" OffContent="" />
-        <TextBlock Classes="label" Text="Offer to read anything new that is copied" />
-      </StackPanel>
-    </Grid>
+          <TextBlock Classes="section" Text="PRONUNCIATIONS" />
+          <TextBlock Classes="hint" Margin="0,0,0,6" Text="Words the voice gets wrong, and how to say them. Whole words only." />
+          <ItemsControl ItemsSource="{Binding Pronunciations}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="text:PronunciationEntry">
+                <Grid ColumnDefinitions="170,*,60,Auto" Margin="0,2">
+                  <TextBlock Classes="label" Text="{Binding Word}" FontWeight="Medium" />
+                  <TextBlock Grid.Column="1" Classes="label" Text="{Binding SayAs}" />
+                  <TextBlock Grid.Column="2" Classes="label" Text="Aa" IsVisible="{Binding CaseSensitive}" Opacity="0.6" ToolTip.Tip="Matches case" />
+                  <Button Grid.Column="3" Content="Remove" Click="OnRemovePronunciation" MinHeight="30" FontSize="13" />
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <Grid ColumnDefinitions="170,*,Auto,Auto" Margin="0,8,0,0">
+            <TextBox Text="{Binding NewWord}" Watermark="Word" MinHeight="32" Margin="0,0,10,0" KeyDown="OnPronunciationKeyDown" />
+            <TextBox Grid.Column="1" Text="{Binding NewSayAs}" Watermark="Say it as" MinHeight="32" KeyDown="OnPronunciationKeyDown" />
+            <CheckBox Grid.Column="2" IsChecked="{Binding NewCaseSensitive}" Content="Match case" Margin="10,0" />
+            <Button Grid.Column="3" Content="Add" Click="OnAddPronunciation" MinHeight="32" />
+          </Grid>
+        </StackPanel>
+      </ScrollViewer>
+    </TabItem>
 
-    <TextBlock Classes="hint" Text="{Binding SettingsFile}" Margin="0,16,0,0" />
-  </StackPanel>
+    <TabItem Header="Read button">
+      <ScrollViewer Classes="page">
+        <StackPanel Spacing="2">
+          <TextBlock Classes="section" Text="READ BUTTON" />
+          <Grid Classes="row" ColumnDefinitions="170,*">
+            <TextBlock Classes="label" Text="Show after a selection" />
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
+              <ToggleSwitch IsChecked="{Binding ReadButtonEnabled}" OnContent="" OffContent="" />
+              <TextBlock Classes="label" Text="A small Read button appears next to the mouse" />
+            </StackPanel>
+          </Grid>
+          <Grid Classes="row" ColumnDefinitions="170,*">
+            <TextBlock Classes="label" Text="Delay" />
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
+              <NumericUpDown Minimum="0" Maximum="1000" Increment="20" Value="{Binding ReadButtonDelayMs}" Width="130" FormatString="0" />
+              <TextBlock Classes="label" Text="milliseconds after you let go of the mouse" />
+            </StackPanel>
+          </Grid>
+          <Grid Classes="row" ColumnDefinitions="170,*">
+            <TextBlock Classes="label" Text="Never in these apps" />
+            <TextBox Grid.Column="1" Text="{Binding ExcludedApps}" MinHeight="32" Watermark="1Password, Bitwarden, KeePass, mstsc" />
+          </Grid>
+          <TextBlock Classes="hint" Text="Program names separated by commas. Password managers and remote desktop are excluded to start with." />
+
+          <TextBlock Classes="section" Text="SHORTCUT" />
+          <Grid Classes="row" ColumnDefinitions="170,*">
+            <TextBlock Classes="label" Text="Read the selection" />
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
+              <ToggleSwitch IsChecked="{Binding HotkeyEnabled}" OnContent="" OffContent="" />
+              <TextBox x:Name="HotkeyBox" Text="{Binding HotkeyText, Mode=OneWay}" Width="220" MinHeight="32" IsReadOnly="True"
+                       KeyDown="OnHotkeyKeyDown" Watermark="Click, then press keys" ToolTip.Tip="Click here and press the keys you want" />
+            </StackPanel>
+          </Grid>
+          <TextBlock Classes="hint" Text="Select text in any app and press it to hear it. With nothing selected it stops. Click the box and press new keys to change it." />
+          <TextBlock Classes="hint" Text="{Binding HotkeyStatus}" IsVisible="{Binding HotkeyStatus, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+          <TextBlock Classes="hint" Text="Ctrl+Alt is AltGr on some keyboards. If the shortcut types a character instead, pick another." />
+
+          <TextBlock Classes="section" Text="CLIPBOARD" />
+          <Grid Classes="row" ColumnDefinitions="170,*">
+            <TextBlock Classes="label" Text="Watch clipboard" />
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
+              <ToggleSwitch IsChecked="{Binding WatchClipboardOn}" OnContent="" OffContent="" />
+              <TextBlock Classes="label" Text="Offer to read anything new that is copied" />
+            </StackPanel>
+          </Grid>
+        </StackPanel>
+      </ScrollViewer>
+    </TabItem>
+
+    <TabItem Header="Look">
+      <ScrollViewer Classes="page">
+        <StackPanel Spacing="2">
+          <Grid Classes="row" ColumnDefinitions="170,*">
+            <TextBlock Classes="label" Text="Vibe" />
+            <ComboBox Grid.Column="1" ItemsSource="{Binding Vibes}" SelectedItem="{Binding VibeChoice}" HorizontalAlignment="Stretch" />
+          </Grid>
+          <StackPanel IsVisible="{Binding IsCustom}" Spacing="6" Margin="0,2,0,4">
+            <Grid Classes="row" ColumnDefinitions="170,*">
+              <TextBlock Classes="label" Text="Start from" />
+              <ComboBox Grid.Column="1" ItemsSource="{Binding Palettes}" SelectedItem="{Binding Palette}" PlaceholderText="Pick a palette" HorizontalAlignment="Stretch" />
+            </Grid>
+            <Grid Classes="row" ColumnDefinitions="170,*">
+              <TextBlock Classes="label" Text="Gradient colours" />
+              <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
+                <ColorPicker Color="{Binding Colour1}" ColorSpectrumShape="Ring" IsAlphaEnabled="False" Width="120" />
+                <ColorPicker Color="{Binding Colour2}" ColorSpectrumShape="Ring" IsAlphaEnabled="False" Width="120" />
+                <ColorPicker Color="{Binding Colour3}" ColorSpectrumShape="Ring" IsAlphaEnabled="False" Width="120" IsEnabled="{Binding UseThirdColour}" />
+                <ToggleSwitch IsChecked="{Binding UseThirdColour}" OnContent="" OffContent="" ToolTip.Tip="Use a third colour" VerticalAlignment="Center" />
+              </StackPanel>
+            </Grid>
+            <TextBlock Classes="hint" Text="Click a colour to open the wheel. Changes apply straight away. The switch adds a third colour." />
+          </StackPanel>
+          <Grid Classes="row" ColumnDefinitions="170,*" IsEnabled="{Binding IsCalm}">
+            <TextBlock Classes="label" Text="Light or dark" />
+            <ComboBox Grid.Column="1" ItemsSource="{Binding Themes}" SelectedItem="{Binding ThemeChoiceValue}" HorizontalAlignment="Stretch" />
+          </Grid>
+          <TextBlock Classes="hint" Text="Neon and Custom are always dark. Calm can follow Windows or be set." />
+          <Grid Classes="row" ColumnDefinitions="170,*">
+            <TextBlock Classes="label" Text="Size" />
+            <ComboBox Grid.Column="1" ItemsSource="{Binding Scales}" SelectedItem="{Binding ScaleChoice}" HorizontalAlignment="Stretch" />
+          </Grid>
+          <Grid Classes="row" ColumnDefinitions="170,*,52" IsVisible="{Binding IsGradientVibe}">
+            <TextBlock Classes="label" Text="Flecks" />
+            <Slider Grid.Column="1" Minimum="0" Maximum="100" TickFrequency="5" IsSnapToTickEnabled="True" Value="{Binding FleckDensity}" />
+            <TextBlock Grid.Column="2" Classes="label" Text="{Binding FleckDensity}" HorizontalAlignment="Right" />
+          </Grid>
+          <Grid Classes="row" ColumnDefinitions="170,*">
+            <TextBlock Classes="label" Text="Move while reading" />
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
+              <ToggleSwitch IsChecked="{Binding AnimateWhileReading}" OnContent="" OffContent="" />
+              <TextBlock Classes="label" Text="Let the colours drift while the voice is speaking" />
+            </StackPanel>
+          </Grid>
+        </StackPanel>
+      </ScrollViewer>
+    </TabItem>
+
+    <TabItem Header="Player">
+      <ScrollViewer Classes="page">
+        <StackPanel Spacing="2">
+          <Grid Classes="row" ColumnDefinitions="170,*">
+            <TextBlock Classes="label" Text="Hide after reading" />
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
+              <NumericUpDown Minimum="0" Maximum="60" Increment="1" Value="{Binding HideAfterSeconds}" Width="120" FormatString="0" />
+              <TextBlock Classes="label" Text="seconds. 0 keeps it open." />
+            </StackPanel>
+          </Grid>
+          <Grid Classes="row" ColumnDefinitions="170,*">
+            <TextBlock Classes="label" Text="Messages appear on" />
+            <ComboBox Grid.Column="1" ItemsSource="{Binding MessageScreens}" SelectedItem="{Binding MessagesOn}" HorizontalAlignment="Stretch" />
+          </Grid>
+        </StackPanel>
+      </ScrollViewer>
+    </TabItem>
+
+    <TabItem Header="Start-up">
+      <ScrollViewer Classes="page">
+        <StackPanel Spacing="2">
+          <Grid Classes="row" ColumnDefinitions="170,*">
+            <TextBlock Classes="label" Text="Start with Windows" />
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
+              <ToggleSwitch IsChecked="{Binding StartWithWindows}" OnContent="" OffContent="" />
+              <TextBlock Classes="label" Text="Sits in the tray from sign-in. Uses no CPU until you read." />
+            </StackPanel>
+          </Grid>
+          <TextBlock Classes="hint" Text="{Binding StartupStatus}" IsVisible="{Binding StartupStatus, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+          <TextBlock Classes="hint" Text="{Binding SettingsFile}" Margin="0,16,0,0" />
+        </StackPanel>
+      </ScrollViewer>
+    </TabItem>
+
+  </TabControl>
 </Window>

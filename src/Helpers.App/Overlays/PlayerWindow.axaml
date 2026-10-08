@@ -49,8 +49,9 @@
       <Setter Property="Background" Value="{DynamicResource HighlightBrush}" />
     </Style>
     <Style Selector="TextBlock.seg">
-      <Setter Property="FontSize" Value="20" />
-      <Setter Property="LineHeight" Value="32" />
+      <Setter Property="FontFamily" Value="{DynamicResource ReadingFontFamily}" />
+      <Setter Property="FontSize" Value="{DynamicResource ReadingFontSize}" />
+      <Setter Property="LineHeight" Value="{DynamicResource ReadingLineHeight}" />
       <Setter Property="TextWrapping" Value="Wrap" />
       <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
     </Style>
@@ -61,7 +62,7 @@
       <Setter Property="Foreground" Value="{DynamicResource HighlightForegroundBrush}" />
     </Style>
     <Style Selector="TextBlock.seg.heading">
-      <Setter Property="FontSize" Value="22" />
+      <Setter Property="FontSize" Value="{DynamicResource ReadingHeadingSize}" />
       <Setter Property="FontWeight" Value="SemiBold" />
       <Setter Property="Margin" Value="0,10,0,0" />
     </Style>
@@ -101,7 +102,7 @@
           <Border x:Name="Highlight" Grid.Row="0" Grid.Column="4" Margin="10,0" VerticalAlignment="Center" CornerRadius="6" Padding="8,3"
                   Background="{DynamicResource HighlightBrush}" Width="480" MinHeight="58">
             <ScrollViewer x:Name="SentenceScroller" Height="52" VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Disabled">
-              <TextBlock x:Name="Sentence" FontSize="18" LineHeight="26" TextWrapping="Wrap"
+              <TextBlock x:Name="Sentence" FontFamily="{DynamicResource ReadingFontFamily}" FontSize="18" LineHeight="26" TextWrapping="Wrap"
                          Foreground="{DynamicResource HighlightForegroundBrush}" />
             </ScrollViewer>
           </Border>
@@ -139,7 +140,7 @@
           <Grid RowDefinitions="Auto,*,Auto">
             <TextBlock Grid.Row="0" Text="{Binding StatusText}" Margin="20,10,20,0" FontSize="14"
                        Foreground="{DynamicResource MutedBrush}" />
-            <ScrollViewer Grid.Row="1" x:Name="Scroller" Padding="14,6,14,6" HorizontalScrollBarVisibility="Disabled">
+            <ScrollViewer Grid.Row="1" x:Name="Scroller" Padding="14,6,14,6" HorizontalScrollBarVisibility="Disabled" Background="{DynamicResource ReadingTintBrush}">
               <ItemsControl x:Name="SegmentList" ItemsSource="{Binding Segments}">
                 <ItemsControl.ItemTemplate>
                   <DataTemplate x:DataType="vm:SegmentItem">

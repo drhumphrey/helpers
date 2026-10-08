@@ -2,6 +2,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Helpers.App.ViewModels;
+using Helpers.Core.Text;
 
 namespace Helpers.App.Windows;
 
@@ -18,6 +19,25 @@ public partial class SettingsWindow : Window
     }
 
     private void OnPreview(object? sender, RoutedEventArgs e) => _viewModel.PreviewVoice();
+
+    private void OnAddPronunciation(object? sender, RoutedEventArgs e) => _viewModel.AddPronunciation();
+
+    private void OnPronunciationKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Enter)
+        {
+            _viewModel.AddPronunciation();
+            e.Handled = true;
+        }
+    }
+
+    private void OnRemovePronunciation(object? sender, RoutedEventArgs e)
+    {
+        if (sender is Button { DataContext: PronunciationEntry entry })
+        {
+            _viewModel.RemovePronunciation(entry);
+        }
+    }
 
     /// <summary>Turns the keys the user presses in the shortcut box into "Ctrl+Alt+Space" text.</summary>
     private void OnHotkeyKeyDown(object? sender, KeyEventArgs e)
