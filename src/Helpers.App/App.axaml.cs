@@ -22,9 +22,14 @@ public partial class App : Application
     private ClipboardWatcher? _clipboard;
     private HotkeyService? _hotkeys;
     private SelectionCapture? _selection;
+    private InputMonitor? _input;
+    private ReadButtonService? _readButton;
+    private QuickMenuWindow? _quickMenu;
     private TrayIcon? _tray;
     private NativeMenuItem? _watchItem;
     private NativeMenuItem? _calmItem;
+    private NativeMenuItem? _pausePillItem;
+    private Windows.SettingsWindow? _settingsWindow;
 
     public override void Initialize()
     {
@@ -49,6 +54,7 @@ public partial class App : Application
             var modelsRoot = settings.ModelsFolder ?? SettingsStore.DefaultModelsFolder();
             var engine = new KokoroEngine(modelsRoot, Math.Clamp(Environment.ProcessorCount / 2, 2, 4));
             _reading = new ReadingController(engine, new NAudioOutput(), _settings, _toasts);
+            _reading.SettingsRequested += ShowSettings;
 
             _clipboard = new ClipboardWatcher();
             _clipboard.Changed += () => Dispatcher.UIThread.Post(OfferToReadClipboard);
@@ -57,18 +63,37 @@ public partial class App : Application
                 _clipboard.Start();
             }
 
-            _reading.SettingsRequested += ShowSettings;
-
             _selection = new SelectionCapture();
             _hotkeys = new HotkeyService();
             _hotkeys.Pressed += () => _ = ReadSelectionAsync();
             ApplyHotkey(settings);
+
+            // The mouse and keyboard hooks share the hotkey's message thread.
+            _input = new InputMonitor(_hotkeys.Window);
+            if (_input.Install())
+            {
+                _readButton = new ReadButtonService(_input, _settings, _reading, _selection, _toasts);
+                _input.MouseDown += (_, _, _, ours) =>
+                {
+                    if (!ours)
+                    {
+                        _quickMenu?.HideMenu();
+                    }
+                };
+                _input.KeyPressed += () => _quickMenu?.HideMenu();
+            }
+            else
+            {
+                _toasts.Error("Windows wouldn't allow the mouse hook, so the Read button is off. The shortcut still works.");
+            }
 
             _tray = BuildTrayIcon(desktop, settings);
             TrayIcon.SetIcons(this, [_tray]);
 
             desktop.Exit += (_, _) =>
             {
+                _readButton?.Dispose();
+                _input?.Dispose();
                 _hotkeys?.Dispose();
                 _clipboard?.Dispose();
                 _reading?.Dispose();
@@ -89,7 +114,7 @@ public partial class App : Application
 
         await _reading.WarmUpAsync();
 
-        // Developer switches: --read-file <path> reads a file at start-up; --read-clipboard reads the clipboard.
+        // Developer switches, harmless if never used.
         for (var i = 0; i < args.Length; i++)
         {
             if (args[i] == "--read-file" && i + 1 < args.Length && File.Exists(args[i + 1]))
@@ -107,6 +132,10 @@ public partial class App : Application
             else if (args[i] == "--expanded")
             {
                 _reading.ExpandPlayer();
+            }
+            else if (args[i] == "--menu")
+            {
+                ShowQuickMenu();
             }
         }
     }
@@ -133,16 +162,14 @@ public partial class App : Application
         var settingsItem = new NativeMenuItem("Settings…");
         settingsItem.Click += (_, _) => ShowSettings();
 
+        _pausePillItem = new NativeMenuItem("Pause the Read button for 1 hour") { ToggleType = MenuItemToggleType.CheckBox };
+        _pausePillItem.Click += (_, _) => TogglePillPause();
+
         _calmItem = new NativeMenuItem("Calm look") { ToggleType = MenuItemToggleType.CheckBox, IsChecked = settings.Vibe == Vibe.Calm };
         _calmItem.Click += (_, _) => ToggleCalm();
 
         var memory = new NativeMenuItem("Memory in use");
-        memory.Click += (_, _) =>
-        {
-            using var process = Process.GetCurrentProcess();
-            process.Refresh();
-            _toasts?.Info($"Working set {process.WorkingSet64 / 1_048_576:N0} MB, private {process.PrivateMemorySize64 / 1_048_576:N0} MB");
-        };
+        memory.Click += (_, _) => ShowMemory();
 
         var exit = new NativeMenuItem("Exit");
         exit.Click += (_, _) => desktop.Shutdown();
@@ -155,6 +182,7 @@ public partial class App : Application
         menu.Items.Add(showPlayer);
         menu.Items.Add(settingsItem);
         menu.Items.Add(new NativeMenuItemSeparator());
+        menu.Items.Add(_pausePillItem);
         menu.Items.Add(_calmItem);
         menu.Items.Add(memory);
         menu.Items.Add(new NativeMenuItemSeparator());
@@ -167,11 +195,69 @@ public partial class App : Application
             Menu = menu,
             IsVisible = true,
         };
-        tray.Clicked += (_, _) => _reading?.ShowPlayer();
+        tray.Clicked += (_, _) => ShowQuickMenu();
         return tray;
     }
 
-    private Windows.SettingsWindow? _settingsWindow;
+    /// <summary>The styled menu on a left-click of the tray icon.</summary>
+    private void ShowQuickMenu()
+    {
+        if (_settings is null || _reading is null)
+        {
+            return;
+        }
+
+        _quickMenu ??= new QuickMenuWindow();
+        _quickMenu.SetItems(
+        [
+            new QuickMenuItem("Read clipboard", () => _reading.ReadClipboard()),
+            new QuickMenuItem("Pause / Resume", () => _reading.TogglePause()),
+            new QuickMenuItem("Stop", () => _reading.Stop()),
+            new QuickMenuItem("Show player", () => _reading.ShowPlayer()),
+            QuickMenuItem.Separator,
+            new QuickMenuItem("Watch clipboard", ToggleWatchClipboard, () => _settings.Current.WatchClipboard),
+            new QuickMenuItem("Pause the Read button for 1 hour", TogglePillPause, () => _readButton?.IsPaused ?? false),
+            new QuickMenuItem("Calm look", ToggleCalm, () => _settings.Current.Vibe == Vibe.Calm),
+            QuickMenuItem.Separator,
+            new QuickMenuItem("Settings…", ShowSettings),
+            new QuickMenuItem("Memory in use", ShowMemory),
+            new QuickMenuItem("Exit", () => (ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.Shutdown()),
+        ]);
+
+        var (x, y) = CursorPosition.Get();
+        _quickMenu.ShowNear(new PixelPoint(x, y));
+    }
+
+    private void ShowMemory()
+    {
+        using var process = Process.GetCurrentProcess();
+        process.Refresh();
+        _toasts?.Info($"Working set {process.WorkingSet64 / 1_048_576:N0} MB, private {process.PrivateMemorySize64 / 1_048_576:N0} MB");
+    }
+
+    private void TogglePillPause()
+    {
+        if (_readButton is null)
+        {
+            return;
+        }
+
+        if (_readButton.IsPaused)
+        {
+            _readButton.Resume();
+            _toasts?.Info("The Read button is back");
+        }
+        else
+        {
+            _readButton.PauseFor(TimeSpan.FromHours(1));
+            _toasts?.Info("Read button paused for an hour");
+        }
+
+        if (_pausePillItem is not null)
+        {
+            _pausePillItem.IsChecked = _readButton.IsPaused;
+        }
+    }
 
     /// <summary>
     /// Watch clipboard offers rather than reads: a copy during normal work must

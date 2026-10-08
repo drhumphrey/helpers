@@ -69,6 +69,15 @@ public sealed class AppSettings
     /// <summary>Read any new text that lands on the clipboard.</summary>
     public bool WatchClipboard { get; set; }
 
+    /// <summary>Show the Read button after a mouse selection.</summary>
+    public bool ReadButtonEnabled { get; set; } = true;
+
+    /// <summary>How long after the selection the button appears. Leaves room for a third click.</summary>
+    public int ReadButtonDelayMs { get; set; } = 180;
+
+    /// <summary>Process names, without .exe, where the Read button must never appear.</summary>
+    public List<string> ExcludedApps { get; set; } = ["1Password", "Bitwarden", "KeePass", "KeePassXC", "mstsc"];
+
     /// <summary>The global shortcut that reads the current selection, or stops reading. Text such as "Ctrl+Alt+Space".</summary>
     public string ReadSelectionHotkey { get; set; } = "Ctrl+Alt+Space";
 

@@ -44,6 +44,9 @@ public sealed class SettingsViewModel : ObservableObject
     private int _hideAfterSeconds;
     private int _unloadAfterMinutes;
     private Choice<MessageScreen> _messagesOn;
+    private bool _readButtonEnabled;
+    private int _readButtonDelayMs;
+    private string _excludedApps = string.Empty;
     private bool _watchClipboardOn;
 
     public SettingsViewModel(SettingsStore store, ReadingController reading, Action<bool> watchClipboard, Action applyLook, Func<bool> applyHotkey)
@@ -102,6 +105,9 @@ public sealed class SettingsViewModel : ObservableObject
             new Choice<MessageScreen>(MessageScreen.Focused, "The screen I'm working on"),
         ];
         _messagesOn = MessageScreens.First(m => m.Value == settings.MessagesOn);
+        _readButtonEnabled = settings.ReadButtonEnabled;
+        _readButtonDelayMs = settings.ReadButtonDelayMs;
+        _excludedApps = string.Join(", ", settings.ExcludedApps);
         _watchClipboardOn = settings.WatchClipboard;
     }
 
@@ -352,6 +358,50 @@ public sealed class SettingsViewModel : ObservableObject
             {
                 _store.Update(s => s.FleckDensity = clamped);
                 _reading.SetFleckDensity(clamped);
+            }
+        }
+    }
+
+    public bool ReadButtonEnabled
+    {
+        get => _readButtonEnabled;
+        set
+        {
+            if (Set(ref _readButtonEnabled, value))
+            {
+                _store.Update(s => s.ReadButtonEnabled = value);
+            }
+        }
+    }
+
+    public int ReadButtonDelayMs
+    {
+        get => _readButtonDelayMs;
+        set
+        {
+            var clamped = Math.Clamp(value, 0, 1000);
+            if (Set(ref _readButtonDelayMs, clamped))
+            {
+                _store.Update(s => s.ReadButtonDelayMs = clamped);
+            }
+        }
+    }
+
+    /// <summary>Process names, comma separated, where the Read button never appears.</summary>
+    public string ExcludedApps
+    {
+        get => _excludedApps;
+        set
+        {
+            if (Set(ref _excludedApps, value ?? string.Empty))
+            {
+                var apps = _excludedApps
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                    .Select(a => a.EndsWith(".exe", StringComparison.OrdinalIgnoreCase) ? a[..^4] : a)
+                    .Where(a => a.Length > 0)
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+                _store.Update(s => s.ExcludedApps = apps);
             }
         }
     }

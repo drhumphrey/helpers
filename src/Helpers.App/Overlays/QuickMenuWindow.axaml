@@ -1,0 +1,43 @@
+<overlays:OverlayWindow xmlns="https://github.com/avaloniaui"
+                        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                        xmlns:overlays="using:Helpers.App.Overlays"
+                        x:Class="Helpers.App.Overlays.QuickMenuWindow"
+                        Title="Helpers menu"
+                        SizeToContent="WidthAndHeight">
+
+  <overlays:OverlayWindow.Styles>
+    <Style Selector="Button.item">
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="HorizontalContentAlignment" Value="Left" />
+      <Setter Property="MinHeight" Value="38" />
+      <Setter Property="Padding" Value="12,0" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+      <Setter Property="FontSize" Value="15" />
+    </Style>
+    <Style Selector="Button.item:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource LineBrush}" />
+    </Style>
+    <Style Selector="Rectangle.sep">
+      <Setter Property="Height" Value="1" />
+      <Setter Property="Fill" Value="{DynamicResource LineBrush}" />
+      <Setter Property="Margin" Value="6,4" />
+    </Style>
+    <Style Selector="PathIcon.tick">
+      <Setter Property="Width" Value="16" />
+      <Setter Property="Height" Value="16" />
+      <Setter Property="Foreground" Value="{DynamicResource AccentTextBrush}" />
+    </Style>
+  </overlays:OverlayWindow.Styles>
+
+  <LayoutTransformControl x:Name="Scaler">
+    <Border Margin="20" CornerRadius="12" BorderThickness="1" Padding="6" MinWidth="260"
+            BorderBrush="{DynamicResource OverlayBorderBrush}"
+            Background="{DynamicResource OverlaySurfaceBrush}"
+            BoxShadow="{DynamicResource OverlayGlow}">
+      <StackPanel x:Name="Items" />
+    </Border>
+  </LayoutTransformControl>
+</overlays:OverlayWindow>

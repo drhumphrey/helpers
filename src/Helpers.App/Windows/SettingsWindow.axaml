@@ -125,6 +125,27 @@
       </StackPanel>
     </Grid>
 
+    <TextBlock Classes="section" Text="READ BUTTON" />
+    <Grid Classes="row" ColumnDefinitions="160,*">
+      <TextBlock Classes="label" Text="Show after a selection" />
+      <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
+        <ToggleSwitch IsChecked="{Binding ReadButtonEnabled}" OnContent="" OffContent="" />
+        <TextBlock Classes="label" Text="A small Read button appears next to the mouse" />
+      </StackPanel>
+    </Grid>
+    <Grid Classes="row" ColumnDefinitions="160,*">
+      <TextBlock Classes="label" Text="Delay" />
+      <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
+        <NumericUpDown Minimum="0" Maximum="1000" Increment="20" Value="{Binding ReadButtonDelayMs}" Width="130" FormatString="0" />
+        <TextBlock Classes="label" Text="milliseconds after you let go of the mouse" />
+      </StackPanel>
+    </Grid>
+    <Grid Classes="row" ColumnDefinitions="160,*">
+      <TextBlock Classes="label" Text="Never in these apps" />
+      <TextBox Grid.Column="1" Text="{Binding ExcludedApps}" MinHeight="32" Watermark="1Password, Bitwarden, KeePass, mstsc" />
+    </Grid>
+    <TextBlock Classes="hint" Text="Program names separated by commas. Password managers and remote desktop are excluded to start with." Margin="160,0,0,0" />
+
     <TextBlock Classes="section" Text="SHORTCUT" />
     <Grid Classes="row" ColumnDefinitions="160,*">
       <TextBlock Classes="label" Text="Read the selection" />
