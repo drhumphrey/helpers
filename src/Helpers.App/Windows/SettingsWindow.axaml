@@ -147,6 +147,10 @@
       </StackPanel>
     </Grid>
     <Grid Classes="row" ColumnDefinitions="160,*">
+      <TextBlock Classes="label" Text="Messages appear on" />
+      <ComboBox Grid.Column="1" ItemsSource="{Binding MessageScreens}" SelectedItem="{Binding MessagesOn}" HorizontalAlignment="Stretch" />
+    </Grid>
+    <Grid Classes="row" ColumnDefinitions="160,*">
       <TextBlock Classes="label" Text="Watch clipboard" />
       <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
         <ToggleSwitch IsChecked="{Binding WatchClipboardOn}" OnContent="" OffContent="" />

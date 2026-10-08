@@ -44,7 +44,7 @@ public partial class App : Application
             UiScale.Set(settings.UiScale);
 
             _toasts = new ToastService();
-            _toastWindow = new ToastWindow(_toasts);
+            _toastWindow = new ToastWindow(_toasts) { FollowFocus = settings.MessagesOn == MessageScreen.Focused };
 
             var modelsRoot = settings.ModelsFolder ?? SettingsStore.DefaultModelsFolder();
             var engine = new KokoroEngine(modelsRoot, Math.Clamp(Environment.ProcessorCount / 2, 2, 4));
@@ -239,7 +239,16 @@ public partial class App : Application
 
         if (_settingsWindow is null)
         {
-            var viewModel = new ViewModels.SettingsViewModel(_settings, _reading, SetWatchClipboard, ApplyLook, () => ApplyHotkey(_settings.Current));
+            var viewModel = new ViewModels.SettingsViewModel(_settings, _reading, SetWatchClipboard, ApplyLook, () => ApplyHotkey(_settings.Current))
+            {
+                MessagesFollowFocusChanged = follow =>
+                {
+                    if (_toastWindow is not null)
+                    {
+                        _toastWindow.FollowFocus = follow;
+                    }
+                },
+            };
             _settingsWindow = new Windows.SettingsWindow(viewModel);
             _settingsWindow.Closed += (_, _) => _settingsWindow = null;
             _settingsWindow.Show();

@@ -22,6 +22,9 @@ public partial class ToastWindow : OverlayWindow
         SizeChanged += (_, _) => Reposition();
     }
 
+    /// <summary>When true, messages follow the focused window's monitor; otherwise they stay on the main one.</summary>
+    public bool FollowFocus { get; set; }
+
     protected override void OnScalingChanged() => Reposition();
 
     private void Reposition()
@@ -36,8 +39,8 @@ public partial class ToastWindow : OverlayWindow
             return;
         }
 
-        // Every message goes to the screen the user is working on, even if earlier ones sat elsewhere.
-        var screen = AttentionScreen();
+        // One predictable corner: the main monitor, unless the user asked messages to follow their work.
+        var screen = FollowFocus ? AttentionScreen() : Screens.Primary ?? AttentionScreen();
         if (!IsVisible)
         {
             Show();

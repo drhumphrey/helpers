@@ -19,6 +19,15 @@ public enum ThemeChoice
 /// <summary>Where a window was last left, in screen pixels.</summary>
 public sealed record WindowPlacement(int X, int Y);
 
+public enum MessageScreen
+{
+    /// <summary>Always the main monitor, like Windows' own notifications.</summary>
+    Primary,
+
+    /// <summary>The monitor holding the window that has focus.</summary>
+    Focused,
+}
+
 /// <summary>Everything the user can change. Saved as JSON in the app's settings file.</summary>
 public sealed class AppSettings
 {
@@ -69,6 +78,9 @@ public sealed class AppSettings
     public int PlayerHideAfterSeconds { get; set; } = 4;
 
     public WindowPlacement? PlayerPlacement { get; set; }
+
+    /// <summary>Which monitor toasts appear on.</summary>
+    public MessageScreen MessagesOn { get; set; } = MessageScreen.Primary;
 
     /// <summary>Folder holding the voice models. Null means the default under local app data.</summary>
     public string? ModelsFolder { get; set; }

@@ -43,6 +43,7 @@ public sealed class SettingsViewModel : ObservableObject
     private int _fleckDensity;
     private int _hideAfterSeconds;
     private int _unloadAfterMinutes;
+    private Choice<MessageScreen> _messagesOn;
     private bool _watchClipboardOn;
 
     public SettingsViewModel(SettingsStore store, ReadingController reading, Action<bool> watchClipboard, Action applyLook, Func<bool> applyHotkey)
@@ -94,6 +95,13 @@ public sealed class SettingsViewModel : ObservableObject
         _fleckDensity = settings.FleckDensity;
         _hideAfterSeconds = settings.PlayerHideAfterSeconds;
         _unloadAfterMinutes = settings.UnloadVoiceAfterMinutes;
+
+        MessageScreens =
+        [
+            new Choice<MessageScreen>(MessageScreen.Primary, "The main screen"),
+            new Choice<MessageScreen>(MessageScreen.Focused, "The screen I'm working on"),
+        ];
+        _messagesOn = MessageScreens.First(m => m.Value == settings.MessagesOn);
         _watchClipboardOn = settings.WatchClipboard;
     }
 
@@ -344,6 +352,24 @@ public sealed class SettingsViewModel : ObservableObject
             {
                 _store.Update(s => s.FleckDensity = clamped);
                 _reading.SetFleckDensity(clamped);
+            }
+        }
+    }
+
+    public IReadOnlyList<Choice<MessageScreen>> MessageScreens { get; }
+
+    /// <summary>Set by the app so a change here reaches the toast window.</summary>
+    public Action<bool>? MessagesFollowFocusChanged { get; set; }
+
+    public Choice<MessageScreen> MessagesOn
+    {
+        get => _messagesOn;
+        set
+        {
+            if (value is not null && Set(ref _messagesOn, value))
+            {
+                _store.Update(s => s.MessagesOn = value.Value);
+                MessagesFollowFocusChanged?.Invoke(value.Value == MessageScreen.Focused);
             }
         }
     }
