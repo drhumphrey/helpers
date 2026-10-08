@@ -75,8 +75,10 @@ public static class ClipboardText
 public sealed class ClipboardWatcher : IDisposable
 {
     private readonly Timer _timer;
+    private readonly object _sync = new();
     private uint _last;
-    private bool _running;
+    private bool _enabled;
+    private int _suspended;
 
     public ClipboardWatcher()
     {
@@ -89,31 +91,76 @@ public sealed class ClipboardWatcher : IDisposable
 
     public void Start()
     {
-        _last = ClipboardText.SequenceNumber;
-        _running = true;
-        _timer.Change(400, 400);
+        lock (_sync)
+        {
+            _last = ClipboardText.SequenceNumber;
+            _enabled = true;
+            if (_suspended == 0)
+            {
+                _timer.Change(400, 400);
+            }
+        }
     }
 
     public void Stop()
     {
-        _running = false;
-        _timer.Change(Timeout.Infinite, Timeout.Infinite);
+        lock (_sync)
+        {
+            _enabled = false;
+            _timer.Change(Timeout.Infinite, Timeout.Infinite);
+        }
+    }
+
+    /// <summary>
+    /// Pauses watching while the clipboard is borrowed, for instance by selection
+    /// capture. Whatever changes in the meantime, including the restore, is ignored.
+    /// </summary>
+    public void Suspend()
+    {
+        lock (_sync)
+        {
+            _suspended++;
+            _timer.Change(Timeout.Infinite, Timeout.Infinite);
+        }
+    }
+
+    public void Resume()
+    {
+        lock (_sync)
+        {
+            _suspended = Math.Max(0, _suspended - 1);
+            if (_suspended == 0)
+            {
+                _last = ClipboardText.SequenceNumber;
+                if (_enabled)
+                {
+                    _timer.Change(400, 400);
+                }
+            }
+        }
     }
 
     public void Dispose() => _timer.Dispose();
 
     private void Poll()
     {
-        if (!_running)
+        uint now;
+        lock (_sync)
         {
-            return;
+            if (!_enabled || _suspended > 0)
+            {
+                return;
+            }
+
+            now = ClipboardText.SequenceNumber;
+            if (now == _last)
+            {
+                return;
+            }
+
+            _last = now;
         }
 
-        var now = ClipboardText.SequenceNumber;
-        if (now != _last)
-        {
-            _last = now;
-            Changed?.Invoke();
-        }
+        Changed?.Invoke();
     }
 }

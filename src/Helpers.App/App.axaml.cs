@@ -61,7 +61,7 @@ public partial class App : Application
 
             _selection = new SelectionCapture();
             _hotkeys = new HotkeyService();
-            _hotkeys.Pressed += () => _ = _reading?.ReadSelectionOrStopAsync(_selection);
+            _hotkeys.Pressed += () => _ = ReadSelectionAsync();
             ApplyHotkey(settings);
 
             _tray = BuildTrayIcon(desktop, settings);
@@ -172,6 +172,25 @@ public partial class App : Application
     }
 
     private Windows.SettingsWindow? _settingsWindow;
+
+    /// <summary>The shortcut's handler. The clipboard watcher sleeps while capture borrows the clipboard.</summary>
+    private async Task ReadSelectionAsync()
+    {
+        if (_reading is null || _selection is null)
+        {
+            return;
+        }
+
+        _clipboard?.Suspend();
+        try
+        {
+            await _reading.ReadSelectionOrStopAsync(_selection);
+        }
+        finally
+        {
+            _clipboard?.Resume();
+        }
+    }
 
     /// <summary>Registers the shortcut from settings and tells the user if Windows refused it.</summary>
     private bool ApplyHotkey(AppSettings settings)
