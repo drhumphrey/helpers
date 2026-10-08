@@ -20,6 +20,8 @@ public partial class App : Application
     private ToastWindow? _toastWindow;
     private ReadingController? _reading;
     private ClipboardWatcher? _clipboard;
+    private HotkeyService? _hotkeys;
+    private SelectionCapture? _selection;
     private TrayIcon? _tray;
     private NativeMenuItem? _watchItem;
     private NativeMenuItem? _calmItem;
@@ -57,11 +59,17 @@ public partial class App : Application
 
             _reading.SettingsRequested += ShowSettings;
 
+            _selection = new SelectionCapture();
+            _hotkeys = new HotkeyService();
+            _hotkeys.Pressed += () => _ = _reading?.ReadSelectionOrStopAsync(_selection);
+            ApplyHotkey(settings);
+
             _tray = BuildTrayIcon(desktop, settings);
             TrayIcon.SetIcons(this, [_tray]);
 
             desktop.Exit += (_, _) =>
             {
+                _hotkeys?.Dispose();
                 _clipboard?.Dispose();
                 _reading?.Dispose();
             };
@@ -165,6 +173,24 @@ public partial class App : Application
 
     private Windows.SettingsWindow? _settingsWindow;
 
+    /// <summary>Registers the shortcut from settings and tells the user if Windows refused it.</summary>
+    private bool ApplyHotkey(AppSettings settings)
+    {
+        if (_hotkeys is null)
+        {
+            return false;
+        }
+
+        var gesture = Helpers.Core.Input.HotkeyGesture.Parse(settings.ReadSelectionHotkey);
+        var ok = _hotkeys.Apply(gesture, settings.ReadSelectionHotkeyEnabled);
+        if (!ok)
+        {
+            _toasts?.Error($"Couldn't claim the shortcut {settings.ReadSelectionHotkey}. Another app may be using it.", "Open Settings", ShowSettings);
+        }
+
+        return ok;
+    }
+
     private void ShowSettings()
     {
         if (_settings is null || _reading is null)
@@ -174,7 +200,7 @@ public partial class App : Application
 
         if (_settingsWindow is null)
         {
-            var viewModel = new ViewModels.SettingsViewModel(_settings, _reading, SetWatchClipboard, ApplyLook);
+            var viewModel = new ViewModels.SettingsViewModel(_settings, _reading, SetWatchClipboard, ApplyLook, () => ApplyHotkey(_settings.Current));
             _settingsWindow = new Windows.SettingsWindow(viewModel);
             _settingsWindow.Closed += (_, _) => _settingsWindow = null;
             _settingsWindow.Show();

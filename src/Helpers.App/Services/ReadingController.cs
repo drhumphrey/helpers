@@ -130,6 +130,49 @@ public sealed class ReadingController : IDisposable
         }
     }
 
+    /// <summary>
+    /// The hotkey's job: stop if reading, otherwise read whatever is selected in
+    /// the app in front. Every failure is a toast with a way forward.
+    /// </summary>
+    public async Task ReadSelectionOrStopAsync(Helpers.Core.Capture.ISelectionSource source)
+    {
+        if (IsReading)
+        {
+            Stop();
+            return;
+        }
+
+        Helpers.Core.Capture.SelectionResult result;
+        try
+        {
+            result = await source.CaptureAsync(CancellationToken.None);
+        }
+        catch (Exception ex)
+        {
+            _toasts.Error($"Couldn't grab the text: {ex.Message}");
+            return;
+        }
+
+        switch (result.Outcome)
+        {
+            case Helpers.Core.Capture.SelectionOutcome.Text:
+                Read(result.Text!);
+                break;
+            case Helpers.Core.Capture.SelectionOutcome.Nothing:
+                _toasts.Error("Nothing selected, or this app wouldn't hand it over", "Read clipboard", ReadClipboard);
+                break;
+            case Helpers.Core.Capture.SelectionOutcome.Elevated:
+                _toasts.Error("Can't read from a window running as administrator", "Read clipboard", ReadClipboard);
+                break;
+            case Helpers.Core.Capture.SelectionOutcome.Password:
+                _toasts.Info("That's a password field, so nothing was read");
+                break;
+            default:
+                _toasts.Error($"Couldn't grab the text: {result.Message}", "Read clipboard", ReadClipboard);
+                break;
+        }
+    }
+
     public void ReadClipboard()
     {
         var text = Helpers.Windows.ClipboardText.TryGet();

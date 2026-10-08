@@ -21,6 +21,10 @@ public sealed class SettingsViewModel : ObservableObject
     private readonly ReadingController _reading;
     private readonly Action<bool> _watchClipboard;
     private readonly Action _applyLook;
+    private readonly Func<bool> _applyHotkey;
+    private string _hotkeyText = string.Empty;
+    private bool _hotkeyEnabled;
+    private string _hotkeyStatus = string.Empty;
 
     private SpeechVoice _voice;
     private float _speed;
@@ -40,14 +44,17 @@ public sealed class SettingsViewModel : ObservableObject
     private int _hideAfterSeconds;
     private bool _watchClipboardOn;
 
-    public SettingsViewModel(SettingsStore store, ReadingController reading, Action<bool> watchClipboard, Action applyLook)
+    public SettingsViewModel(SettingsStore store, ReadingController reading, Action<bool> watchClipboard, Action applyLook, Func<bool> applyHotkey)
     {
         _store = store;
         _reading = reading;
         _watchClipboard = watchClipboard;
         _applyLook = applyLook;
+        _applyHotkey = applyHotkey;
 
         var settings = store.Current;
+        _hotkeyText = settings.ReadSelectionHotkey;
+        _hotkeyEnabled = settings.ReadSelectionHotkeyEnabled;
         Voices = reading.Voices;
         _voice = Voices.FirstOrDefault(v => v.Id == settings.VoiceId) ?? Voices[0];
         _speed = settings.Speed;
@@ -366,4 +373,50 @@ public sealed class SettingsViewModel : ObservableObject
     }
 
     public void PreviewVoice() => _reading.Read("Hello, this is how I sound. Select some text anywhere and I will read it to you.");
+
+    /// <summary>The shortcut as text, such as "Ctrl+Alt+Space". Set from the key-capture box.</summary>
+    public string HotkeyText
+    {
+        get => _hotkeyText;
+        set
+        {
+            var gesture = Helpers.Core.Input.HotkeyGesture.Parse(value);
+            if (gesture is null)
+            {
+                HotkeyStatus = "That isn't a shortcut. Try something like Ctrl+Alt+Space.";
+                return;
+            }
+
+            if (!gesture.HasModifier)
+            {
+                HotkeyStatus = "Add Ctrl, Alt, Shift or Win, or plain typing would trigger it.";
+                return;
+            }
+
+            if (Set(ref _hotkeyText, gesture.ToString()))
+            {
+                _store.Update(s => s.ReadSelectionHotkey = _hotkeyText);
+                HotkeyStatus = _applyHotkey() ? string.Empty : "Windows refused that shortcut. Another app may own it.";
+            }
+        }
+    }
+
+    public bool HotkeyEnabled
+    {
+        get => _hotkeyEnabled;
+        set
+        {
+            if (Set(ref _hotkeyEnabled, value))
+            {
+                _store.Update(s => s.ReadSelectionHotkeyEnabled = value);
+                HotkeyStatus = _applyHotkey() ? string.Empty : "Windows refused that shortcut. Another app may own it.";
+            }
+        }
+    }
+
+    public string HotkeyStatus
+    {
+        get => _hotkeyStatus;
+        private set => Set(ref _hotkeyStatus, value);
+    }
 }

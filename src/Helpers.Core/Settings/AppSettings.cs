@@ -60,6 +60,11 @@ public sealed class AppSettings
     /// <summary>Read any new text that lands on the clipboard.</summary>
     public bool WatchClipboard { get; set; }
 
+    /// <summary>The global shortcut that reads the current selection, or stops reading. Text such as "Ctrl+Alt+Space".</summary>
+    public string ReadSelectionHotkey { get; set; } = "Ctrl+Alt+Space";
+
+    public bool ReadSelectionHotkeyEnabled { get; set; } = true;
+
     /// <summary>Seconds after reading ends before the player hides. 0 keeps it open.</summary>
     public int PlayerHideAfterSeconds { get; set; } = 4;
 

@@ -99,3 +99,11 @@ One entry per milestone: what was built, what was measured, what didn't go to pl
 **Milestone 3 measured:** about 750 MB working set while reading a long reply, the same as the engine spike, so reading sentence by sentence did not shrink the engine's arena. Idle CPU is effectively zero: the only timer that runs while idle is the 40 ms fleck drift, and only while the player is visible.
 
 **Milestone 3 done, 8 October 2026.** Not in the brief but built on Dave's requests along the way: volume, output device, a first Settings window, UI scaling, a resizable reading view, custom gradient colours with colour wheels, gradient motion, word-level highlighting. Deferred to milestone 4 and 5: the hotkey, selection capture, the Read button, and a styled quick menu in place of the native tray menu.
+
+## Milestone 4: selection capture and the hotkey (started 8 October 2026)
+
+**Built:** `SelectionCapture` in `Helpers.Windows`, behind `ISelectionSource` in Core. UI Automation first through FlaUI, time-boxed to 150 ms; then the clipboard: every copyable format is saved, the clipboard is cleared, Ctrl+Insert is sent, the app waits up to 350 ms for text, and only then, and never to a terminal, VS Code or Cursor, does it try Ctrl+C for up to a second. The saved clipboard is always put back. Windows running as administrator are detected and refused with a hint. Password fields are refused.
+
+**The hotkey:** a hidden message-only window on its own thread (`MessageWindow`) registers a global shortcut, default Ctrl+Alt+Space, on by default because Dave asked for it. Pressed while reading, it stops; otherwise it reads the selection. Settings has a key-capture box, an on/off switch, and a message if Windows refuses the combination because another app owns it. Verified from a second process: Windows refuses to register Ctrl+Alt+Space while the app runs, so the app holds it.
+
+**Also in Core:** `HotkeyGesture` parses and formats shortcut text, with tests.

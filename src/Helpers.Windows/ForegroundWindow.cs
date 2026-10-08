@@ -21,6 +21,17 @@ public static class ForegroundWindow
         return buffer.ToString();
     }
 
+    public static uint ProcessId(nint hwnd)
+    {
+        if (hwnd == 0)
+        {
+            return 0;
+        }
+
+        NativeMethods.GetWindowThreadProcessId(hwnd, out var processId);
+        return processId;
+    }
+
     public static string ProcessName(nint hwnd)
     {
         if (hwnd == 0)
