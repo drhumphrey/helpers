@@ -42,6 +42,7 @@ public sealed class SettingsViewModel : ObservableObject
     private bool _animate;
     private int _fleckDensity;
     private int _hideAfterSeconds;
+    private int _unloadAfterMinutes;
     private bool _watchClipboardOn;
 
     public SettingsViewModel(SettingsStore store, ReadingController reading, Action<bool> watchClipboard, Action applyLook, Func<bool> applyHotkey)
@@ -92,6 +93,7 @@ public sealed class SettingsViewModel : ObservableObject
         _animate = settings.AnimateWhileReading;
         _fleckDensity = settings.FleckDensity;
         _hideAfterSeconds = settings.PlayerHideAfterSeconds;
+        _unloadAfterMinutes = settings.UnloadVoiceAfterMinutes;
         _watchClipboardOn = settings.WatchClipboard;
     }
 
@@ -342,6 +344,19 @@ public sealed class SettingsViewModel : ObservableObject
             {
                 _store.Update(s => s.FleckDensity = clamped);
                 _reading.SetFleckDensity(clamped);
+            }
+        }
+    }
+
+    public int UnloadAfterMinutes
+    {
+        get => _unloadAfterMinutes;
+        set
+        {
+            var clamped = Math.Clamp(value, 0, 240);
+            if (Set(ref _unloadAfterMinutes, clamped))
+            {
+                _store.Update(s => s.UnloadVoiceAfterMinutes = clamped);
             }
         }
     }

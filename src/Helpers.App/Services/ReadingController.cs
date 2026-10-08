@@ -118,6 +118,7 @@ public sealed class ReadingController : IDisposable
         try
         {
             await _engine.LoadAsync(reporter, CancellationToken.None);
+            ScheduleUnload();
         }
         catch (Exception ex)
         {
@@ -201,6 +202,7 @@ public sealed class ReadingController : IDisposable
     private void StartSession(IReadOnlyList<SpeechSegment> segments, int startIndex)
     {
         StopCurrent();
+        _unloadTimer?.Stop();
 
         var session = new ReadingSession(_engine, _output, segments, _player.Voice ?? _engine.Voices[0], _player.Speed, startIndex);
         _session = session;
@@ -257,6 +259,29 @@ public sealed class ReadingController : IDisposable
         _output.Dispose();
     }
 
+    private DispatcherTimer? _unloadTimer;
+
+    /// <summary>Frees the voice's memory after a quiet spell. The next read loads it again in about a second.</summary>
+    private void ScheduleUnload()
+    {
+        _unloadTimer?.Stop();
+        var minutes = _settings.Current.UnloadVoiceAfterMinutes;
+        if (minutes <= 0)
+        {
+            return;
+        }
+
+        _unloadTimer = new DispatcherTimer(TimeSpan.FromMinutes(minutes), DispatcherPriority.Background, (_, _) =>
+        {
+            _unloadTimer?.Stop();
+            if (!IsReading && _engine.IsLoaded)
+            {
+                _engine.Unload();
+            }
+        });
+        _unloadTimer.Start();
+    }
+
     private void OnStateChanged(ReadingSession session, ReadingState state)
     {
         if (session != _session)
@@ -266,6 +291,7 @@ public sealed class ReadingController : IDisposable
 
         if (state is ReadingState.Finished or ReadingState.Stopped or ReadingState.Failed)
         {
+            ScheduleUnload();
             var seconds = _settings.Current.PlayerHideAfterSeconds;
             if (seconds > 0 && !_player.IsExpanded)
             {

@@ -73,5 +73,8 @@ public sealed class AppSettings
     /// <summary>Folder holding the voice models. Null means the default under local app data.</summary>
     public string? ModelsFolder { get; set; }
 
+    /// <summary>Minutes of silence before the voice is unloaded to free its memory. 0 keeps it loaded.</summary>
+    public int UnloadVoiceAfterMinutes { get; set; } = 15;
+
     public ReadingSettings Reading { get; set; } = new();
 }
