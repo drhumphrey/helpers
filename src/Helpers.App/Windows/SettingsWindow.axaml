@@ -123,11 +123,11 @@
       <TextBlock Classes="label" Text="Read the selection" />
       <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
         <ToggleSwitch IsChecked="{Binding HotkeyEnabled}" OnContent="" OffContent="" />
-        <TextBox x:Name="HotkeyBox" Text="{Binding HotkeyText, Mode=OneWay}" Width="200" MinHeight="32" IsReadOnly="True"
+        <TextBox x:Name="HotkeyBox" Text="{Binding HotkeyText, Mode=OneWay}" Width="220" MinHeight="32" IsReadOnly="True"
                  KeyDown="OnHotkeyKeyDown" Watermark="Click, then press keys" ToolTip.Tip="Click here and press the keys you want" />
-        <TextBlock Classes="label" Text="Press the shortcut to read what's selected, or to stop" />
       </StackPanel>
     </Grid>
+    <TextBlock Classes="hint" Text="Select text in any app and press it to hear it. Press it again to stop. Click the box and press new keys to change it." Margin="160,0,0,0" />
     <TextBlock Classes="hint" Text="{Binding HotkeyStatus}" Margin="160,0,0,0" IsVisible="{Binding HotkeyStatus, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
     <TextBlock Classes="hint" Text="Ctrl+Alt is AltGr on some keyboards. If the shortcut types a character instead, pick another." Margin="160,0,0,0" />
 
