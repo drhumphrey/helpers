@@ -96,6 +96,10 @@ public partial class App : Application
             {
                 ShowSettings();
             }
+            else if (args[i] == "--expanded")
+            {
+                _reading.ExpandPlayer();
+            }
         }
     }
 

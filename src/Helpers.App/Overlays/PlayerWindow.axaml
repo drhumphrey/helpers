@@ -79,7 +79,7 @@
       <DockPanel LastChildFill="True">
 
         <!-- Compact bar -->
-        <Grid DockPanel.Dock="Top" ColumnDefinitions="Auto,Auto,Auto,Auto,*,Auto,Auto,Auto,Auto,Auto,Auto" Margin="12,10" MinWidth="700">
+        <Grid DockPanel.Dock="Top" ColumnDefinitions="Auto,Auto,Auto,Auto,*,Auto,Auto,Auto,Auto,Auto,Auto" RowDefinitions="Auto,Auto" Margin="12,10" MinWidth="700">
           <Button Grid.Column="0" Classes="icon primary" Click="OnPlayPause" ToolTip.Tip="Play or pause">
             <Panel>
               <PathIcon Data="M6 5h4v14H6zM14 5h4v14h-4z" IsVisible="{Binding ShowPause}" />
@@ -96,7 +96,7 @@
             <PathIcon Data="M5 5h14v14H5z" Width="16" Height="16" />
           </Button>
 
-          <Border x:Name="Highlight" Grid.Column="4" Margin="10,0" VerticalAlignment="Center" CornerRadius="6" Padding="8,3"
+          <Border x:Name="Highlight" Grid.Row="0" Grid.Column="4" Margin="10,0" VerticalAlignment="Center" CornerRadius="6" Padding="8,3"
                   Background="{DynamicResource HighlightBrush}" Width="480" MinHeight="58">
             <ScrollViewer x:Name="SentenceScroller" Height="52" VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Disabled">
               <TextBlock x:Name="Sentence" FontSize="18" LineHeight="26" TextWrapping="Wrap"
@@ -119,7 +119,10 @@
           </ComboBox>
 
           <Button Grid.Column="8" Classes="icon" Click="OnToggleExpand" ToolTip.Tip="Reading view" Margin="6,0,0,0">
-            <PathIcon Data="M3 3h8v2H5v6H3zM13 19h8v-8h-2v6h-6z" />
+            <Panel>
+              <PathIcon Data="M3 3h8v2H5v6H3zM13 19h8v-8h-2v6h-6z" IsVisible="{Binding IsCollapsed}" />
+              <PathIcon Data="M11 11H3V9h6V3h2zM13 13h8v2h-6v6h-2z" IsVisible="{Binding IsExpanded}" />
+            </Panel>
           </Button>
           <Button Grid.Column="9" Classes="icon" Click="OnSettings" ToolTip.Tip="Settings">
             <PathIcon Data="M19.4 13a7.5 7.5 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.6 7.6 0 0 0-1.7-1L15 3H9l-.3 2.9a7.6 7.6 0 0 0-1.7 1l-2.5-1-2 3.5L4.6 11a7.5 7.5 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1a7.6 7.6 0 0 0 1.7 1L9 21h6l.3-2.9a7.6 7.6 0 0 0 1.7-1l2.5 1 2-3.5zM12 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z" />

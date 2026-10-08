@@ -28,6 +28,7 @@ public partial class PlayerWindow : OverlayWindow
     private bool _resizing;
     private Point _resizeStart;
     private Size _resizeFrom;
+    private int _renderedListIndex = -1;
 
     public PlayerWindow(PlayerViewModel viewModel)
     {
@@ -41,10 +42,12 @@ public partial class PlayerWindow : OverlayWindow
             {
                 case nameof(PlayerViewModel.CurrentIndex):
                     BringCurrentIntoView();
+                    RenderListWord();
                     break;
                 case nameof(PlayerViewModel.CurrentText):
                 case nameof(PlayerViewModel.CurrentWordIndex):
                     RenderSentence();
+                    RenderListWord();
                     break;
             }
         };
@@ -75,6 +78,9 @@ public partial class PlayerWindow : OverlayWindow
     /// <summary>Raised after the reading view has been resized by hand, in device-independent pixels.</summary>
     public event Action<double, double>? ReadingViewResized;
 
+    /// <summary>Raised when the reading view is opened or closed.</summary>
+    public event Action<bool>? ExpandedChanged;
+
     public bool AnimateWhileReading { get; set; } = true;
 
     /// <summary>The size to use for the reading view, or null for the default.</summary>
@@ -96,6 +102,51 @@ public partial class PlayerWindow : OverlayWindow
         }
     }
 
+    /// <summary>Opens or closes the reading view. The sentence box moves to its own line when open.</summary>
+    public void SetExpanded(bool expand)
+    {
+        if (expand == _viewModel.IsExpanded)
+        {
+            return;
+        }
+
+        if (expand)
+        {
+            var size = ExpandedSize ?? DefaultExpandedSize();
+            SizeToContent = SizeToContent.Manual;
+            Width = Math.Max(MinExpandedWidth, size.Width);
+            Height = Math.Max(MinExpandedHeight, size.Height);
+
+            Grid.SetRow(Highlight, 1);
+            Grid.SetColumn(Highlight, 0);
+            Grid.SetColumnSpan(Highlight, 11);
+            Highlight.Width = double.NaN;
+            Highlight.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch;
+            Highlight.Margin = new Thickness(0, 10, 0, 0);
+
+            _viewModel.IsExpanded = true;
+            BringCurrentIntoView();
+            RenderListWord();
+        }
+        else
+        {
+            _viewModel.IsExpanded = false;
+
+            Grid.SetRow(Highlight, 0);
+            Grid.SetColumn(Highlight, 4);
+            Grid.SetColumnSpan(Highlight, 1);
+            Highlight.Width = 480;
+            Highlight.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center;
+            Highlight.Margin = new Thickness(10, 0);
+
+            Width = double.NaN;
+            Height = double.NaN;
+            SizeToContent = SizeToContent.WidthAndHeight;
+        }
+
+        ExpandedChanged?.Invoke(expand);
+    }
+
     protected override void OnOpened(EventArgs e)
     {
         base.OnOpened(e);
@@ -112,26 +163,7 @@ public partial class PlayerWindow : OverlayWindow
 
     private void OnSettings(object? sender, RoutedEventArgs e) => SettingsRequested?.Invoke();
 
-    private void OnToggleExpand(object? sender, RoutedEventArgs e)
-    {
-        var expand = !_viewModel.IsExpanded;
-        if (expand)
-        {
-            var size = ExpandedSize ?? DefaultExpandedSize();
-            SizeToContent = SizeToContent.Manual;
-            Width = Math.Max(MinExpandedWidth, size.Width);
-            Height = Math.Max(MinExpandedHeight, size.Height);
-            _viewModel.IsExpanded = true;
-            BringCurrentIntoView();
-        }
-        else
-        {
-            _viewModel.IsExpanded = false;
-            Width = double.NaN;
-            Height = double.NaN;
-            SizeToContent = SizeToContent.WidthAndHeight;
-        }
-    }
+    private void OnToggleExpand(object? sender, RoutedEventArgs e) => SetExpanded(!_viewModel.IsExpanded);
 
     private void OnHide(object? sender, RoutedEventArgs e) => Hide();
 
@@ -220,42 +252,12 @@ public partial class PlayerWindow : OverlayWindow
     }
 
     /// <summary>
-    /// Draws the current sentence word by word, marks the word being spoken,
-    /// and scrolls so that word's line is in view. Nothing is ever cut off.
+    /// Draws the current sentence word by word in the bar, marks the word being
+    /// spoken, and scrolls so that word's line is in view. Nothing is ever cut off.
     /// </summary>
     private void RenderSentence()
     {
-        var words = _viewModel.Words;
-        var current = _viewModel.CurrentWordIndex;
-        var inlines = new InlineCollection();
-        var currentStart = -1;
-        var position = 0;
-
-        if (words.Count == 0)
-        {
-            inlines.Add(new Run(_viewModel.CurrentText));
-        }
-
-        for (var i = 0; i < words.Count; i++)
-        {
-            var run = new Run(words[i]);
-            if (i == current)
-            {
-                run.Background = this.FindResource("WordBrush") as IBrush;
-                run.FontWeight = FontWeight.SemiBold;
-                currentStart = position;
-            }
-
-            inlines.Add(run);
-            position += words[i].Length;
-            if (i < words.Count - 1)
-            {
-                inlines.Add(new Run(" "));
-                position += 1;
-            }
-        }
-
-        Sentence.Inlines = inlines;
+        Sentence.Inlines = BuildInlines(_viewModel.Words, _viewModel.CurrentWordIndex, _viewModel.CurrentText, out var currentStart);
 
         if (currentStart < 0)
         {
@@ -281,6 +283,76 @@ public partial class PlayerWindow : OverlayWindow
                 SentenceScroller.Offset = new Vector(0, lineTop);
             }
         }, DispatcherPriority.Loaded);
+    }
+
+    /// <summary>Marks the spoken word on the current line of the reading view as well, and clears the line it left.</summary>
+    private void RenderListWord()
+    {
+        if (!_viewModel.IsExpanded)
+        {
+            return;
+        }
+
+        var index = _viewModel.CurrentIndex;
+        if (_renderedListIndex >= 0 && _renderedListIndex != index)
+        {
+            ResetListLine(_renderedListIndex);
+            _renderedListIndex = -1;
+        }
+
+        if (index < 0 || FindListTextBlock(index) is not { } block)
+        {
+            return;
+        }
+
+        block.Inlines = BuildInlines(_viewModel.Words, _viewModel.CurrentWordIndex, _viewModel.CurrentText, out _);
+        _renderedListIndex = index;
+    }
+
+    private void ResetListLine(int index)
+    {
+        if (FindListTextBlock(index) is { } block && index < _viewModel.Segments.Count)
+        {
+            block.Inlines = new InlineCollection { new Run(_viewModel.Segments[index].Display) };
+        }
+    }
+
+    private TextBlock? FindListTextBlock(int index) =>
+        SegmentList.ContainerFromIndex(index)?.GetVisualDescendants().OfType<TextBlock>().FirstOrDefault();
+
+    /// <summary>Words as runs, the current one marked. <paramref name="currentStart"/> is its character index, or -1.</summary>
+    private InlineCollection BuildInlines(IReadOnlyList<string> words, int current, string fallback, out int currentStart)
+    {
+        var inlines = new InlineCollection();
+        currentStart = -1;
+        if (words.Count == 0)
+        {
+            inlines.Add(new Run(fallback));
+            return inlines;
+        }
+
+        var position = 0;
+        var wordBrush = this.FindResource("WordBrush") as IBrush;
+        for (var i = 0; i < words.Count; i++)
+        {
+            var run = new Run(words[i]);
+            if (i == current)
+            {
+                run.Background = wordBrush;
+                run.FontWeight = FontWeight.SemiBold;
+                currentStart = position;
+            }
+
+            inlines.Add(run);
+            position += words[i].Length;
+            if (i < words.Count - 1)
+            {
+                inlines.Add(new Run(" "));
+                position += 1;
+            }
+        }
+
+        return inlines;
     }
 
     /// <summary>Moves the gradients a little each tick while reading. Still when paused, stopped or switched off.</summary>

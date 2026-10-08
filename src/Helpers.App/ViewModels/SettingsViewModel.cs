@@ -30,9 +30,11 @@ public sealed class SettingsViewModel : ObservableObject
     private Choice<ThemeChoice> _theme;
     private Choice<double> _scale;
     private Choice<string[]>? _palette;
-    private string _colour1 = string.Empty;
-    private string _colour2 = string.Empty;
-    private string _colour3 = string.Empty;
+    private Color _colour1;
+    private Color _colour2;
+    private Color _colour3;
+    private bool _useThirdColour;
+    private bool _loadingPalette;
     private bool _animate;
     private int _hideAfterSeconds;
     private bool _watchClipboardOn;
@@ -73,10 +75,11 @@ public sealed class SettingsViewModel : ObservableObject
         _scale = Scales.OrderBy(s => Math.Abs(s.Value - settings.UiScale)).First();
 
         Palettes = Services.Vibes.Palettes.Select(p => new Choice<string[]>(p.Colours, p.Name)).ToList();
-        var colours = settings.GradientColours;
-        _colour1 = colours.ElementAtOrDefault(0) ?? string.Empty;
-        _colour2 = colours.ElementAtOrDefault(1) ?? string.Empty;
-        _colour3 = colours.ElementAtOrDefault(2) ?? string.Empty;
+        var colours = Services.Vibes.ParseColours(settings.GradientColours);
+        _colour1 = colours[0];
+        _colour2 = colours[1];
+        _useThirdColour = colours.Length > 2;
+        _colour3 = colours.Length > 2 ? colours[2] : Color.Parse("#FFE14D");
 
         _animate = settings.AnimateWhileReading;
         _hideAfterSeconds = settings.PlayerHideAfterSeconds;
@@ -211,63 +214,89 @@ public sealed class SettingsViewModel : ObservableObject
         {
             if (value is not null && Set(ref _palette, value))
             {
-                Colour1 = value.Value.ElementAtOrDefault(0) ?? string.Empty;
-                Colour2 = value.Value.ElementAtOrDefault(1) ?? string.Empty;
-                Colour3 = value.Value.ElementAtOrDefault(2) ?? string.Empty;
+                var colours = Services.Vibes.ParseColours(value.Value);
+                _loadingPalette = true;
+                try
+                {
+                    Colour1 = colours[0];
+                    Colour2 = colours[1];
+                    UseThirdColour = colours.Length > 2;
+                    if (colours.Length > 2)
+                    {
+                        Colour3 = colours[2];
+                    }
+                }
+                finally
+                {
+                    _loadingPalette = false;
+                }
+
                 ApplyColours();
             }
         }
     }
 
-    public string Colour1
+    public Color Colour1
     {
         get => _colour1;
         set
         {
-            if (Set(ref _colour1, value ?? string.Empty))
+            if (Set(ref _colour1, value))
             {
-                Raise(nameof(Preview1));
+                ApplyColours();
             }
         }
     }
 
-    public string Colour2
+    public Color Colour2
     {
         get => _colour2;
         set
         {
-            if (Set(ref _colour2, value ?? string.Empty))
+            if (Set(ref _colour2, value))
             {
-                Raise(nameof(Preview2));
+                ApplyColours();
             }
         }
     }
 
-    public string Colour3
+    public Color Colour3
     {
         get => _colour3;
         set
         {
-            if (Set(ref _colour3, value ?? string.Empty))
+            if (Set(ref _colour3, value))
             {
-                Raise(nameof(Preview3));
+                ApplyColours();
             }
         }
     }
 
-    public IBrush Preview1 => PreviewBrush(_colour1);
-
-    public IBrush Preview2 => PreviewBrush(_colour2);
-
-    public IBrush Preview3 => PreviewBrush(_colour3);
-
-    /// <summary>Saves the three colours and re-skins the app. Blank third colour means a two-stop gradient.</summary>
-    public void ApplyColours()
+    public bool UseThirdColour
     {
-        var colours = new[] { _colour1, _colour2, _colour3 }
-            .Select(c => c.Trim())
-            .Where(c => c.Length > 0)
-            .ToList();
+        get => _useThirdColour;
+        set
+        {
+            if (Set(ref _useThirdColour, value))
+            {
+                ApplyColours();
+            }
+        }
+    }
+
+    /// <summary>Saves the colours and re-skins the app at once. Every picker change comes through here.</summary>
+    private void ApplyColours()
+    {
+        if (_loadingPalette)
+        {
+            return;
+        }
+
+        var colours = new List<string> { Hex(_colour1), Hex(_colour2) };
+        if (_useThirdColour)
+        {
+            colours.Add(Hex(_colour3));
+        }
 
         _store.Update(s => s.GradientColours = colours);
         if (IsCustom)
@@ -275,6 +304,8 @@ public sealed class SettingsViewModel : ObservableObject
             _applyLook();
         }
     }
+
+    private static string Hex(Color c) => $"#{c.R:X2}{c.G:X2}{c.B:X2}";
 
     public bool AnimateWhileReading
     {
@@ -316,7 +347,4 @@ public sealed class SettingsViewModel : ObservableObject
     }
 
     public void PreviewVoice() => _reading.Read("Hello, this is how I sound. Select some text anywhere and I will read it to you.");
-
-    private static IBrush PreviewBrush(string hex) =>
-        Color.TryParse(hex.Trim(), out var colour) ? new SolidColorBrush(colour) : Brushes.Transparent;
 }

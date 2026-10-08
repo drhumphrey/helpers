@@ -51,6 +51,9 @@ public sealed class AppSettings
 
     public double? ReadingViewHeight { get; set; }
 
+    /// <summary>Whether the player was left open in the reading view.</summary>
+    public bool PlayerExpanded { get; set; }
+
     /// <summary>Read any new text that lands on the clipboard.</summary>
     public bool WatchClipboard { get; set; }
 

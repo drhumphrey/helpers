@@ -68,6 +68,12 @@ public sealed class ReadingController : IDisposable
 
     public void SetVoice(SpeechVoice voice) => _player.Voice = voice;
 
+    public void ExpandPlayer()
+    {
+        ShowPlayer();
+        _window?.SetExpanded(true);
+    }
+
     public void SetAnimate(bool on)
     {
         if (_window is not null)
@@ -177,10 +183,15 @@ public sealed class ReadingController : IDisposable
                 s.ReadingViewHeight = h;
             });
             _window.SettingsRequested += () => SettingsRequested?.Invoke();
+            _window.ExpandedChanged += expanded => _settings.Update(s => s.PlayerExpanded = expanded);
             _window.Closed += (_, _) => _window = null;
             _window.Show();
             var remembered = _settings.Current.PlayerPlacement;
             _window.PlaceAt(remembered is null ? null : new PixelPoint(remembered.X, remembered.Y));
+            if (current.PlayerExpanded)
+            {
+                _window.SetExpanded(true);
+            }
         }
         else if (!_window.IsVisible)
         {

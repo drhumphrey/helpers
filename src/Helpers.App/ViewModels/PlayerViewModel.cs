@@ -189,8 +189,16 @@ public sealed class PlayerViewModel : ObservableObject
     public bool IsExpanded
     {
         get => _isExpanded;
-        set => Set(ref _isExpanded, value);
+        set
+        {
+            if (Set(ref _isExpanded, value))
+            {
+                Raise(nameof(IsCollapsed));
+            }
+        }
     }
+
+    public bool IsCollapsed => !_isExpanded;
 
     public void Attach(ReadingSession session)
     {
