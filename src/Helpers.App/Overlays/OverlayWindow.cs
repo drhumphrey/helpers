@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Platform;
+using Avalonia.Threading;
 using Avalonia.Win32;
 using Helpers.App.Services;
 using Helpers.Windows;
@@ -40,6 +41,7 @@ public class OverlayWindow : Window
         }
 
         SizeChanged += (_, _) => KeepOnScreen();
+        ScalingChanged += (_, _) => Dispatcher.UIThread.Post(OnScalingChanged, DispatcherPriority.Background);
         UiScale.Changed += ApplyScale;
         Closed += (_, _) => UiScale.Changed -= ApplyScale;
     }
@@ -89,13 +91,35 @@ public class OverlayWindow : Window
     /// <summary>The window's size in screen pixels on a given screen.</summary>
     public PixelSize PixelSizeOn(Screen screen) => PixelSize.FromSize(ClientSize, screen.Scaling);
 
-    /// <summary>Places the window at the bottom-right of a screen's working area, with a margin.</summary>
+    /// <summary>
+    /// Places the window at the bottom-right of a screen's working area, with a
+    /// margin. Moving between monitors with different scaling makes Windows
+    /// resize the window after the move, so the placement is settled twice.
+    /// </summary>
     public void PlaceBottomRight(Screen screen, int marginRight, int marginBottom)
     {
         var area = screen.WorkingArea;
         var size = PixelSizeOn(screen);
         Position = new PixelPoint(area.Right - size.Width - marginRight, area.Bottom - size.Height - marginBottom);
+
+        Dispatcher.UIThread.Post(() =>
+        {
+            if (!IsVisible)
+            {
+                return;
+            }
+
+            var actual = PixelSize.FromSize(ClientSize, RenderScaling);
+            var settled = new PixelPoint(area.Right - actual.Width - marginRight, area.Bottom - actual.Height - marginBottom);
+            if (settled != Position)
+            {
+                Position = settled;
+            }
+        }, DispatcherPriority.Background);
     }
+
+    /// <summary>Called when the window lands on a monitor with different scaling. Overlays re-place themselves.</summary>
+    protected virtual void OnScalingChanged() => KeepOnScreen();
 
     /// <summary>Nudges the window back inside its home screen's working area if any edge has drifted off.</summary>
     public void KeepOnScreen()

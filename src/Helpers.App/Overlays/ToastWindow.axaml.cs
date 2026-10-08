@@ -22,6 +22,8 @@ public partial class ToastWindow : OverlayWindow
         SizeChanged += (_, _) => Reposition();
     }
 
+    protected override void OnScalingChanged() => Reposition();
+
     private void Reposition()
     {
         if (_toasts.Items.Count == 0)
