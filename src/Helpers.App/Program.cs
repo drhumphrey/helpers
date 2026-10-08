@@ -1,9 +1,9 @@
-﻿using Avalonia;
-using System;
+using Avalonia;
+using Avalonia.Media;
 
 namespace Helpers.App;
 
-class Program
+internal static class Program
 {
     // Initialization code. Don't use any Avalonia, third-party APIs or any
     // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
@@ -19,6 +19,11 @@ class Program
 #if DEBUG
             .WithDeveloperTools()
 #endif
-            .WithInterFont()
+            .With(new FontManagerOptions
+            {
+                // Lexend, bundled under Assets/Fonts (SIL Open Font Licence), for all app text.
+                DefaultFamilyName = "avares://Helpers.App/Assets/Fonts#Lexend",
+                FontFallbacks = [new FontFallback { FontFamily = new FontFamily("Segoe UI") }],
+            })
             .LogToTrace();
 }

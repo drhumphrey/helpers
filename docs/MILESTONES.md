@@ -60,3 +60,14 @@ One entry per milestone: what was built, what was measured, what didn't go to pl
 - Markdig is at version 1.4, not the 0.x series the docs online mostly describe. The API was the same.
 - Two things only showed up when reading real output rather than unit tests: a quoted abbreviation such as "e.g." wrongly ended a sentence, and table rows joined with commas were hard to follow. Both fixed and now covered by tests.
 - Bold-only lines were added as headings. The brief didn't ask for it, but every Claude Code reply uses them that way.
+
+## Milestone 3: player and tray (started 8 October 2026)
+
+**Step 1, the overlay spike: passed.** An Avalonia 12 window can be clicked without taking focus. `OverlayWindow` in the app project is borderless, topmost, off the taskbar, translucent with acrylic blur, and refuses activation two ways: the Win32 no-activate and tool-window styles are added once the window opens, and a message hook answers `WM_MOUSEACTIVATE` with `MA_NOACTIVATE`. The test: Notepad in front, two simulated clicks on a button inside the overlay, Notepad still in front, the button's counter at 2. Every overlay surface (pill, player, toasts, AI card) will inherit from this class.
+
+**Also in step 1:** Lexend is now the app font, bundled under `src/Helpers.App/Assets/Fonts` with its licence, replacing the template's Inter package. The app has no main window: it starts in the tray with a menu, and `ShutdownMode` is explicit.
+
+**Not to plan so far:**
+
+- Avalonia 12 renamed `SystemDecorations` to `WindowDecorations`. Expect more renames like it; the online docs mostly describe 11.
+- `Helpers.App` and `Helpers.Windows` now target `net10.0-windows` rather than plain `net10.0`, because NAudio's playback classes only ship for Windows frameworks and a plain project can't reference a Windows one. The Mac build will need its own target later; Core, Speech and Ai stay platform-neutral.
