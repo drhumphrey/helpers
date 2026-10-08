@@ -44,7 +44,7 @@ public sealed class ReadingController : IDisposable
         {
             if (_lastSegments is not null)
             {
-                StartSession(_lastSegments, index);
+                _ = StartSessionAsync(_lastSegments, index);
             }
         };
     }
@@ -132,17 +132,12 @@ public sealed class ReadingController : IDisposable
     }
 
     /// <summary>
-    /// The hotkey's job: stop if reading, otherwise read whatever is selected in
-    /// the app in front. Every failure is a toast with a way forward.
+    /// The hotkey's job: read whatever is selected in the app in front. With
+    /// nothing selected, it stops a reading in progress. Every failure is a
+    /// toast with a way forward.
     /// </summary>
     public async Task ReadSelectionOrStopAsync(Helpers.Core.Capture.ISelectionSource source)
     {
-        if (IsReading)
-        {
-            Stop();
-            return;
-        }
-
         Helpers.Core.Capture.SelectionResult result;
         try
         {
@@ -157,7 +152,10 @@ public sealed class ReadingController : IDisposable
         switch (result.Outcome)
         {
             case Helpers.Core.Capture.SelectionOutcome.Text:
-                Read(result.Text!);
+                await ReadAsync(result.Text!);
+                break;
+            case Helpers.Core.Capture.SelectionOutcome.Nothing when IsReading:
+                await StopCurrentAsync();
                 break;
             case Helpers.Core.Capture.SelectionOutcome.Nothing:
                 _toasts.Error("Nothing selected, or this app wouldn't hand it over", "Read clipboard", ReadClipboard);
@@ -186,7 +184,9 @@ public sealed class ReadingController : IDisposable
         Read(text);
     }
 
-    public void Read(string text)
+    public void Read(string text) => _ = ReadAsync(text);
+
+    public async Task ReadAsync(string text)
     {
         var segments = ReadingPipeline.Prepare(text, _settings.Current.Reading);
         if (segments.Count == 0)
@@ -196,12 +196,12 @@ public sealed class ReadingController : IDisposable
         }
 
         _lastSegments = segments;
-        StartSession(segments, 0);
+        await StartSessionAsync(segments, 0);
     }
 
-    private void StartSession(IReadOnlyList<SpeechSegment> segments, int startIndex)
+    private async Task StartSessionAsync(IReadOnlyList<SpeechSegment> segments, int startIndex)
     {
-        StopCurrent();
+        await StopCurrentAsync();
         _unloadTimer?.Stop();
 
         var session = new ReadingSession(_engine, _output, segments, _player.Voice ?? _engine.Voices[0], _player.Speed, startIndex);
@@ -211,12 +211,12 @@ public sealed class ReadingController : IDisposable
         session.Failed += message => _toasts.Error($"Couldn't read that: {message}");
 
         ShowPlayer();
-        _ = session.RunAsync();
+        _ = session.Start();
     }
 
     public void TogglePause() => _session?.TogglePause();
 
-    public void Stop() => StopCurrent();
+    public void Stop() => _ = StopCurrentAsync();
 
     public void ShowPlayer()
     {
@@ -251,12 +251,6 @@ public sealed class ReadingController : IDisposable
         {
             _window.Show();
         }
-    }
-
-    public void Dispose()
-    {
-        StopCurrent();
-        _output.Dispose();
     }
 
     private DispatcherTimer? _unloadTimer;
@@ -309,17 +303,25 @@ public sealed class ReadingController : IDisposable
         }
     }
 
-    private void StopCurrent()
+    /// <summary>Stops the current reading and waits, briefly, for its loop to let go of the audio device.</summary>
+    private async Task StopCurrentAsync()
     {
         _hideTimer?.Stop();
-        if (_session is null)
+        var session = _session;
+        if (session is null)
         {
             return;
         }
 
-        _player.Detach();
-        _session.Stop();
-        _session.Dispose();
         _session = null;
+        _player.Detach();
+        session.Stop();
+        await Task.WhenAny(session.Completion, Task.Delay(TimeSpan.FromSeconds(3)));
+    }
+
+    public void Dispose()
+    {
+        _session?.Stop();
+        _output.Dispose();
     }
 }

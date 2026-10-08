@@ -61,6 +61,24 @@ public class OverlayWindow : Window
     }
 
     /// <summary>
+    /// The screen the user is most likely looking at: the one holding the window
+    /// that has focus, falling back to the mouse's screen. Messages go here.
+    /// </summary>
+    public Screen? AttentionScreen()
+    {
+        if (OperatingSystem.IsWindows() && ForegroundWindow.Centre(ForegroundWindow.Handle) is var (x, y))
+        {
+            var screen = Screens.ScreenFromPoint(new PixelPoint(x, y));
+            if (screen is not null)
+            {
+                return screen;
+            }
+        }
+
+        return TargetScreen();
+    }
+
+    /// <summary>
     /// The screen this window belongs to: the one holding its top-left corner.
     /// Growing to the right or down never changes it, so a window that grows
     /// across a monitor edge is pulled back rather than pushed over.

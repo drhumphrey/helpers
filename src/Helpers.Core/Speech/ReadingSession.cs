@@ -113,6 +113,18 @@ public sealed class ReadingSession : IDisposable
         }
     }
 
+    private Task? _run;
+
+    /// <summary>Starts the reading on a background task and returns a task that completes when it has fully stopped.</summary>
+    public Task Start()
+    {
+        _run ??= RunAsync();
+        return _run;
+    }
+
+    /// <summary>The running task, or a completed one if the session never started.</summary>
+    public Task Completion => _run ?? Task.CompletedTask;
+
     /// <summary>Runs the whole reading. Completes when it finishes, is stopped, or fails.</summary>
     public async Task RunAsync()
     {
@@ -202,6 +214,12 @@ public sealed class ReadingSession : IDisposable
         {
             SetState(ReadingState.Stopped);
         }
+        catch (Exception ex) when (token.IsCancellationRequested)
+        {
+            // Torn down mid-step: that's a stop, not a failure, whatever the exception was.
+            _ = ex;
+            SetState(ReadingState.Stopped);
+        }
         catch (Exception ex)
         {
             Failed?.Invoke(ex.Message);
@@ -210,6 +228,12 @@ public sealed class ReadingSession : IDisposable
         finally
         {
             _output.Stop();
+            lock (_sync)
+            {
+                _itemCts.Dispose();
+            }
+
+            _sessionCts.Dispose();
         }
     }
 
@@ -281,20 +305,25 @@ public sealed class ReadingSession : IDisposable
             Resume();
         }
 
-        toCancel.Cancel();
+        CancelItem(toCancel);
     }
 
     public void Stop()
     {
-        _sessionCts.Cancel();
+        try
+        {
+            _sessionCts.Cancel();
+        }
+        catch (ObjectDisposedException)
+        {
+            // Already finished and cleaned up.
+        }
+
         _resumed.TrySetResult();
     }
 
-    public void Dispose()
-    {
-        Stop();
-        _sessionCts.Dispose();
-    }
+    /// <summary>Stops the reading. The token sources are disposed by the run loop itself once it has exited.</summary>
+    public void Dispose() => Stop();
 
     private Task<AudioClip> GetOrStart(int index, CancellationToken token)
     {
@@ -316,6 +345,19 @@ public sealed class ReadingSession : IDisposable
             _itemCts.Dispose();
             _itemCts = CancellationTokenSource.CreateLinkedTokenSource(_sessionCts.Token);
             return _itemCts.Token;
+        }
+    }
+
+    /// <summary>Cancels the current item. Safe to call after the session has ended.</summary>
+    private void CancelItem(CancellationTokenSource source)
+    {
+        try
+        {
+            source.Cancel();
+        }
+        catch (ObjectDisposedException)
+        {
+            // The loop has already moved on or finished.
         }
     }
 

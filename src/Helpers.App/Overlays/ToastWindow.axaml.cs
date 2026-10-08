@@ -34,7 +34,8 @@ public partial class ToastWindow : OverlayWindow
             return;
         }
 
-        var screen = IsVisible ? HomeScreen() : TargetScreen();
+        // Every message goes to the screen the user is working on, even if earlier ones sat elsewhere.
+        var screen = AttentionScreen();
         if (!IsVisible)
         {
             Show();

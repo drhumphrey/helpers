@@ -21,6 +21,22 @@ public static class ForegroundWindow
         return buffer.ToString();
     }
 
+    /// <summary>The centre of the window in screen pixels, or null if it has no rectangle.</summary>
+    public static (int X, int Y)? Centre(nint hwnd)
+    {
+        if (hwnd == 0 || !NativeMethods.GetWindowRect(hwnd, out var rect))
+        {
+            return null;
+        }
+
+        if (rect.Right <= rect.Left || rect.Bottom <= rect.Top)
+        {
+            return null;
+        }
+
+        return ((rect.Left + rect.Right) / 2, (rect.Top + rect.Bottom) / 2);
+    }
+
     public static uint ProcessId(nint hwnd)
     {
         if (hwnd == 0)
