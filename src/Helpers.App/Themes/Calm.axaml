@@ -1,0 +1,38 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <!-- Calm vibe: quiet glass, one flat accent, follows light or dark. -->
+  <ResourceDictionary.ThemeDictionaries>
+    <ResourceDictionary x:Key="Light">
+      <SolidColorBrush x:Key="OverlaySurfaceBrush" Color="#F7FFFFFF" />
+      <SolidColorBrush x:Key="OverlayBorderBrush" Color="#1F1B1F24" />
+      <BoxShadows x:Key="OverlayGlow">0 12 32 0 #241B1F24, 0 2 6 0 #141B1F24</BoxShadows>
+      <SolidColorBrush x:Key="PrimaryBrush" Color="#0F6CBD" />
+      <SolidColorBrush x:Key="PrimaryForegroundBrush" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="HighlightBrush" Color="#FFE89A" />
+      <SolidColorBrush x:Key="HighlightForegroundBrush" Color="#1B1F24" />
+      <SolidColorBrush x:Key="TextBrush" Color="#1B1F24" />
+      <SolidColorBrush x:Key="MutedBrush" Color="#5B6572" />
+      <SolidColorBrush x:Key="DoneBrush" Color="#6B7480" />
+      <SolidColorBrush x:Key="LineBrush" Color="#1F1B1F24" />
+      <SolidColorBrush x:Key="AccentTextBrush" Color="#0F6CBD" />
+      <SolidColorBrush x:Key="SuccessBrush" Color="#1B7F4B" />
+      <SolidColorBrush x:Key="ErrorBrush" Color="#B42318" />
+    </ResourceDictionary>
+    <ResourceDictionary x:Key="Dark">
+      <SolidColorBrush x:Key="OverlaySurfaceBrush" Color="#F522252C" />
+      <SolidColorBrush x:Key="OverlayBorderBrush" Color="#1FECEFF3" />
+      <BoxShadows x:Key="OverlayGlow">0 12 32 0 #80000000, 0 2 6 0 #59000000</BoxShadows>
+      <SolidColorBrush x:Key="PrimaryBrush" Color="#6BB2FF" />
+      <SolidColorBrush x:Key="PrimaryForegroundBrush" Color="#0B1C33" />
+      <SolidColorBrush x:Key="HighlightBrush" Color="#42FFD666" />
+      <SolidColorBrush x:Key="HighlightForegroundBrush" Color="#FFE9A8" />
+      <SolidColorBrush x:Key="TextBrush" Color="#ECEFF3" />
+      <SolidColorBrush x:Key="MutedBrush" Color="#A2ABB6" />
+      <SolidColorBrush x:Key="DoneBrush" Color="#8A939E" />
+      <SolidColorBrush x:Key="LineBrush" Color="#1FECEFF3" />
+      <SolidColorBrush x:Key="AccentTextBrush" Color="#6BB2FF" />
+      <SolidColorBrush x:Key="SuccessBrush" Color="#6EDFA3" />
+      <SolidColorBrush x:Key="ErrorBrush" Color="#FF8A80" />
+    </ResourceDictionary>
+  </ResourceDictionary.ThemeDictionaries>
+</ResourceDictionary>

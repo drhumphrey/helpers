@@ -21,9 +21,10 @@ public class OverlayWindow : Window
         Topmost = true;
         CanResize = false;
         Background = Brushes.Transparent;
+        // Plain transparency, not acrylic: Windows applies acrylic blur to the whole
+        // window rectangle, which turns the shadow margin into a frosted box.
         TransparencyLevelHint =
         [
-            WindowTransparencyLevel.AcrylicBlur,
             WindowTransparencyLevel.Transparent,
             WindowTransparencyLevel.None,
         ];

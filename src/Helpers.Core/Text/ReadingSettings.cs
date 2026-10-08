@@ -47,5 +47,22 @@ public sealed class ReadingSettings
     /// <summary>The longest piece of text handed to the engine in one go.</summary>
     public int MaxChunkLength { get; set; } = 400;
 
+    [System.Text.Json.Serialization.JsonIgnore]
     public PronunciationDictionary Pronunciations { get; set; } = PronunciationDictionary.CreateStarter();
+
+    /// <summary>The dictionary's entries in a shape the settings file can hold.</summary>
+    public List<PronunciationEntry> PronunciationEntries
+    {
+        get => [.. Pronunciations.Entries];
+        set
+        {
+            var dictionary = new PronunciationDictionary();
+            foreach (var entry in value ?? [])
+            {
+                dictionary.Add(entry.Word, entry.SayAs, entry.CaseSensitive);
+            }
+
+            Pronunciations = dictionary;
+        }
+    }
 }

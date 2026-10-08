@@ -1,0 +1,149 @@
+<overlays:OverlayWindow xmlns="https://github.com/avaloniaui"
+                        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                        xmlns:overlays="using:Helpers.App.Overlays"
+                        xmlns:vm="using:Helpers.App.ViewModels"
+                        x:Class="Helpers.App.Overlays.PlayerWindow"
+                        x:DataType="vm:PlayerViewModel"
+                        Title="Helpers player"
+                        SizeToContent="WidthAndHeight">
+
+  <overlays:OverlayWindow.Styles>
+    <Style Selector="Button.icon">
+      <Setter Property="Width" Value="40" />
+      <Setter Property="Height" Value="40" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="CornerRadius" Value="10" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Button.icon:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource LineBrush}" />
+    </Style>
+    <Style Selector="Button.icon.primary">
+      <Setter Property="Width" Value="48" />
+      <Setter Property="Height" Value="48" />
+      <Setter Property="CornerRadius" Value="12" />
+      <Setter Property="Background" Value="{DynamicResource PrimaryBrush}" />
+      <Setter Property="Foreground" Value="{DynamicResource PrimaryForegroundBrush}" />
+    </Style>
+    <Style Selector="Button.icon.primary:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource PrimaryBrush}" />
+      <Setter Property="Opacity" Value="0.9" />
+    </Style>
+    <Style Selector="PathIcon">
+      <Setter Property="Width" Value="18" />
+      <Setter Property="Height" Value="18" />
+    </Style>
+    <Style Selector="Button.primary PathIcon">
+      <Setter Property="Width" Value="22" />
+      <Setter Property="Height" Value="22" />
+    </Style>
+    <Style Selector="Border.seg">
+      <Setter Property="CornerRadius" Value="6" />
+      <Setter Property="Padding" Value="8,4" />
+      <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="Border.seg.current">
+      <Setter Property="Background" Value="{DynamicResource HighlightBrush}" />
+    </Style>
+    <Style Selector="TextBlock.seg">
+      <Setter Property="FontSize" Value="20" />
+      <Setter Property="LineHeight" Value="32" />
+      <Setter Property="TextWrapping" Value="Wrap" />
+      <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+    </Style>
+    <Style Selector="TextBlock.seg.done">
+      <Setter Property="Foreground" Value="{DynamicResource DoneBrush}" />
+    </Style>
+    <Style Selector="TextBlock.seg.current">
+      <Setter Property="Foreground" Value="{DynamicResource HighlightForegroundBrush}" />
+    </Style>
+    <Style Selector="TextBlock.seg.heading">
+      <Setter Property="FontSize" Value="22" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Margin" Value="0,10,0,0" />
+    </Style>
+    <Style Selector="TextBlock.seg.listitem">
+      <Setter Property="Margin" Value="18,0,0,0" />
+    </Style>
+  </overlays:OverlayWindow.Styles>
+
+  <Border x:Name="Card" Margin="24" CornerRadius="14" BorderThickness="1"
+          BorderBrush="{DynamicResource OverlayBorderBrush}"
+          Background="{DynamicResource OverlaySurfaceBrush}"
+          BoxShadow="{DynamicResource OverlayGlow}"
+          PointerPressed="OnCardPressed">
+    <StackPanel>
+
+      <!-- Compact bar -->
+      <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,*,Auto,Auto,Auto,Auto,Auto" Margin="12,10" MinWidth="700">
+        <Button Grid.Column="0" Classes="icon primary" Click="OnPlayPause" ToolTip.Tip="Play or pause">
+          <Panel>
+            <PathIcon Data="M6 5h4v14H6zM14 5h4v14h-4z" IsVisible="{Binding ShowPause}" />
+            <PathIcon Data="M7 5v14l12-7z" IsVisible="{Binding ShowPlay}" />
+          </Panel>
+        </Button>
+        <Button Grid.Column="1" Classes="icon" Click="OnBack" ToolTip.Tip="Back one sentence" Margin="6,0,0,0">
+          <PathIcon Data="M6 5h2v14H6zM20 5v14l-11-7z" />
+        </Button>
+        <Button Grid.Column="2" Classes="icon" Click="OnForward" ToolTip.Tip="Forward one sentence">
+          <PathIcon Data="M16 5h2v14h-2zM4 5v14l11-7z" />
+        </Button>
+        <Button Grid.Column="3" Classes="icon" Click="OnStop" ToolTip.Tip="Stop">
+          <PathIcon Data="M5 5h14v14H5z" Width="16" Height="16" />
+        </Button>
+
+        <Border Grid.Column="4" Margin="10,0" VerticalAlignment="Center" CornerRadius="6" Padding="8,3"
+                Background="{DynamicResource HighlightBrush}" Width="480" MinHeight="58">
+          <TextBlock Text="{Binding CurrentText}" FontSize="18" LineHeight="26" TextWrapping="Wrap" MaxLines="2"
+                     TextTrimming="CharacterEllipsis" Foreground="{DynamicResource HighlightForegroundBrush}" />
+        </Border>
+
+        <Slider Grid.Column="5" Width="110" Minimum="0.5" Maximum="2.0" TickFrequency="0.1" IsSnapToTickEnabled="True"
+                Value="{Binding Speed}" VerticalAlignment="Center" ToolTip.Tip="Speed" />
+        <TextBlock Grid.Column="6" Text="{Binding SpeedText}" VerticalAlignment="Center" Margin="8,0" MinWidth="40"
+                   Foreground="{DynamicResource TextBrush}" />
+
+        <ComboBox Grid.Column="7" ItemsSource="{Binding Voices}" SelectedItem="{Binding Voice}" MinWidth="110"
+                  VerticalAlignment="Center" ToolTip.Tip="Voice">
+          <ComboBox.ItemTemplate>
+            <DataTemplate>
+              <TextBlock Text="{Binding DisplayName}" />
+            </DataTemplate>
+          </ComboBox.ItemTemplate>
+        </ComboBox>
+
+        <Button Grid.Column="8" Classes="icon" Click="OnToggleExpand" ToolTip.Tip="Reading view" Margin="6,0,0,0">
+          <PathIcon Data="M3 3h8v2H5v6H3zM13 19h8v-8h-2v6h-6z" />
+        </Button>
+        <Button Grid.Column="9" Classes="icon" Click="OnHide" ToolTip.Tip="Hide">
+          <PathIcon Data="M6.3 5 12 10.7 17.7 5 19 6.3 13.3 12 19 17.7 17.7 19 12 13.3 6.3 19 5 17.7 10.7 12 5 6.3z" />
+        </Button>
+      </Grid>
+
+      <!-- Reading view -->
+      <Border IsVisible="{Binding IsExpanded}" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource LineBrush}">
+        <DockPanel>
+          <TextBlock DockPanel.Dock="Top" Text="{Binding StatusText}" Margin="20,10,20,0" FontSize="14"
+                     Foreground="{DynamicResource MutedBrush}" />
+          <ScrollViewer x:Name="Scroller" MaxHeight="520" Width="760" Padding="14,6,14,14">
+            <ItemsControl x:Name="SegmentList" ItemsSource="{Binding Segments}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:SegmentItem">
+                  <Border Classes="seg" Classes.current="{Binding IsCurrent}" PointerPressed="OnSegmentPressed" Margin="0,2">
+                    <TextBlock Classes="seg" Classes.current="{Binding IsCurrent}" Classes.done="{Binding IsDone}"
+                               Classes.heading="{Binding IsHeading}" Classes.listitem="{Binding IsListItem}"
+                               Text="{Binding Display}" />
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </ScrollViewer>
+        </DockPanel>
+      </Border>
+
+    </StackPanel>
+  </Border>
+</overlays:OverlayWindow>

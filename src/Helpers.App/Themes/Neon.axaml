@@ -1,0 +1,28 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <!-- Neon vibe: dark only. Gradient edges, glow, bright primary buttons. Text stays plain. -->
+  <SolidColorBrush x:Key="OverlaySurfaceBrush" Color="#F5161821" />
+  <LinearGradientBrush x:Key="OverlayBorderBrush" StartPoint="0%,0%" EndPoint="100%,100%">
+    <GradientStop Offset="0" Color="#19E6FF" />
+    <GradientStop Offset="0.55" Color="#FF2FD1" />
+    <GradientStop Offset="1" Color="#FFE14D" />
+  </LinearGradientBrush>
+  <BoxShadows x:Key="OverlayGlow">0 0 26 0 #4219E6FF, 0 0 60 0 #1FFF2FD1, 0 12 32 0 #8C000000</BoxShadows>
+  <LinearGradientBrush x:Key="PrimaryBrush" StartPoint="0%,0%" EndPoint="100%,100%">
+    <GradientStop Offset="0" Color="#19E6FF" />
+    <GradientStop Offset="1" Color="#FF7AE0" />
+  </LinearGradientBrush>
+  <SolidColorBrush x:Key="PrimaryForegroundBrush" Color="#0B0D12" />
+  <LinearGradientBrush x:Key="HighlightBrush" StartPoint="0%,0%" EndPoint="100%,0%">
+    <GradientStop Offset="0" Color="#3D19E6FF" />
+    <GradientStop Offset="1" Color="#3DFF2FD1" />
+  </LinearGradientBrush>
+  <SolidColorBrush x:Key="HighlightForegroundBrush" Color="#FFFFFF" />
+  <SolidColorBrush x:Key="TextBrush" Color="#F2F4F8" />
+  <SolidColorBrush x:Key="MutedBrush" Color="#A9B1BD" />
+  <SolidColorBrush x:Key="DoneBrush" Color="#7E8794" />
+  <SolidColorBrush x:Key="LineBrush" Color="#24FFFFFF" />
+  <SolidColorBrush x:Key="AccentTextBrush" Color="#19E6FF" />
+  <SolidColorBrush x:Key="SuccessBrush" Color="#6EDFA3" />
+  <SolidColorBrush x:Key="ErrorBrush" Color="#FF8A80" />
+</ResourceDictionary>
