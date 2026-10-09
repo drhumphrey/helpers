@@ -15,6 +15,9 @@ public sealed class KokoroEngine : ISpeechEngine
     public const string DownloadUrl =
         "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/" + PackageName + ".tar.bz2";
 
+    /// <summary>The package's SHA-256, as GitHub publishes it for the release asset (349,906,910 bytes).</summary>
+    private const string DownloadSha256 = "c5f7e2d2caf082bc1d20fb70334a61d99d20b484500aad32e7cf84c128ea3298";
+
     private const int DefaultSampleRate = 24000;
 
     private static readonly SpeechVoice[] BritishVoices =
@@ -62,7 +65,7 @@ public sealed class KokoroEngine : ISpeechEngine
                 return;
             }
 
-            await ModelDownloader.EnsureAsync(_modelsRoot, PackageName, DownloadUrl, progress, cancellationToken).ConfigureAwait(false);
+            await ModelDownloader.EnsureAsync(_modelsRoot, PackageName, DownloadUrl, DownloadSha256, progress, cancellationToken).ConfigureAwait(false);
             progress?.Report(new EngineProgress("Loading the voice", null));
             var modelDir = Path.Combine(_modelsRoot, PackageName);
             _tts = await Task.Run(() => Create(modelDir, _threads), cancellationToken).ConfigureAwait(false);

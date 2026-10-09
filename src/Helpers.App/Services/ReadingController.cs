@@ -186,7 +186,10 @@ public sealed class ReadingController : IDisposable
 
     public void Read(string text) => _ = ReadAsync(text);
 
-    public async Task ReadAsync(string text)
+    /// <summary>Reads at a one-off speed, such as a word said slowly, without changing the player's setting.</summary>
+    public void Read(string text, float? speed) => _ = ReadAsync(text, speed);
+
+    public async Task ReadAsync(string text, float? speed = null)
     {
         var segments = ReadingPipeline.Prepare(text, _settings.Current.Reading);
         if (segments.Count == 0)
@@ -196,15 +199,15 @@ public sealed class ReadingController : IDisposable
         }
 
         _lastSegments = segments;
-        await StartSessionAsync(segments, 0);
+        await StartSessionAsync(segments, 0, speed);
     }
 
-    private async Task StartSessionAsync(IReadOnlyList<SpeechSegment> segments, int startIndex)
+    private async Task StartSessionAsync(IReadOnlyList<SpeechSegment> segments, int startIndex, float? speed = null)
     {
         await StopCurrentAsync();
         _unloadTimer?.Stop();
 
-        var session = new ReadingSession(_engine, _output, segments, _player.Voice ?? _engine.Voices[0], _player.Speed, startIndex);
+        var session = new ReadingSession(_engine, _output, segments, _player.Voice ?? _engine.Voices[0], speed ?? _player.Speed, startIndex);
         _session = session;
         _player.Attach(session);
         session.StateChanged += state => Dispatcher.UIThread.Post(() => OnStateChanged(session, state));

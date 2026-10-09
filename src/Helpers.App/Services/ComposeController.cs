@@ -28,13 +28,16 @@ public sealed class ComposeController : IDisposable
     private bool _sending;
 
     private readonly AssistantService _assistant;
+    private readonly WordToolsService _words;
 
-    public ComposeController(SettingsStore settings, ReadingController reading, ToastService toasts, AssistantService assistant)
+    public ComposeController(SettingsStore settings, ReadingController reading, ToastService toasts, AssistantService assistant, WordToolsService words)
     {
         _settings = settings;
         _reading = reading;
         _toasts = toasts;
         _assistant = assistant;
+        _words = words;
+        _words.ReplaceRequested += word => _window?.ReplaceLookedUpWord(word);
 
         var dictionary = new UserDictionary(Path.Combine(SettingsStore.DefaultFolder(), "dictionary.txt"));
         dictionary.Load();
@@ -142,6 +145,11 @@ public sealed class ComposeController : IDisposable
         var window = new ComposeWindow(_spelling, _assistant, _settings);
         window.Text = _settings.Current.ComposeDraft ?? string.Empty;
         window.ReadBackRequested += ReadBack;
+        window.LookupRequested += word =>
+        {
+            var (x, y) = CursorPosition.Get();
+            _words.Show(word, new PixelPoint(x, y));
+        };
         window.CopyRequested += text => Copy(text, announce: true);
         window.SendRequested += text => _ = SendAsync(text);
         window.UseThisWindowRequested += () => _ = PickWindowAsync();

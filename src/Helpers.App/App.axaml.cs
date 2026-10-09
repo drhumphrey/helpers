@@ -26,6 +26,7 @@ public partial class App : Application
     private ReadButtonService? _readButton;
     private ComposeController? _compose;
     private AssistantService? _assistant;
+    private WordToolsService? _words;
     private KokoroEngine? _engine;
     private QuickMenuWindow? _quickMenu;
     private TrayIcon? _tray;
@@ -70,7 +71,8 @@ public partial class App : Application
 
             _selection = new SelectionCapture();
             _assistant = new AssistantService(_settings, new CredentialStore());
-            _compose = new ComposeController(_settings, _reading, _toasts, _assistant);
+            _words = new WordToolsService(_settings, _reading, _toasts);
+            _compose = new ComposeController(_settings, _reading, _toasts, _assistant, _words);
             _hotkeys = new HotkeyService();
             ApplyReadHotkey();
             ApplyComposeHotkey();
@@ -100,6 +102,7 @@ public partial class App : Application
             desktop.Exit += (_, _) =>
             {
                 _compose?.Dispose();
+                _words?.Dispose();
                 _assistant?.Dispose();
                 _readButton?.Dispose();
                 _input?.Dispose();
@@ -177,6 +180,27 @@ public partial class App : Application
                 if (i + 1 < args.Length && !args[i + 1].StartsWith("--", StringComparison.Ordinal))
                 {
                     _settingsWindow?.SelectTab(args[++i]);
+                }
+            }
+            else if (args[i] == "--lookup" && i + 1 < args.Length)
+            {
+                _words?.Show(args[++i]);
+            }
+            else if (args[i] == "--dictionary" && _words is not null && _toasts is not null)
+            {
+                var toast = _toasts.Progress("Downloading the dictionary…");
+                try
+                {
+                    await _words.DownloadDictionaryAsync(new Progress<double>(fraction => toast.Fraction = fraction));
+                    _toasts.Info("Dictionary ready");
+                }
+                catch (Exception ex)
+                {
+                    _toasts.Error($"Dictionary download failed: {ex.Message}");
+                }
+                finally
+                {
+                    _toasts.Dismiss(toast);
                 }
             }
             else if (args[i] == "--compose-check")

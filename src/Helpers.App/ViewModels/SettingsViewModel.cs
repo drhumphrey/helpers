@@ -1082,6 +1082,21 @@ public sealed class SettingsViewModel : ObservableObject
 
     public void ResetPrompt() => PromptText = PromptTemplates.Default(_promptAction.Value);
 
+    // Privacy and licences
+
+    public IReadOnlyList<Helpers.Core.ThirdPartyComponent> Notices => Helpers.Core.ThirdPartyNotices.Components;
+
+    public string AboutText
+    {
+        get
+        {
+            var version = typeof(SettingsViewModel).Assembly.GetName().Version?.ToString(3) ?? "0.1";
+            return $"Helpers {version}. Free software under the GNU GPL v3 or later: free for everyone, no tiers, no paid extras, no telemetry.";
+        }
+    }
+
+    public string WindowsPartsText => "Also used, as part of Windows: " + string.Join(" ", Helpers.Core.ThirdPartyNotices.WindowsParts);
+
     /// <summary>Refreshes the AI page's read-only lines after a change.</summary>
     public void RefreshAiStatus(bool keepStatus = false)
     {

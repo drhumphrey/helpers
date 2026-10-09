@@ -3,6 +3,7 @@
                      xmlns:windows="using:Helpers.App.Windows"
                      xmlns:vm="using:Helpers.App.ViewModels"
                      xmlns:text="using:Helpers.Core.Text"
+                     xmlns:core="using:Helpers.Core"
                      x:Class="Helpers.App.Windows.SettingsWindow"
                      x:DataType="vm:SettingsViewModel"
                      Title="Helpers settings"
@@ -374,6 +375,54 @@
           </Grid>
           <TextBlock Classes="hint" Text="{Binding StartupStatus}" IsVisible="{Binding StartupStatus, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
           <TextBlock Classes="hint" Text="{Binding SettingsFile}" Margin="0,16,0,0" />
+        </StackPanel>
+      </ScrollViewer>
+    </TabItem>
+
+    <TabItem Header="Privacy and licences">
+      <ScrollViewer Classes="page">
+        <StackPanel Spacing="6">
+          <TextBlock Classes="section" Text="THIS APP" />
+          <TextBlock Classes="label" Text="{Binding AboutText}" />
+          <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
+            <Button Content="Source code and licence" Click="OnOpenRepo" MinHeight="32" />
+            <Button Content="Full privacy notes" Click="OnOpenPrivacy" MinHeight="32" />
+          </StackPanel>
+
+          <TextBlock Classes="section" Text="WHAT LEAVES YOUR PC" />
+          <TextBlock Classes="label" Text="Nothing phones home. No telemetry, no crash reports, no update checks." />
+          <TextBlock Classes="label" Text="The voice, the local AI model and the dictionary each download once, over an encrypted connection, when you first use them, and are checked against a checksum built into the app. After that they never touch the network." />
+          <TextBlock Classes="label" Text="On this PC keeps your text on this PC. The model runs on your processor and cannot use the network." />
+          <TextBlock Classes="label" Text="Claude in the cloud sends your draft, and only your draft and the instructions for that button, to Anthropic, with your own key, only when you press a button with the cloud mark. What Anthropic does with it is covered by their terms, not ours." />
+          <Button Content="Anthropic's privacy policy" Click="OnOpenAnthropicPrivacy" MinHeight="30" HorizontalAlignment="Left" />
+          <TextBlock Classes="label" Text="The app reads the selection in another app only when you press Read or Edit, or the shortcut. Its mouse hook sees positions and buttons; its keyboard hook sees only that a key was pressed, never which. Password fields and the excluded apps are never read." />
+
+          <TextBlock Classes="section" Text="BUILT WITH" />
+          <ItemsControl ItemsSource="{Binding Notices}">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate>
+                <StackPanel Spacing="8" />
+              </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="core:ThirdPartyComponent">
+                <Grid ColumnDefinitions="*,Auto">
+                  <StackPanel Spacing="1">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                      <TextBlock Classes="label" Text="{Binding Name}" FontWeight="SemiBold" />
+                      <TextBlock Classes="label" Text="{Binding Version}" Opacity="0.7" />
+                      <TextBlock Classes="label" Text="{Binding Licence}" Foreground="{DynamicResource AccentTextBrush}" FontSize="13" />
+                    </StackPanel>
+                    <TextBlock Classes="label" Text="{Binding Role}" FontSize="14" />
+                    <TextBlock Classes="label" Text="{Binding NetworkNote}" FontSize="13" Opacity="0.7" />
+                  </StackPanel>
+                  <Button Grid.Column="1" Content="Website" Click="OnOpenComponent" MinHeight="28" FontSize="13" Margin="10,0,0,0" VerticalAlignment="Top" />
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <TextBlock Classes="label" Margin="0,10,0,0" FontSize="14" Text="{Binding WindowsPartsText}" />
+          <TextBlock Classes="label" FontSize="13" Opacity="0.7" Text="Open English WordNet: Global WordNet Association, CC BY 4.0, derived from Princeton WordNet 3.0. British hyphenation patterns: Dominik Wujastyk and Graham Toal, MIT." />
         </StackPanel>
       </ScrollViewer>
     </TabItem>

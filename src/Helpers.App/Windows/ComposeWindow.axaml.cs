@@ -42,6 +42,7 @@ public partial class ComposeWindow : ShellWindow
     private CancellationTokenSource? _aiRun;
     private AssistantAction? _pendingAction;
     private string _resultText = string.Empty;
+    private SpellingError? _lookupRange;
 
     public ComposeWindow(DraftSpelling spelling, AssistantService assistant, SettingsStore settings)
     {
@@ -100,6 +101,37 @@ public partial class ComposeWindow : ShellWindow
 
     /// <summary>Raised a couple of seconds after the last edit, and on hide, with the whole draft.</summary>
     public event Action<string>? DraftChanged;
+
+    /// <summary>Raised from the right-click menu with the word to look up.</summary>
+    public event Action<string>? LookupRequested;
+
+    /// <summary>Puts a word from the word tools in place of the one that was looked up, through the editor's undo.</summary>
+    public void ReplaceLookedUpWord(string replacement)
+    {
+        if (_lookupRange is null)
+        {
+            return;
+        }
+
+        var text = Text;
+        var (start, length) = _lookupRange.End <= text.Length
+            ? (_lookupRange.Start, _lookupRange.Length)
+            : (-1, 0);
+        if (start < 0)
+        {
+            return;
+        }
+
+        Editor.CaretIndex = start;
+        Editor.SelectionStart = start;
+        Editor.SelectionEnd = start + length;
+        Editor.SelectedText = replacement;
+        Editor.CaretIndex = start + replacement.Length;
+        _lookupRange = new SpellingError(start, replacement.Length);
+        Activate();
+        Editor.Focus();
+        CheckNow();
+    }
 
     /// <summary>Raised when the window has settled somewhere new, in screen pixels and client size.</summary>
     public event Action<PixelPoint, Size>? PlacementChanged;
@@ -369,6 +401,22 @@ public partial class ComposeWindow : ShellWindow
         if (index < 0)
         {
             index = Editor.CaretIndex;
+        }
+
+        // The word tools first: meaning, syllables, how to say it, other words for it.
+        var wordRange = SpellingErrors.WordAt(text, index);
+        if (wordRange is not null && wordRange.Length >= 2)
+        {
+            var word = DraftSpelling.WordAt(text, wordRange);
+            var lookup = new MenuItem { Header = $"Look up “{word}”" };
+            var range = wordRange;
+            lookup.Click += (_, _) =>
+            {
+                _lookupRange = range;
+                LookupRequested?.Invoke(word);
+            };
+            menu.Items.Add(lookup);
+            menu.Items.Add(new Separator());
         }
 
         var error = _spelling.IsAvailable ? SpellingErrors.FindAt(_errors, index) ?? MisspeltWordAt(text, index) : null;

@@ -6,8 +6,11 @@ namespace Helpers.Speech;
 /// <summary>Fetches a sherpa-onnx model package once and unpacks it with the system's tar.</summary>
 public static class ModelDownloader
 {
-    /// <summary>Makes sure <c>modelsRoot/packageName/model.onnx</c> exists, downloading and unpacking if not.</summary>
-    public static async Task EnsureAsync(string modelsRoot, string packageName, string url, IProgress<EngineProgress>? progress, CancellationToken cancellationToken)
+    /// <summary>
+    /// Makes sure <c>modelsRoot/packageName/model.onnx</c> exists, downloading and unpacking if not.
+    /// The download is checked against <paramref name="sha256"/> before it is unpacked.
+    /// </summary>
+    public static async Task EnsureAsync(string modelsRoot, string packageName, string url, string? sha256, IProgress<EngineProgress>? progress, CancellationToken cancellationToken)
     {
         var modelDir = Path.Combine(modelsRoot, packageName);
         if (File.Exists(Path.Combine(modelDir, "model.onnx")))
@@ -19,7 +22,7 @@ public static class ModelDownloader
         var archive = Path.Combine(modelsRoot, packageName + ".tar.bz2");
         if (!File.Exists(archive))
         {
-            await DownloadAsync(url, archive, progress, cancellationToken).ConfigureAwait(false);
+            await DownloadAsync(url, archive, sha256, progress, cancellationToken).ConfigureAwait(false);
         }
 
         progress?.Report(new EngineProgress("Unpacking the voice", null));
@@ -33,9 +36,9 @@ public static class ModelDownloader
         File.Delete(archive);
     }
 
-    private static async Task DownloadAsync(string url, string destination, IProgress<EngineProgress>? progress, CancellationToken cancellationToken)
+    private static async Task DownloadAsync(string url, string destination, string? sha256, IProgress<EngineProgress>? progress, CancellationToken cancellationToken)
     {
-        using var http = new HttpClient();
+        using var http = new HttpClient { Timeout = Timeout.InfiniteTimeSpan };
         using var response = await http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
         response.EnsureSuccessStatusCode();
 
@@ -43,6 +46,7 @@ public static class ModelDownloader
         var partial = destination + ".part";
         progress?.Report(new EngineProgress("Downloading the voice", total > 0 ? 0 : null));
 
+        using var hasher = System.Security.Cryptography.SHA256.Create();
         await using (var source = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false))
         await using (var file = File.Create(partial))
         {
@@ -53,6 +57,7 @@ public static class ModelDownloader
             while ((read = await source.ReadAsync(chunk, cancellationToken).ConfigureAwait(false)) > 0)
             {
                 await file.WriteAsync(chunk.AsMemory(0, read), cancellationToken).ConfigureAwait(false);
+                hasher.TransformBlock(chunk, 0, read, null, 0);
                 done += read;
                 if (total > 0)
                 {
@@ -63,6 +68,17 @@ public static class ModelDownloader
                         lastReported = percent;
                     }
                 }
+            }
+        }
+
+        hasher.TransformFinalBlock([], 0, 0);
+        if (sha256 is not null)
+        {
+            var actual = Convert.ToHexString(hasher.Hash!).ToLowerInvariant();
+            if (!string.Equals(actual, sha256, StringComparison.OrdinalIgnoreCase))
+            {
+                File.Delete(partial);
+                throw new InvalidDataException("The voice download didn't match its checksum, so it was discarded.");
             }
         }
 

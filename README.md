@@ -21,6 +21,10 @@ AI assistants are brilliant, but working with them means reading a lot of long t
 
 **Check my thinking.** A reader's notes on your draft: where the logic jumps, what's missing, which word is unclear. Questions and small fixes pinned to your words, never a rewrite, so your tone stays yours. Tidy fixes spelling and grammar with every change marked. Runs on a small model on your own PC for free, or on Claude with your own key.
 
+**Word tools.** Right-click a word: see it in syllables, hear it, see how to say it, read what it means, pick another word for it.
+
+**Privacy.** Nothing phones home. The voice, the local model and the dictionary download once and then work offline. Only Claude, if you choose it, sends your draft anywhere. Every component and its licence is listed in Settings and in [docs/THIRD-PARTY-NOTICES.md](docs/THIRD-PARTY-NOTICES.md); the full notes are in [docs/PRIVACY.md](docs/PRIVACY.md).
+
 ## Try the prototype today
 
 The prototype is an AutoHotkey script that uses the voices already on Windows.

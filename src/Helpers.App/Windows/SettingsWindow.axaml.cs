@@ -33,6 +33,20 @@ public partial class SettingsWindow : ShellWindow
 
     private void OnPreview(object? sender, RoutedEventArgs e) => _viewModel.PreviewVoice();
 
+    private void OnOpenRepo(object? sender, RoutedEventArgs e) => Services.Links.Open("https://github.com/drhumphrey/helpers");
+
+    private void OnOpenPrivacy(object? sender, RoutedEventArgs e) => Services.Links.Open("https://github.com/drhumphrey/helpers/blob/main/docs/PRIVACY.md");
+
+    private void OnOpenAnthropicPrivacy(object? sender, RoutedEventArgs e) => Services.Links.Open("https://www.anthropic.com/legal/privacy");
+
+    private void OnOpenComponent(object? sender, RoutedEventArgs e)
+    {
+        if (sender is Button { DataContext: Helpers.Core.ThirdPartyComponent component })
+        {
+            Services.Links.Open(component.Url);
+        }
+    }
+
     private void OnSaveKey(object? sender, RoutedEventArgs e) => _viewModel.SaveCloudKey();
 
     private void OnRemoveKey(object? sender, RoutedEventArgs e) => _viewModel.RemoveCloudKey();

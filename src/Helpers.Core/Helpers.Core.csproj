@@ -10,4 +10,9 @@
     <PackageReference Include="Markdig" Version="1.4.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- British English hyphenation patterns (MIT, Wujastyk and Toal), with their licence header. -->
+    <EmbeddedResource Include="Resources\hyph-en-gb.tex" LogicalName="Helpers.Core.Resources.hyph-en-gb.tex" />
+  </ItemGroup>
+
 </Project>

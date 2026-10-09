@@ -15,7 +15,15 @@ public sealed class AnthropicAssistant : IAssistant
 
     public AnthropicAssistant(string apiKey, string model)
     {
-        _client = new AnthropicClient { ApiKey = apiKey, MaxRetries = 2, Timeout = TimeSpan.FromSeconds(90) };
+        // The address is pinned. The SDK would otherwise honour an ANTHROPIC_BASE_URL environment
+        // variable, which could quietly send the user's text and key somewhere else.
+        _client = new AnthropicClient
+        {
+            ApiKey = apiKey,
+            BaseUrl = "https://api.anthropic.com",
+            MaxRetries = 2,
+            Timeout = TimeSpan.FromSeconds(90),
+        };
         _model = model;
     }
 

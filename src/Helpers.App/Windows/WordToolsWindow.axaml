@@ -1,0 +1,124 @@
+<windows:ShellWindow xmlns="https://github.com/avaloniaui"
+                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                     xmlns:windows="using:Helpers.App.Windows"
+                     xmlns:words="using:Helpers.Core.Words"
+                     x:Class="Helpers.App.Windows.WordToolsWindow"
+                     Title="Word"
+                     Width="480" Height="620" MinWidth="400" MinHeight="420"
+                     WindowStartupLocation="Manual"
+                     Padding="22,2,22,14">
+
+  <windows:ShellWindow.Styles>
+    <Style Selector="TextBlock.word">
+      <Setter Property="FontFamily" Value="{DynamicResource ReadingFontFamily}" />
+      <Setter Property="FontSize" Value="32" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+      <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+    <Style Selector="TextBlock.syllables">
+      <Setter Property="FontFamily" Value="{DynamicResource ReadingFontFamily}" />
+      <Setter Property="FontSize" Value="22" />
+      <Setter Property="Foreground" Value="{DynamicResource AccentTextBrush}" />
+      <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+    <Style Selector="TextBlock.say">
+      <Setter Property="FontFamily" Value="{DynamicResource ReadingFontFamily}" />
+      <Setter Property="FontSize" Value="18" />
+      <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+      <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+    <Style Selector="TextBlock.ipa">
+      <Setter Property="FontSize" Value="15" />
+      <Setter Property="Foreground" Value="{DynamicResource MutedBrush}" />
+    </Style>
+    <Style Selector="TextBlock.label">
+      <Setter Property="FontSize" Value="13" />
+      <Setter Property="Foreground" Value="{DynamicResource MutedBrush}" />
+      <Setter Property="Margin" Value="0,14,0,4" />
+    </Style>
+    <Style Selector="TextBlock.hint">
+      <Setter Property="FontSize" Value="13" />
+      <Setter Property="Foreground" Value="{DynamicResource MutedBrush}" />
+      <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+    <Style Selector="TextBlock.part">
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Foreground" Value="{DynamicResource AccentTextBrush}" />
+    </Style>
+    <Style Selector="TextBlock.meaning">
+      <Setter Property="FontFamily" Value="{DynamicResource ReadingFontFamily}" />
+      <Setter Property="FontSize" Value="16" />
+      <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+      <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+    <Style Selector="TextBlock.example">
+      <Setter Property="FontSize" Value="14" />
+      <Setter Property="FontStyle" Value="Italic" />
+      <Setter Property="Foreground" Value="{DynamicResource MutedBrush}" />
+      <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+    <Style Selector="Button.small">
+      <Setter Property="MinHeight" Value="30" />
+      <Setter Property="Padding" Value="12,0" />
+      <Setter Property="FontSize" Value="14" />
+    </Style>
+    <Style Selector="Button.chip">
+      <Setter Property="MinHeight" Value="30" />
+      <Setter Property="Padding" Value="12,0" />
+      <Setter Property="FontSize" Value="14" />
+      <Setter Property="CornerRadius" Value="999" />
+      <Setter Property="Margin" Value="0,0,6,6" />
+    </Style>
+  </windows:ShellWindow.Styles>
+
+  <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+    <StackPanel>
+      <TextBlock x:Name="WordText" Classes="word" />
+      <TextBlock x:Name="SyllableText" Classes="syllables" Margin="0,2,0,0" />
+
+      <TextBlock Classes="label" Text="HOW TO SAY IT" />
+      <TextBlock x:Name="RespellingText" Classes="say" />
+      <TextBlock x:Name="IpaText" Classes="ipa" Margin="0,2,0,0" />
+      <TextBlock x:Name="NoSoundText" Classes="hint" Text="This word isn't in the voice's pronunciation list. Hear it still works: the voice will sound it out." IsVisible="False" />
+      <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,10,0,0">
+        <Button Classes="small" Content="Hear it" Click="OnHear" />
+        <Button Classes="small" Content="Slowly" Click="OnHearSlowly" />
+        <Button Classes="small" Content="Google" Click="OnGoogle" ToolTip.Tip="Search Google for the definition, in your browser" />
+        <Button Classes="small" Content="Wiktionary" Click="OnWiktionary" ToolTip.Tip="Open the Wiktionary page, in your browser" />
+      </StackPanel>
+
+      <TextBlock Classes="label" Text="MEANING" />
+      <StackPanel x:Name="DownloadPanel" IsVisible="False" Spacing="8">
+        <TextBlock Classes="hint" Text="Meanings and synonyms come from Open English WordNet, a free dictionary. It downloads once, about 10 MB, and then works offline." />
+        <Grid ColumnDefinitions="Auto,*">
+          <Button Classes="small" x:Name="DownloadButton" Content="Download the dictionary" Click="OnDownload" />
+          <ProgressBar Grid.Column="1" x:Name="DownloadProgress" Minimum="0" Maximum="100" Height="6" Margin="12,0,0,0" VerticalAlignment="Center" IsVisible="False" />
+        </Grid>
+        <TextBlock x:Name="DownloadStatus" Classes="hint" />
+      </StackPanel>
+      <TextBlock x:Name="NoMeaningText" Classes="hint" Text="No entry for this word in the dictionary. Google and Wiktionary may have it." IsVisible="False" />
+      <ItemsControl x:Name="MeaningsList">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate>
+            <StackPanel Spacing="10" />
+          </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="words:WordMeaning">
+            <StackPanel Spacing="2">
+              <TextBlock Classes="part" Text="{Binding PartText}" />
+              <TextBlock Classes="meaning" Text="{Binding Definition}" />
+              <TextBlock Classes="example" Text="{Binding ExampleText}" IsVisible="{Binding ExampleText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+            </StackPanel>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+
+      <TextBlock x:Name="SynonymLabel" Classes="label" Text="OTHER WORDS FOR IT" IsVisible="False" />
+      <WrapPanel x:Name="SynonymChips" />
+      <TextBlock x:Name="SynonymHint" Classes="hint" Text="Press one to use it in place of the word in Compose." IsVisible="False" />
+    </StackPanel>
+  </ScrollViewer>
+</windows:ShellWindow>
