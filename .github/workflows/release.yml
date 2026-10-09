@@ -34,6 +34,10 @@ jobs:
           -p:Version=${{ steps.version.outputs.version }} -p:PublishSingleFile=false
           --output out/publish/win-x64
 
+      - name: Drop native debug symbols
+        shell: pwsh
+        run: Get-ChildItem out/publish/win-x64 -Filter *.pdb | Remove-Item
+
       - name: Zip
         shell: pwsh
         run: Compress-Archive -Path out/publish/win-x64/* -DestinationPath "out/Helpers-${{ steps.version.outputs.version }}-win-x64.zip"

@@ -123,3 +123,17 @@ One entry per milestone: what was built, what was measured, what didn't go to pl
 **Built, with Dave away and testing tomorrow:** the Settings window is now tabbed: Voice, Reading, Read button, Look, Player, Start-up. New in it: the pronunciation dictionary editor (add a word and how to say it, match case optional, remove), readable-text options for the reading view and the sentence bar (Lexend, Atkinson Hyperlegible or the Windows font; size 14 to 32; line spacing; a cream or grey tint), and the Markdown reading options from the brief (code blocks, file paths, tables, web and email addresses, numbers). Start with Windows uses the per-user Run key and shows in Settings, the tray and the quick menu. Atkinson Hyperlegible is bundled with its licence, as the brief said.
 
 **Not to plan:** nothing yet; Dave hasn't seen it. The readable-text settings don't reach Compose because Compose doesn't exist yet; the resources are in place for it.
+
+## Milestone 7: packaging (9 October 2026, small hours)
+
+**Built:** version 0.1.0 in `Directory.Build.props`; a self-contained win-x64 publish (`dotnet publish`, not single-file, so the native libraries sit beside the exe as the brief suggested); an Inno Setup script for a per-user install under `%LOCALAPPDATA%\Programs\Helpers` with no admin rights, a Start menu entry, an optional start-with-Windows task, and an uninstaller that leaves the voice model and settings alone; a Release workflow that runs on a `v*` tag, tests, publishes, zips, builds the installer on GitHub's Windows runner (which ships Inno Setup) and attaches both files to a GitHub release; a first-run screen; install notes in the README.
+
+**Measured:** the publish is 162 MB on disk and 65 MB zipped. Run from the publish folder, the app starts, holds its hotkey, and sits at about 560 MB working set with the voice loaded.
+
+**Not to plan:**
+
+- The first publish was 262 MB because SkiaSharp and HarfBuzz ship 100 MB of native debug symbols. They are deleted after publish in CI and excluded from the installer.
+- About 25 MB of the remaining size is Windows Forms, pulled in by FlaUI. Replacing FlaUI with direct UI Automation COM calls would remove it. Not worth it for v0.1.
+- The installer is not built locally because Inno Setup isn't installed on this PC and winget hangs here. CI builds it. A local `iscc` run is one command if it's ever installed.
+- Nothing is code-signed. SmartScreen will warn on first run; the README says so.
+- The v0.1.0 tag is Dave's call after testing milestones 5 and 6. Pushing it is what makes the release.
