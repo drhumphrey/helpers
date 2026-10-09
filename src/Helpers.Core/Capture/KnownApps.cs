@@ -9,19 +9,32 @@ public static class KnownApps
         "mintty", "alacritty", "wezterm-gui", "OpenConsole", "Terminal",
     };
 
+    private static readonly HashSet<string> ScreenCaptureTools = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "ScreenClippingHost", "SnippingTool", "ScreenSketch", "SnipSketch",
+    };
+
     /// <summary>
     /// Terminals and editors with built-in terminals. In these Ctrl+C means
     /// "interrupt" and Ctrl+V may be eaten by a shell, so the Insert-key
     /// shortcuts are used instead.
     /// </summary>
-    public static bool IsTerminal(string? processName)
+    public static bool IsTerminal(string? processName) => Terminals.Contains(Trim(processName));
+
+    /// <summary>
+    /// Windows' own screen-capture overlays. Dragging out a snip looks exactly
+    /// like selecting text, so the Read button must never appear there,
+    /// whatever the user's own exclusion list says.
+    /// </summary>
+    public static bool IsScreenCaptureTool(string? processName) => ScreenCaptureTools.Contains(Trim(processName));
+
+    private static string Trim(string? processName)
     {
         if (string.IsNullOrWhiteSpace(processName))
         {
-            return false;
+            return string.Empty;
         }
 
-        var name = processName.EndsWith(".exe", StringComparison.OrdinalIgnoreCase) ? processName[..^4] : processName;
-        return Terminals.Contains(name);
+        return processName.EndsWith(".exe", StringComparison.OrdinalIgnoreCase) ? processName[..^4] : processName;
     }
 }

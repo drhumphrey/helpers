@@ -111,8 +111,10 @@ public sealed class ReadButtonService : IDisposable
             return;
         }
 
+        // Dragging out a snip looks just like selecting text; never offer to read a screenshot.
         var process = WindowAtPoint.ProcessName(releasedWindow);
-        if (_settings.Current.ExcludedApps.Any(app => string.Equals(app, process, StringComparison.OrdinalIgnoreCase)))
+        if (KnownApps.IsScreenCaptureTool(process)
+            || _settings.Current.ExcludedApps.Any(app => string.Equals(app, process, StringComparison.OrdinalIgnoreCase)))
         {
             return;
         }

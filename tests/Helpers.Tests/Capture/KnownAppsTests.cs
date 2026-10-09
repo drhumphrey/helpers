@@ -23,4 +23,22 @@ public class KnownAppsTests
     {
         Assert.False(KnownApps.IsTerminal(process));
     }
+
+    [Theory]
+    [InlineData("ScreenClippingHost")]
+    [InlineData("SnippingTool.exe")]
+    [InlineData("screensketch")]
+    public void KnowsWindowsScreenCaptureTools(string process)
+    {
+        Assert.True(KnownApps.IsScreenCaptureTool(process));
+    }
+
+    [Theory]
+    [InlineData("chrome")]
+    [InlineData("")]
+    [InlineData(null)]
+    public void OtherAppsAreNotScreenCaptureTools(string? process)
+    {
+        Assert.False(KnownApps.IsScreenCaptureTool(process));
+    }
 }
