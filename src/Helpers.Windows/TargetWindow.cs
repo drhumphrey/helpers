@@ -119,6 +119,45 @@ public sealed class TargetWindow : ITargetWindow
         }
     }
 
+    /// <summary>
+    /// Pastes whatever is on the clipboard already, over the selection in this
+    /// window. The pill's Paste: the clipboard is the user's, so it is left alone.
+    /// </summary>
+    public async Task<PasteOutcome> PasteClipboardAsync(CancellationToken cancellationToken)
+    {
+        if (!IsAlive)
+        {
+            return PasteOutcome.WindowGone;
+        }
+
+        if (!ProcessElevation.SelfIsElevated() && ProcessElevation.IsElevated(ProcessId))
+        {
+            return PasteOutcome.Elevated;
+        }
+
+        var patience = Stopwatch.StartNew();
+        while (KeyboardInput.ModifiersHeld() && patience.ElapsedMilliseconds < 1500)
+        {
+            await Task.Delay(20, cancellationToken).ConfigureAwait(false);
+        }
+
+        if (!await BringToFrontAsync(cancellationToken).ConfigureAwait(false))
+        {
+            return PasteOutcome.CouldNotFocus;
+        }
+
+        if (IsTerminal)
+        {
+            KeyboardInput.SendShiftInsert();
+        }
+        else
+        {
+            KeyboardInput.SendCtrlV();
+        }
+
+        return PasteOutcome.Pasted;
+    }
+
     private async Task<bool> BringToFrontAsync(CancellationToken cancellationToken)
     {
         if (NativeMethods.IsIconic(Handle))

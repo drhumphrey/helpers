@@ -77,7 +77,7 @@ public partial class App : Application
             _input = new InputMonitor(_hotkeys.Window);
             if (_input.Install())
             {
-                _readButton = new ReadButtonService(_input, _settings, _reading, _selection, _toasts);
+                _readButton = new ReadButtonService(_input, _settings, _reading, _selection, _toasts, _compose);
                 _input.MouseDown += (_, _, _, ours) =>
                 {
                     if (!ours)
@@ -187,6 +187,10 @@ public partial class App : Application
             else if (args[i] == "--first-run" && _engine is not null)
             {
                 ShowFirstRun(_engine);
+            }
+            else if (args[i] == "--pill")
+            {
+                _readButton?.ShowForPreview();
             }
         }
     }

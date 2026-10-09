@@ -61,6 +61,40 @@ public sealed class ComposeController : IDisposable
 
         var window = EnsureWindow();
         window.SetTarget(_target);
+        window.SetEditingMode(false);
+
+        if (!window.IsVisible)
+        {
+            Place(window);
+            window.Show();
+        }
+
+        if (window.WindowState == WindowState.Minimized)
+        {
+            window.WindowState = WindowState.Normal;
+        }
+
+        window.Activate();
+        window.FocusEditor();
+    }
+
+    /// <summary>
+    /// Edit on the pill: opens Compose on the selected text, sending back to
+    /// the window it came from. The main button then reads "Put it back".
+    /// Any unsent draft is replaced through the editor's undo, so Ctrl+Z
+    /// brings it back.
+    /// </summary>
+    public void OpenWith(string text, TargetWindow? source)
+    {
+        if (source is not null)
+        {
+            _target = source;
+        }
+
+        var window = EnsureWindow();
+        window.SetTarget(_target);
+        window.LoadForEditing(text);
+        window.SetEditingMode(true);
 
         if (!window.IsVisible)
         {
@@ -210,10 +244,12 @@ public sealed class ComposeController : IDisposable
             switch (outcome)
             {
                 case PasteOutcome.Pasted:
+                    var editing = _window.IsEditing;
                     _window.Text = string.Empty;
+                    _window.SetEditingMode(false);
                     _settings.Update(s => s.ComposeDraft = null);
                     _window.HideKeepingDraft();
-                    _toasts.Success($"Sent to {name}. Press Enter there when you're ready.");
+                    _toasts.Success(editing ? $"Put back in {name}." : $"Sent to {name}. Press Enter there when you're ready.");
                     break;
                 case PasteOutcome.WindowGone:
                     _target = null;

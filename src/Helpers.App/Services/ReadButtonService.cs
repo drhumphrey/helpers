@@ -21,20 +21,23 @@ public sealed class ReadButtonService : IDisposable
     private readonly ReadingController _reading;
     private readonly ISelectionSource _selection;
     private readonly ToastService _toasts;
+    private readonly ComposeController _compose;
     private readonly DispatcherTimer _showTimer;
     private PillWindow? _pill;
     private nint _pressedWindow;
+    private nint _pendingWindow;
     private GesturePoint _pressedPoint;
     private GesturePoint _pendingPoint;
     private DateTime? _pausedUntil;
 
-    public ReadButtonService(InputMonitor input, SettingsStore settings, ReadingController reading, ISelectionSource selection, ToastService toasts)
+    public ReadButtonService(InputMonitor input, SettingsStore settings, ReadingController reading, ISelectionSource selection, ToastService toasts, ComposeController compose)
     {
         _input = input;
         _settings = settings;
         _reading = reading;
         _selection = selection;
         _toasts = toasts;
+        _compose = compose;
 
         _showTimer = new DispatcherTimer(TimeSpan.FromMilliseconds(settings.Current.ReadButtonDelayMs), DispatcherPriority.Background, (_, _) => ShowPill());
         _detector.SelectionMade += OnSelectionMade;
@@ -120,6 +123,7 @@ public sealed class ReadButtonService : IDisposable
         }
 
         _pendingPoint = point;
+        _pendingWindow = releasedWindow;
         _showTimer.Interval = TimeSpan.FromMilliseconds(Math.Max(0, _settings.Current.ReadButtonDelayMs));
         _showTimer.Stop();
         _showTimer.Start();
@@ -129,13 +133,25 @@ public sealed class ReadButtonService : IDisposable
     {
         _showTimer.Stop();
         _pill ??= CreatePill();
-        _pill.ShowAt(new PixelPoint(_pendingPoint.X, _pendingPoint.Y), TimeSpan.FromSeconds(3));
+        var canPaste = !string.IsNullOrEmpty(ClipboardText.TryGet());
+        _pill.ShowAt(new PixelPoint(_pendingPoint.X, _pendingPoint.Y), TimeSpan.FromSeconds(3), canPaste);
+    }
+
+    /// <summary>Shows the pill at the mouse as if a selection had just been made. A dev switch, for looking at it.</summary>
+    public void ShowForPreview()
+    {
+        var (x, y) = CursorPosition.Get();
+        _pendingPoint = new GesturePoint(x, y);
+        _pendingWindow = WindowAtPoint.TopLevelHandle(x, y);
+        ShowPill();
     }
 
     private PillWindow CreatePill()
     {
         var pill = new PillWindow();
         pill.ReadRequested += () => _ = ReadAsync();
+        pill.EditRequested += () => _ = EditAsync();
+        pill.PasteRequested += () => _ = PasteAsync();
         pill.Closed += (_, _) => _pill = null;
         return pill;
     }
@@ -149,6 +165,76 @@ public sealed class ReadButtonService : IDisposable
         catch (Exception ex)
         {
             _toasts.Error($"Couldn't read that: {ex.Message}");
+        }
+    }
+
+    /// <summary>Edit: grab the selection the same way Read does, then open it in Compose, sending back to its window.</summary>
+    private async Task EditAsync()
+    {
+        var source = TargetWindow.From(_pendingWindow);
+        SelectionResult result;
+        try
+        {
+            result = await _selection.CaptureAsync(CancellationToken.None);
+        }
+        catch (Exception ex)
+        {
+            _toasts.Error($"Couldn't grab the text: {ex.Message}");
+            return;
+        }
+
+        switch (result.Outcome)
+        {
+            case SelectionOutcome.Text:
+                _compose.OpenWith(result.Text!, source);
+                break;
+            case SelectionOutcome.Nothing:
+                _toasts.Info("Nothing selected to edit");
+                break;
+            case SelectionOutcome.Elevated:
+                _toasts.Info("That window runs as administrator, so its text can't be read");
+                break;
+            case SelectionOutcome.Password:
+                _toasts.Info("That's a password field, so nothing was taken");
+                break;
+            default:
+                _toasts.Error($"Couldn't grab the text: {result.Message}");
+                break;
+        }
+    }
+
+    /// <summary>Paste: the clipboard over the selection, in the window the selection was made in.</summary>
+    private async Task PasteAsync()
+    {
+        var target = TargetWindow.From(_pendingWindow);
+        if (target is null)
+        {
+            _toasts.Info("That window has gone");
+            return;
+        }
+
+        try
+        {
+            var outcome = await target.PasteClipboardAsync(CancellationToken.None);
+            switch (outcome)
+            {
+                case PasteOutcome.Pasted:
+                    _toasts.Success($"Pasted into {target.AppName}");
+                    break;
+                case PasteOutcome.Elevated:
+                    _toasts.Error($"{target.AppName} runs as administrator, so keys can't be sent to it.");
+                    break;
+                case PasteOutcome.CouldNotFocus:
+                    _toasts.Error($"Couldn't bring {target.AppName} to the front, so nothing was pasted.");
+                    break;
+                default:
+                    _toasts.Info("That window has gone");
+                    break;
+            }
+        }
+        catch (Exception ex)
+        {
+            _toasts.Error($"Couldn't paste: {ex.Message}");
         }
     }
 }

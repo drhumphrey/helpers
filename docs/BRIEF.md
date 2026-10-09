@@ -41,6 +41,8 @@ People who are strong systems thinkers and creatives but are not natural typers,
 | Markdown | Markdig (BSD-2) in Core to parse Markdown into spoken text. No regex-only Markdown handling. |
 | Spelling | On Windows, the Windows spell-check engine through its `ISpellChecker` COM API, with the underlines drawn by our own Avalonia adorner. Language en-GB. User dictionary supported. Free, offline, nothing to ship. On Mac, `NSSpellChecker` behind the same interface. |
 | Grammar and rewriting | A language model behind one `IAssistant` interface. Local provider first, cloud provider second. See AI helpers. |
+| How AI help is shown | As notes pinned to spots in the user's own text: a question or a minimal fix each, accepted one at a time. Never a silent rewrite, because rewrites lose the writer's tone and can quietly drop a point. Tidy is spelling and grammar only, with every change marked. Decided by Dave on 9 October 2026. |
+| The editing loop | Select text anywhere, press Edit on the pill, work on it in Compose, press Put it back to paste it over the original. Decided by Dave on 9 October 2026. |
 | Local model | LLamaSharp (MIT) with the CPU backend. Default model: Qwen3-4B instruct, Q4_K_M GGUF (Apache-2.0), run with thinking off. Fallback for low-memory PCs: Qwen3-1.7B. Confirm the exact model at milestone 9 by testing on Dave's laptop. |
 | Cloud model | Optional, bring-your-own-key. First provider is Claude through the official Anthropic C# SDK (NuGet `Anthropic`). Default model ID `claude-haiku-4-5` because it is the cheapest and these are simple tasks. The model ID is a setting; `claude-sonnet-5-5` gives better rewrites at higher cost. |
 | Dictation | Use the operating system's own voice typing (Win+H on Windows, the dictation key on Mac). It works in the Compose window already. Nothing to build in v1. |
@@ -56,7 +58,7 @@ These are decided below so work can start. Overrule any of them.
 
 - **Product name.** "Helpers" is the working title and the solution name. The tray app needs a friendlier name before v0.1 ships.
 - **Publish v0.1 early.** The plan releases the reading half on its own as v0.1 before Compose exists. I think that is right: it's useful on day one.
-- **Four AI actions.** Tidy, Make a request, Summarise and Explain simply. All are prompt templates behind the same plumbing, so each extra one costs little. Cut any you don't want.
+- **Five AI actions.** Check my thinking, Tidy, Make a request, Summarise and Explain simply. All are prompt templates behind the same plumbing, so each extra one costs little. Cut any you don't want. Dave's steer on 9 October 2026: the help that matters most to a dyslexic writer is not spelling and grammar, which inline checkers already do, but a reader saying "I don't follow this bit" or "something is missing here", without rewriting.
 - **Dropbox.** Resolved 8 October 2026: the checkout stays in Dropbox, but `.git` and every `bin` and `obj` folder are marked as Dropbox-ignored, so Dropbox never touches git internals or build output. See Gotchas for the command to run when a project is added.
 
 ## User experience
@@ -67,12 +69,12 @@ There is no main window. The app lives in the tray and shows a small surface onl
 
 | Surface | When it appears | Takes focus? | Goes away |
 |---|---|---|---|
-| **Read pill** | After a mouse selection | Never | After 3 s, or on any click, key or scroll elsewhere |
+| **Read pill** | After a mouse selection: Read, Edit, and Paste when the clipboard holds text | Never | After 3 s, or on any click, key or scroll elsewhere |
 | **Player** | When reading starts | Never | A few seconds after reading ends (setting), or Stop |
 | **Reading view** | Player expanded | Never | Collapse, or with the player |
 | **Toast** | Short confirmations and errors: "Copied", "Sent to Visual Studio Code", "Couldn't grab the text from this app", "Loading voice…", "Downloading model, 43%" | Never | 3 s for confirmations. Errors stay until clicked. Progress stays until done. |
 | **AI result card** | After Summarise or Explain simply from the pill or player | Never | Dismiss, or "Use this" |
-| **Compose** | From the tray, hotkey or pill | Yes, it has a text box | Close, or Send |
+| **Compose** | From the tray, hotkey or pill | Yes, it has a text box | Close, Send to chat, or Put it back |
 | **Settings** | From the tray | Yes | Close |
 | **First run** | First launch only: pick a voice, hear it, done | Yes | Done |
 
@@ -100,7 +102,7 @@ The aim is a modern, attractive app that feels native on Windows 11 and on Mac, 
 
 ### Read button (the main trigger)
 
-- **When it appears:** after a mouse text selection (drag-select, double-click or triple-click). It's a small pill near the cursor showing "Read" with a speaker icon. When AI helpers are enabled it also shows "Summarise".
+- **When it appears:** after a mouse text selection (drag-select, double-click or triple-click). It's a small pill near the cursor with three buttons at most, because it is clicked mid-selection: **Read** with a speaker icon; **Edit**, which opens Compose with the selected text and remembers the window it came from; and **Paste**, shown only when the clipboard holds text, which pastes over the selection. Summarise lives in the player and in Compose, not on the pill. (Changed 9 October 2026 from a single Read button, for the editing loop.)
 - **Focus:** it must never steal focus. Use a non-activating window.
 - **When it must not appear:**
   - window drags, file drags and scrollbar drags
@@ -132,11 +134,14 @@ A plain window for writing to the AI. Opened from the tray, the hotkey, or the p
 - **Editor.** A multi-line text box with spelling as you type (red underline, right-click suggestions, "Add to dictionary"). Readable-text settings apply. The operating system's voice typing works here with nothing extra.
 - **Buttons.**
   - **Read back.** Reads the draft with the same voice and player.
-  - **Tidy.** Fixes spelling, grammar and order. Keeps the meaning. Needs an AI helper (see below). Greyed out with a hint if no model is set up.
+  - **Check my thinking.** The reader's notes: where the logic jumps, what is missing, which word is unclear. Questions and minimal fixes pinned to the text, never a rewrite. Needs an AI helper (see below). Greyed out with a hint if no model is set up.
+  - **Tidy.** Spelling and grammar only, every change marked. Keeps the words and the tone. Needs an AI helper.
   - **Make a request.** Rewrites the draft as a clear instruction to a coding assistant. Needs an AI helper.
   - **Send to chat.** Pastes the text into the target window. Never presses Enter. The user presses Enter themselves.
+  - **Put it back.** The same button when Compose was opened by Edit on the pill: pastes the text over the original selection in the window it came from.
   - **Copy.** Puts the text on the clipboard and says so.
-- **AI results** never replace the draft silently. They appear beside it with the changes marked, and buttons for "Use this", "Keep mine" and "Read it". Picking "Use this" keeps the old draft in an undo stack.
+- **AI results** never replace the draft silently. Notes appear beside the draft, each pinned to a spot in the text; clicking a note highlights its spot. A note with a fix has "Apply"; a note that is a question is answered by editing. Tidy's changes are marked in place with "Apply", "Apply all" and "Keep mine". Every applied change goes through the editor's own undo, so Ctrl+Z reverses it.
+- **The editing loop.** Select your own half-written text anywhere, press Edit on the pill, fix it in Compose with the spelling, the notes and Read back, then Put it back. Decided 9 October 2026.
 - **Drafts** auto-save to settings every few seconds and come back when Compose reopens.
 
 ### Readable text
@@ -283,15 +288,20 @@ Threading:
 
 The principle: keep the voice local because it's free, private and fast. Use a language model only for what rules can't do: grammar, reordering, summarising, rephrasing.
 
-**Interface.** `IAssistant` in Core has one method: run a named action on some text and stream the result. Core holds the four prompt templates, editable in Settings and resettable to defaults.
+**Interface.** `IAssistant` in Core has one method: run a named action on some text and stream the result. Core holds the five prompt templates, editable in Settings and resettable to defaults.
 
-**The four actions.**
+**The principle for help with writing** (Dave, 9 October 2026): spelling and grammar fixes do not help with the thing that actually trips a dyslexic or otherwise neurodivergent writer, which is the order of thought and the steps that got skipped because they were obvious to the writer. A full rewrite "fixes" that by replacing the writer's voice, which is worse. So the help is a reader's notes: "I don't quite follow this bit", "something is missing between these two sentences", "which 'it' is this?", each pinned to the spot, each a question or the smallest possible fix, accepted one at a time.
+
+**The five actions.**
 
 | Action | Prompt intent | Where it appears |
 |---|---|---|
-| Tidy | Fix spelling, grammar and sentence order. Keep every fact and the user's voice. Don't add anything. Output only the text. | Compose |
+| Check my thinking | Read as a careful colleague. Return notes, each pinned to a quoted span: where the logic jumps, where context the reader needs is missing, where a word or reference is unclear, where a word is missing. Each note is one short question or one minimal fix. Never rewrite. Never add facts. Output as a list of {span, kind, note, fix?}. | Compose |
+| Tidy | Fix spelling and grammar only. Keep every word that isn't wrong, every fact, and the user's voice. Don't reorder, don't add, don't remove. Output as a list of {span, fix}. | Compose |
 | Make a request | Rewrite notes as a clear instruction to a coding assistant. Keep every fact. Don't invent requirements. Use numbered steps if there are several asks. Mark anything unclear with [check]. | Compose |
-| Summarise | Give the main points in up to five short bullets, then one line saying what the reader needs to do, if anything. | Pill, player, Compose |
+| Summarise | Give the main points in up to five short bullets, then one line saying what the reader needs to do, if anything. | Player, Compose |
+
+**Test material.** A handful of Dave's own messages from this project's chat, with his permission given on 9 October 2026, as fixtures for the prompt work. They are good examples: a missing word here, a step skipped there, exactly what a spell checker cannot see and a reader can.
 | Explain simply | Rewrite for a non-technical reader. Short sentences. No jargon. Keep it accurate. | Player, Compose |
 
 **Local provider (LLamaSharp).**
@@ -357,8 +367,8 @@ Demo each one before starting the next.
 5. **Read button.** Mouse hook, show/hide rules, non-activating window, multiple monitors and DPI.
 6. **Settings.** Pronunciation dictionary, readable text, Start with Windows, excluded apps, hotkeys.
 7. **Packaging.** Installer, model download, CI release. **Ship v0.1: reading only.**
-8. **Compose.** Spell check, read back, send to chat, drafts. No AI yet.
-9. **AI helpers, local.** `IAssistant`, the LLamaSharp provider, model download, the four actions, the before/after view. Confirm the default model on Dave's laptop.
+8. **Compose.** Spell check, read back, send to chat, drafts. No AI yet. Added 9 October 2026: the editing loop, Edit and Paste on the pill and Put it back in Compose.
+9. **AI helpers, local.** `IAssistant`, the LLamaSharp provider, model download, the five actions, the notes view beside the draft with Apply per note. Check my thinking is the one to get right; Tidy is the easy one. Confirm the default model on Dave's laptop.
 10. **AI helpers, cloud.** The Anthropic provider, key storage, transparency and cost tracking. **Ship v0.2.**
 11. **macOS.** See "macOS version" below. Only after v0.2 and only if Dave still wants it.
 

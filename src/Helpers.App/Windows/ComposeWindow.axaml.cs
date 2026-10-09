@@ -118,6 +118,38 @@ public partial class ComposeWindow : ShellWindow
     /// <summary>The title row's close mark hides, like the window's own close, so the draft and checker stay warm.</summary>
     protected override void RequestClose() => HideKeepingDraft();
 
+    /// <summary>True when the text came from Edit on the pill and the main button says "Put it back".</summary>
+    public bool IsEditing { get; private set; }
+
+    /// <summary>Switches the main button between sending to a chat and putting edited text back.</summary>
+    public void SetEditingMode(bool editing)
+    {
+        IsEditing = editing;
+        SendButton.Content = editing ? "Put it back" : "Send to chat";
+        ToolTip.SetTip(SendButton, editing
+            ? "Pastes the text over the selection in the window it came from. Ctrl+Enter does the same."
+            : "Pastes the draft into the window above. It never presses Enter; you do. Ctrl+Enter does the same.");
+    }
+
+    /// <summary>
+    /// Puts selected text from another app into the editor through the box's
+    /// own editing path, so an unsent draft is one Ctrl+Z away.
+    /// </summary>
+    public void LoadForEditing(string text)
+    {
+        if (Text.Length == 0)
+        {
+            Text = text;
+            return;
+        }
+
+        Editor.SelectAll();
+        Editor.SelectedText = text;
+        Editor.CaretIndex = text.Length;
+        _typingCaret = -1;
+        RestartCheck();
+    }
+
     /// <summary>Shows which window Send will paste into.</summary>
     public void SetTarget(ITargetWindow? target)
     {
