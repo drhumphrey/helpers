@@ -65,8 +65,8 @@ Version 0.1.0 is released on GitHub (10 October 2026) and works on the PC it was
 
 ## Next, in order
 
-1. **Test on the second PC.** Clone and run from source, or release and install.
-2. **Release v0.1.0.** Push the tag; check the installer, the zip and `version.json` appear; install from the release; try the update check.
+1. **Install v0.1.0 on the second PC** from the [Releases page](https://github.com/drhumphrey/helpers/releases), and set up the development copy there ([DEVELOPING.md](DEVELOPING.md)).
+2. **Try the update check** once a newer version is released.
 3. **On GitHub:** turn on private vulnerability reporting (Settings, Code security), and add topics.
 4. **Dependabot:** five pull requests are open. The test-tool ones can merge once green. Run the app on the five-library group before merging it.
 5. **Try everything under "Not tried yet"**, fix what turns up, and log it.
