@@ -14,6 +14,18 @@ public static class KnownApps
         "ScreenClippingHost", "SnippingTool", "ScreenSketch", "SnipSketch",
     };
 
+    private static readonly HashSet<string> SystemShell = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "LockApp", "LogonUI", "ShellExperienceHost", "StartMenuExperienceHost", "SearchHost", "SearchApp", "SearchUI",
+        "TextInputHost", "ShellHost", "ApplicationFrameHost", "SystemSettings",
+    };
+
+    /// <summary>
+    /// Parts of Windows itself: the lock screen, Start, search, the touch
+    /// keyboard. Never somewhere to send a draft, even when one is in front.
+    /// </summary>
+    public static bool IsSystemShell(string? processName) => SystemShell.Contains(Trim(processName));
+
     /// <summary>
     /// Terminals and editors with built-in terminals. In these Ctrl+C means
     /// "interrupt" and Ctrl+V may be eaten by a shell, so the Insert-key

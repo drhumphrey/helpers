@@ -977,7 +977,7 @@ public sealed class SettingsViewModel : ObservableObject
         {
             var model = LocalModels.ByName(_store.Current.Ai.LocalModel);
             var cpu = LlamaAssistant.CpuIsSupported ? string.Empty : " This PC's processor lacks AVX2, so the local model can't run here.";
-            return $"{model.Description} Downloaded once from Hugging Face to {_assistant.LocalModelsFolder}.{cpu}";
+            return $"{model.Description} Downloaded once from Hugging Face to {FriendlyPath(_assistant.LocalModelsFolder)}.{cpu}";
         }
     }
 
@@ -990,7 +990,23 @@ public sealed class SettingsViewModel : ObservableObject
     public bool IsDownloading
     {
         get => _isDownloading;
-        private set => Set(ref _isDownloading, value);
+        private set
+        {
+            if (Set(ref _isDownloading, value))
+            {
+                Raise(nameof(CanDownload));
+            }
+        }
+    }
+
+    /// <summary>Download shows only when there is something to download.</summary>
+    public bool CanDownload => !_isDownloading && !_assistant.LocalModelDownloaded;
+
+    /// <summary>"%LOCALAPPDATA%\Helpers\models\llm" rather than a path with the user's name in it.</summary>
+    private static string FriendlyPath(string path)
+    {
+        var local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        return path.StartsWith(local, StringComparison.OrdinalIgnoreCase) ? "%LOCALAPPDATA%" + path[local.Length..] : path;
     }
 
     public async Task DownloadLocalModelAsync()
@@ -1154,6 +1170,7 @@ public sealed class SettingsViewModel : ObservableObject
 
         Raise(nameof(CloudKeyWatermark));
         Raise(nameof(LocalModelHint));
+        Raise(nameof(CanDownload));
         Raise(nameof(SpendText));
     }
 

@@ -65,6 +65,11 @@ public sealed class TargetWindow : ITargetWindow
         }
 
         var process = ForegroundWindow.ProcessName(hwnd);
+        if (KnownApps.IsSystemShell(process))
+        {
+            return null;
+        }
+
         var appName = ForegroundWindow.FriendlyName(hwnd);
         return new TargetWindow(hwnd, appName.Length > 0 ? appName : process, ForegroundWindow.Title(hwnd), processId, KnownApps.IsTerminal(process));
     }

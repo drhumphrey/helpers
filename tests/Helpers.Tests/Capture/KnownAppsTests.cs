@@ -34,6 +34,25 @@ public class KnownAppsTests
     }
 
     [Theory]
+    [InlineData("LockApp")]
+    [InlineData("SearchHost.exe")]
+    [InlineData("startmenuexperiencehost")]
+    public void KnowsTheWindowsShellIsNeverATarget(string process)
+    {
+        Assert.True(KnownApps.IsSystemShell(process));
+    }
+
+    [Theory]
+    [InlineData("Code")]
+    [InlineData("chrome")]
+    [InlineData("explorer")]
+    [InlineData(null)]
+    public void OrdinaryAppsAreNotTheShell(string? process)
+    {
+        Assert.False(KnownApps.IsSystemShell(process));
+    }
+
+    [Theory]
     [InlineData("chrome")]
     [InlineData("")]
     [InlineData(null)]
