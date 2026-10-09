@@ -223,3 +223,11 @@ Dave is moving the project off the first PC, where it lived in a Dropbox folder,
 - The brief's Dropbox note is replaced with "keep the checkout out of synced folders".
 
 On the first PC the app was moved out of the project folder into `%LOCALAPPDATA%\Programs\Helpers`, where the installer would put it, and the Start with Windows entry now points there, so the project folder can be deleted without breaking the app.
+
+## v0.1.0 released (10 October 2026, 00:10)
+
+Tagged and released at Dave's word. Before the tag: the release workflow was given written release notes (`docs/releases/v0.1.0.md`) and a step to make sure Inno Setup was there. The Release run passed first time: installer 54 MB, zip 82 MB, `version.json` with both checksums, all on the Releases page, not marked pre-release so the update check's `releases/latest` address finds it.
+
+**Checked from this PC:** `version.json` fetched from the exact address the app uses parses and points at the files. The installer was downloaded, matched its published SHA-256, installed silently over the hand-copied app in `%LOCALAPPDATA%\Programs\Helpers`, registered with Windows as "Helpers 0.1.0", added the Start menu entry, kept the Start with Windows entry, and started with the voice loaded.
+
+**Not to plan:** an automated security review of the workflow commit flagged two things. Tag and version values were pasted into script text, so a crafted tag name could inject commands; only maintainers can push tags, but every value now reaches the scripts through environment variables, and the tag must look like a version. And the Inno Setup fallback would have fetched the newest Inno Setup from Chocolatey's public feed; GitHub's Windows images already include Inno Setup 6.7.1, so the fallback is gone and the release stops with a clear message if it's ever missing.

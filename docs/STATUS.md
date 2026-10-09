@@ -4,7 +4,7 @@ Where the project stands, what's been checked, what hasn't, and what comes next.
 
 ## In one line
 
-Version 0.1.0 is built and works on the PC it was made on: reading aloud, the Read button, Compose, the AI helpers on the PC and on Claude, the word tools, settings, the installer script and an opt-in update check. It hasn't been released yet, and some parts haven't been tried by a user.
+Version 0.1.0 is released on GitHub (10 October 2026) and works on the PC it was made on: reading aloud, the Read button, Compose, the AI helpers on the PC and on Claude, the word tools, settings, the installer and an opt-in update check. Some parts haven't been tried by a user yet.
 
 ## Built
 
@@ -15,7 +15,7 @@ Version 0.1.0 is built and works on the PC it was made on: reading aloud, the Re
 | 4 | Selection capture and Ctrl+Alt+Space | Done, checked in Teams, VS Code, Chrome and Outlook |
 | 5 | Read button and styled quick menu | Done |
 | 6 | Tabbed Settings, pronunciations, readable text, Start with Windows | Done |
-| 7 | Packaging: installer script, release workflow, welcome screen | Built; the installer has only ever been built by CI on a tag, and no tag has been pushed |
+| 7 | Packaging: installer, release workflow, welcome screen | Done. v0.1.0 released; the released installer was downloaded, checked against its published checksum, installed silently over an existing copy, registered with Windows, and started |
 | 8 | Compose: spelling, Read back, Send to chat, drafts, Edit and Put it back, Paste on the Read button | Done |
 | 9 | AI helpers: Check my thinking, Tidy, Make a request; on this PC (Qwen3 4B) and Claude | Done for those three actions |
 | 10 | Claude provider, key storage, cost shown, first-use confirmation | Built early, as part of 9 |
@@ -40,8 +40,8 @@ Version 0.1.0 is built and works on the PC it was made on: reading aloud, the Re
 - **Check my thinking** and **Tidy** on real writing, in daily use.
 - **Claude** in the cloud. No key has been entered yet.
 - **Word tools** in daily use.
-- **The installer**, the **release**, and the **update check** end to end. All need a tag.
-- **Start with Windows** from the installed location.
+- **The update check** end to end. It needs a newer release than the one installed to find anything.
+- **Start with Windows** after a real sign-in, from the installed location.
 - From the acceptance list: Word, PDFs in a browser and Acrobat, Notepad, Explorer renaming, Windows Terminal, the Claude desktop app.
 - A second PC.
 

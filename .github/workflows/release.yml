@@ -7,6 +7,12 @@ on:
 permissions:
   contents: write
 
+# Values from the event (the tag name, the repository) reach the scripts only through
+# environment variables, never pasted into the script text, so a tag name can't inject code.
+env:
+  REF_NAME: ${{ github.ref_name }}
+  REPOSITORY: ${{ github.repository }}
+
 jobs:
   release:
     runs-on: windows-latest
@@ -22,17 +28,21 @@ jobs:
         id: version
         shell: pwsh
         run: |
-          $v = "${{ github.ref_name }}".TrimStart("v")
+          $v = $env:REF_NAME.TrimStart("v")
+          if ($v -notmatch '^\d+\.\d+\.\d+([-.][0-9A-Za-z.-]+)?$') { throw "The tag '$env:REF_NAME' isn't a version such as v1.2.3." }
           "version=$v" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
 
       - name: Test
         run: dotnet test tests/Helpers.Tests --configuration Release
 
       - name: Publish
-        run: >
-          dotnet publish src/Helpers.App --configuration Release --runtime win-x64 --self-contained true
-          -p:Version=${{ steps.version.outputs.version }} -p:PublishSingleFile=false
-          --output out/publish/win-x64
+        shell: pwsh
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          dotnet publish src/Helpers.App --configuration Release --runtime win-x64 --self-contained true `
+            "-p:Version=$env:VERSION" -p:PublishSingleFile=false --output out/publish/win-x64
+          if ($LASTEXITCODE -ne 0) { throw "Publish failed with $LASTEXITCODE" }
 
       - name: Drop native debug symbols
         shell: pwsh
@@ -40,30 +50,33 @@ jobs:
 
       - name: Zip
         shell: pwsh
-        run: Compress-Archive -Path out/publish/win-x64/* -DestinationPath "out/Helpers-${{ steps.version.outputs.version }}-win-x64.zip"
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: Compress-Archive -Path out/publish/win-x64/* -DestinationPath "out/Helpers-$env:VERSION-win-x64.zip"
 
-      - name: Make sure Inno Setup is installed
-        shell: pwsh
-        run: |
-          if (-not (Test-Path "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe")) {
-            choco install innosetup --no-progress -y
-          }
-
+      # GitHub's Windows images include Inno Setup 6. Nothing is downloaded here: if it's ever
+      # missing, the release stops rather than fetching a build tool from a public feed.
       - name: Installer
         shell: pwsh
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
         run: |
-          & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" installer\Helpers.iss "/DVersion=${{ steps.version.outputs.version }}" "/DPublishDir=..\out\publish\win-x64"
+          $iscc = Join-Path ${env:ProgramFiles(x86)} "Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) { throw "Inno Setup 6 isn't on this runner image. Check actions/runner-images before changing this step." }
+          & $iscc installer\Helpers.iss "/DVersion=$env:VERSION" "/DPublishDir=..\out\publish\win-x64"
           if ($LASTEXITCODE -ne 0) { throw "Inno Setup failed with $LASTEXITCODE" }
 
       - name: Version file for the app's opt-in update check
         shell: pwsh
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
         run: |
-          $v = "${{ steps.version.outputs.version }}"
-          $base = "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}"
+          $v = $env:VERSION
+          $base = "https://github.com/$env:REPOSITORY/releases/download/$env:REF_NAME"
           $info = [ordered]@{
             version = $v
             notes = "See the release page for what changed."
-            page = "https://github.com/${{ github.repository }}/releases/tag/${{ github.ref_name }}"
+            page = "https://github.com/$env:REPOSITORY/releases/tag/$env:REF_NAME"
             installer = [ordered]@{ url = "$base/Helpers-$v-setup.exe"; sha256 = (Get-FileHash "out/Helpers-$v-setup.exe" -Algorithm SHA256).Hash.ToLower() }
             zip = [ordered]@{ url = "$base/Helpers-$v-win-x64.zip"; sha256 = (Get-FileHash "out/Helpers-$v-win-x64.zip" -Algorithm SHA256).Hash.ToLower() }
           }
@@ -74,13 +87,14 @@ jobs:
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
         run: |
-          $v = "${{ steps.version.outputs.version }}"
+          $v = $env:VERSION
           $files = @("out/Helpers-$v-setup.exe", "out/Helpers-$v-win-x64.zip", "out/version.json")
           $notes = "docs/releases/v$v.md"
           if (Test-Path $notes) {
-            gh release create "${{ github.ref_name }}" --title "Helpers $v" --notes-file $notes @files
+            gh release create $env:REF_NAME --title "Helpers $v" --notes-file $notes @files
           } else {
-            gh release create "${{ github.ref_name }}" --title "Helpers $v" --generate-notes @files
+            gh release create $env:REF_NAME --title "Helpers $v" --generate-notes @files
           }
           if ($LASTEXITCODE -ne 0) { throw "gh release create failed with $LASTEXITCODE" }
