@@ -1,0 +1,53 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Work out the version from the tag
+        id: version
+        shell: pwsh
+        run: |
+          $v = "${{ github.ref_name }}".TrimStart("v")
+          "version=$v" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+
+      - name: Test
+        run: dotnet test tests/Helpers.Tests --configuration Release
+
+      - name: Publish
+        run: >
+          dotnet publish src/Helpers.App --configuration Release --runtime win-x64 --self-contained true
+          -p:Version=${{ steps.version.outputs.version }} -p:PublishSingleFile=false
+          --output out/publish/win-x64
+
+      - name: Zip
+        shell: pwsh
+        run: Compress-Archive -Path out/publish/win-x64/* -DestinationPath "out/Helpers-${{ steps.version.outputs.version }}-win-x64.zip"
+
+      - name: Installer
+        shell: pwsh
+        run: |
+          & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" installer\Helpers.iss "/DVersion=${{ steps.version.outputs.version }}" "/DPublishDir=..\out\publish\win-x64"
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Helpers ${{ steps.version.outputs.version }}
+          generate_release_notes: true
+          files: |
+            out/Helpers-${{ steps.version.outputs.version }}-setup.exe
+            out/Helpers-${{ steps.version.outputs.version }}-win-x64.zip

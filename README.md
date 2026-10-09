@@ -1,4 +1,4 @@
-# helpers
+﻿# helpers
 
 Free, open-source tools for people with dyslexia who work with AI chat assistants. Windows first, with macOS planned.
 
@@ -38,9 +38,17 @@ The prototype is an AutoHotkey script that uses the voices already on Windows.
 | `tests/` | Unit tests |
 | `tools/` | Spikes and developer tools. `EngineSpike` is the milestone 1 voice check; `ReadingDump` prints what the reading pipeline would say for a file. |
 
+## Installing
+
+Grab the latest release from the Releases page: either the installer, `Helpers-x.y.z-setup.exe`, which installs for your user only and needs no admin rights, or the zip, which runs from any folder.
+
+The build is not code-signed yet, so Windows SmartScreen will warn on first run. Choose "More info" then "Run anyway". The first run downloads the voice, about 350 MB, once, into `%LOCALAPPDATA%\Helpers\models`. Settings live in `%APPDATA%\Helpers\settings.json`.
+
+Then: select text in any app and press **Ctrl+Alt+Space**, or click the small **Read** button that appears when you select with the mouse. The tray icon has the rest.
+
 ## Building
 
-Install the .NET 10 SDK, then from the repo root run `dotnet build Helpers.slnx` and `dotnet test Helpers.slnx`. Nothing useful runs yet: the app window is a placeholder until milestone 3.
+Install the .NET 10 SDK, then from the repo root run `dotnet build Helpers.slnx` and `dotnet test Helpers.slnx`. To run the app: `dotnet run --project src/Helpers.App`. To make a release: push a tag such as `v0.1.0` and the Release workflow publishes, zips, builds the installer with Inno Setup and attaches both to a GitHub release.
 
 To hear the voices, run `dotnet run --project tools/EngineSpike`. The first run downloads the Kokoro voice model (about 350 MB) into your local app data folder, then reads a paragraph aloud with two British voices and prints timing and memory figures. Add `--no-play` to skip playback, or `--runs bf_lily:1.2` to try other voices and speeds.
 

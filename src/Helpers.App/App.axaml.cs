@@ -100,10 +100,47 @@ public partial class App : Application
                 _reading?.Dispose();
             };
 
+            if (!settings.FirstRunDone)
+            {
+                ShowFirstRun(engine);
+            }
+
             _ = StartAsync(desktop.Args ?? []);
         }
 
         base.OnFrameworkInitializationCompleted();
+    }
+
+    /// <summary>One screen on the first launch. Everything it sets can be changed later in Settings.</summary>
+    private void ShowFirstRun(KokoroEngine engine)
+    {
+        if (_settings is null || _reading is null)
+        {
+            return;
+        }
+
+        var current = engine.Voices.FirstOrDefault(v => v.Id == _settings.Current.VoiceId) ?? KokoroEngine.DefaultVoice;
+        var window = new Windows.FirstRunWindow(engine.Voices, current);
+        window.VoiceChosen += voice => _reading.SetVoice(voice);
+        window.PreviewRequested += voice =>
+        {
+            _reading.SetVoice(voice);
+            _reading.Read($"Hello, I'm {voice.DisplayName}. Select some text anywhere and I will read it to you.");
+        };
+        window.Finished += (voice, readButton, startup) =>
+        {
+            _settings.Update(s =>
+            {
+                s.VoiceId = voice.Id;
+                s.ReadButtonEnabled = readButton;
+                s.FirstRunDone = true;
+            });
+            if (startup != StartupRegistration.IsEnabled())
+            {
+                SetStartWithWindows(startup);
+            }
+        };
+        window.Show();
     }
 
     private async Task StartAsync(string[] args)

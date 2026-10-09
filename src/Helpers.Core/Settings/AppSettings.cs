@@ -126,4 +126,7 @@ public sealed class AppSettings
 
     /// <summary>Mirrors the Windows Run key so the setting shows correctly; the key is the truth.</summary>
     public bool StartWithWindows { get; set; }
+
+    /// <summary>Set once the first-run screen has been seen.</summary>
+    public bool FirstRunDone { get; set; }
 }
