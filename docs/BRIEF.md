@@ -1,6 +1,6 @@
 # Helpers: build brief 2.0
 
-Working title: **Helpers**. A small tray app for people with dyslexia who work with AI assistants such as Claude, Claude Code and ChatGPT. Windows 10/11 first; macOS is a stated goal (see below).
+Working title: **Helpers**. A small tray app that helps people read, write and think things through when working with AI assistants such as Claude, Claude Code and ChatGPT: for anyone who finds a wall of text or a careful request hard work. Windows 10/11 first; macOS is a stated goal (see below).
 
 It does three jobs:
 
@@ -45,6 +45,7 @@ People who are strong systems thinkers and creatives but are not natural typers,
 | The editing loop | Select text anywhere, press Edit on the pill, work on it in Compose, press Put it back to paste it over the original. Decided by Dave on 9 October 2026. |
 | Word tools | Meanings and synonyms from Open English WordNet (CC BY 4.0, downloaded once, 10 MB). Syllables from the TeX British English hyphenation patterns (MIT, bundled). Pronunciation from the British word list that ships inside the voice package, shown as IPA and as a plain respelling. Google and Wiktionary open in the browser. Approved by Dave on 9 October 2026. |
 | Updates | Opt-in, asked on the first-run screen and switchable on the Privacy page. On, the app fetches the latest GitHub release's `version.json` once a day and offers a newer version in a toast; Update now downloads the installer, checks its SHA-256, runs it silently and restarts. Off, the app never contacts anything on its own. Chosen by Dave on 9 October 2026. |
+| How the app is described | A general tool that helps people read, write and think things through. Public text leads on what it does, never on a condition or a diagnosis, and never makes a claim that it diagnoses, treats or compensates for a medical condition, so it stays clearly a reading and writing tool rather than a medical device. Decided by Dave on 9 October 2026. |
 | Licences and privacy in the app | A Privacy and licences page in Settings lists every component with its licence and whether it uses the network, and says in plain words what leaves the PC. The list lives in code (`ThirdPartyNotices`) and in `docs/THIRD-PARTY-NOTICES.md`; the review is `docs/PRIVACY.md`. Asked for by Dave on 9 October 2026. |
 | Local model | LLamaSharp (MIT) with the CPU backend. Default model: Qwen3-4B instruct, Q4_K_M GGUF (Apache-2.0), run with thinking off. Fallback for low-memory PCs: Qwen3-1.7B. Confirm the exact model at milestone 9 by testing on Dave's laptop. |
 | Cloud model | Optional, bring-your-own-key. First provider is Claude through the official Anthropic C# SDK (NuGet `Anthropic`). Default model ID `claude-haiku-4-5` because it is the cheapest and these are simple tasks. The model ID is a setting; `claude-sonnet-5-5` gives better rewrites at higher cost. |
@@ -61,7 +62,7 @@ These are decided below so work can start. Overrule any of them.
 
 - **Product name.** "Helpers" is the working title and the solution name. The tray app needs a friendlier name before v0.1 ships.
 - **Publish v0.1 early.** The plan releases the reading half on its own as v0.1 before Compose exists. I think that is right: it's useful on day one.
-- **Five AI actions.** Check my thinking, Tidy, Make a request, Summarise and Explain simply. All are prompt templates behind the same plumbing, so each extra one costs little. Cut any you don't want. Dave's steer on 9 October 2026: the help that matters most to a dyslexic writer is not spelling and grammar, which inline checkers already do, but a reader saying "I don't follow this bit" or "something is missing here", without rewriting.
+- **Five AI actions.** Check my thinking, Tidy, Make a request, Summarise and Explain simply. All are prompt templates behind the same plumbing, so each extra one costs little. Cut any you don't want. Dave's steer on 9 October 2026: the help that matters most to a writer who finds writing hard is not spelling and grammar, which inline checkers already do, but a reader saying "I don't follow this bit" or "something is missing here", without rewriting.
 - **Dropbox.** Resolved 8 October 2026: the checkout stays in Dropbox, but `.git` and every `bin` and `obj` folder are marked as Dropbox-ignored, so Dropbox never touches git internals or build output. See Gotchas for the command to run when a project is added.
 
 ## User experience
@@ -294,7 +295,7 @@ The principle: keep the voice local because it's free, private and fast. Use a l
 
 **Interface.** `IAssistant` in Core has one method: run a named action on some text and stream the result. Core holds the five prompt templates, editable in Settings and resettable to defaults.
 
-**The principle for help with writing** (Dave, 9 October 2026): spelling and grammar fixes do not help with the thing that actually trips a dyslexic or otherwise neurodivergent writer, which is the order of thought and the steps that got skipped because they were obvious to the writer. A full rewrite "fixes" that by replacing the writer's voice, which is worse. So the help is a reader's notes: "I don't quite follow this bit", "something is missing between these two sentences", "which 'it' is this?", each pinned to the spot, each a question or the smallest possible fix, accepted one at a time.
+**The principle for help with writing** (Dave, 9 October 2026): spelling and grammar fixes do not help with the thing that actually trips most people who find writing hard, which is the order of thought and the steps that got skipped because they were obvious to the writer. A full rewrite "fixes" that by replacing the writer's voice, which is worse. So the help is a reader's notes: "I don't quite follow this bit", "something is missing between these two sentences", "which 'it' is this?", each pinned to the spot, each a question or the smallest possible fix, accepted one at a time.
 
 **The five actions.**
 
@@ -454,7 +455,7 @@ What needs a Mac implementation (`Helpers.Mac`):
 
 ## What changed from brief 1.0
 
-- **Scope widened** from a read-aloud app to a three-job dyslexia companion: hear it, write it, shape it.
+- **Scope widened** from a read-aloud app to a three-job reading and writing companion: hear it, write it, shape it.
 - **macOS added as a stated goal** after v0.2, with the Mac work listed.
 - **UI toolkit changed from WPF to Avalonia** (decided 7 October 2026) so one UI serves Windows and Mac. Spell check moves from WPF's built-in to the Windows `ISpellChecker` API with our own underlines.
 - **Surfaces and Look and feel sections added.** No main window; a small set of non-activating overlays with one visual language; errors only ever appear as toasts; a design doc with mockups comes before milestone 3.

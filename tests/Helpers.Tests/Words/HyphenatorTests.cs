@@ -15,7 +15,7 @@ public class HyphenatorTests
     [InlineData("university", "uni·ver·sity")]
     [InlineData("however", "how·ever")]
     [InlineData("information", "in·form·a·tion")]
-    [InlineData("dyslexia", "dys·lexia")]
+    [InlineData("necessary", "ne·ces·sary")]
     public void SplitsLongWordsIntoPieces(string word, string expected)
     {
         Assert.Equal(expected, Hyphenator.British.Hyphenate(word));

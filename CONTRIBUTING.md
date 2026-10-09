@@ -1,6 +1,6 @@
 # Contributing to Helpers
 
-Thank you for helping. This project is for people with dyslexia, so the most useful thing you can tell us is often "this bit was hard".
+Thank you for helping. This project is for anyone who finds reading or writing hard work, so the most useful thing you can tell us is often "this bit was hard".
 
 ## Ways to help
 
@@ -16,15 +16,16 @@ Thank you for helping. This project is for people with dyslexia, so the most use
 These come from the project's principles. A change that breaks one won't be merged.
 
 1. **Free for everyone.** No paid tiers, no paid extras, no selling AI credits.
-2. **Offline first.** Anything that can run on the PC does. Cloud features are optional, off by default, labelled with the cloud mark, and use the person's own key.
-3. **No telemetry.** No analytics, no crash reporting, no usage pings. Nothing that phones home on its own, except the update check, which is opt-in.
-4. **Never log the user's text.** Not in logs, not in error messages, not in crash dumps.
-5. **Never store secrets in files.** Keys go in Windows Credential Manager.
-6. **Every download is checked** against a SHA-256 built into the app.
+2. **A tool, not a treatment.** Describe what it does: reads aloud, checks spelling, gives notes. Never claim it diagnoses, treats or helps with a medical condition.
+3. **Offline first.** Anything that can run on the PC does. Cloud features are optional, off by default, labelled with the cloud mark, and use the person's own key.
+4. **No telemetry.** No analytics, no crash reporting, no usage pings. Nothing that phones home on its own, except the update check, which is opt-in.
+5. **Never log the user's text.** Not in logs, not in error messages, not in crash dumps.
+6. **Never store secrets in files.** Keys go in Windows Credential Manager.
+7. **Every download is checked** against a SHA-256 built into the app.
 
 ## Writing for this app
 
-The people using it have dyslexia. Every word on screen should be easy to read.
+People reach for this app when reading and writing feel like hard work. Every word on screen should be easy to read.
 
 - UK English: colour, organise, centre.
 - Short sentences. One idea each.

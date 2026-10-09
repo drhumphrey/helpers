@@ -128,7 +128,8 @@
               <Path Stroke="{DynamicResource MutedBrush}" StrokeThickness="1.5" Data="M5 5L15 15M15 5L5 15" Width="20" Height="20" />
             </Button>
           </Grid>
-          <StackPanel DockPanel.Dock="Bottom" x:Name="ResultButtons" Orientation="Horizontal" Spacing="8" Margin="14,8,14,12" IsVisible="False">
+          <TextBlock DockPanel.Dock="Bottom" Classes="hint" Margin="14,4,14,10" Text="AI notes can be wrong. You decide what to change." />
+          <StackPanel DockPanel.Dock="Bottom" x:Name="ResultButtons" Orientation="Horizontal" Spacing="8" Margin="14,8,14,4" IsVisible="False">
             <Button Content="Use this" Classes="main" Click="OnUseResult" ToolTip.Tip="Replace the draft with this. Ctrl+Z brings the draft back." />
             <Button Content="Copy" Click="OnCopyResult" />
             <Button Content="Read it" Click="OnReadResult" />

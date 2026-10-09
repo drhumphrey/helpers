@@ -17,4 +17,4 @@ Read `docs/BRIEF.md` before writing any code. Its "Decisions already made" table
 
 ## Working with Dave
 
-Dave has dyslexia. Lead with the answer. Short sentences. Bullets over paragraphs. Keep code out of prose. Expect typos in his messages and read for intent.
+Lead with the answer. Short sentences. Bullets over paragraphs. Keep code out of prose. Expect typos in his messages and read for intent.

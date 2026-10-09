@@ -1,6 +1,6 @@
 # Helpers
 
-**Free tools for people with dyslexia who work with AI.** Hear what the AI wrote. Write back with confidence. Keep your text on your own PC.
+**Free tools that help you read, write and think things through, especially with AI.** Hear any text read aloud. Write back with confidence. Keep your text on your own PC.
 
 [![Build](https://github.com/drhumphrey/helpers/actions/workflows/build.yml/badge.svg)](https://github.com/drhumphrey/helpers/actions/workflows/build.yml)
 [![Licence: GPL v3](https://img.shields.io/badge/licence-GPL%20v3-blue.svg)](LICENSE)
@@ -10,7 +10,7 @@
 
 ## Why
 
-AI assistants are brilliant. Working with them means reading a lot of long text and typing a lot of careful requests. That is hard work if you have dyslexia, aren't a natural typist, or find it easier to think than to put your thoughts in order on the page.
+AI assistants are brilliant. Working with them means reading a lot of long text and typing a lot of careful requests. That's hard work when you're tired, short on time, not a natural typist, writing in a second language, or simply better at thinking out loud than putting thoughts in order on the page.
 
 Helpers takes that strain off. It sits in the tray and helps in three ways:
 
@@ -151,10 +151,12 @@ To make a release, push a tag such as `v0.2.0`. The Release workflow tests, publ
 
 ## Contributing
 
-Help is very welcome, especially from people with dyslexia. Telling us what's hard to use is as valuable as code. See [CONTRIBUTING.md](CONTRIBUTING.md).
+Help is very welcome, especially from people who find reading or writing hard work. Telling us what's hard to use is as valuable as code. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 Found a security problem? Please read [SECURITY.md](SECURITY.md) and report it privately.
 
 ## Licence
 
-Helpers is free software under the [GNU General Public License v3](LICENSE) or later. It's built on many other open-source projects, listed with their licences in [docs/THIRD-PARTY-NOTICES.md](docs/THIRD-PARTY-NOTICES.md).
+Helpers is free software under the [GNU General Public License v3](LICENSE) or later. It comes with no warranty; see sections 15 and 16 of the licence. It's built on many other open-source projects, listed with their licences in [docs/THIRD-PARTY-NOTICES.md](docs/THIRD-PARTY-NOTICES.md).
+
+Helpers is a general reading and writing tool. It isn't a medical device and doesn't diagnose or treat anything. AI notes can be wrong; you decide what to change.

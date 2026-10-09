@@ -5,7 +5,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Helpers is for people with dyslexia. If something is hard to read, hard to find or hard to understand, we want to know.
+        Helpers should be easy for everyone. If something is hard to read, hard to find or hard to understand, we want to know.
   - type: textarea
     id: problem
     attributes:

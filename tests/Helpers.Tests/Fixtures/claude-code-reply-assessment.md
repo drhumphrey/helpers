@@ -1,4 +1,4 @@
-**Short version:** the brief is good and I'd happily build from it. But it describes about a third of what you just told me you need. It is a read-aloud app. You described a dyslexia companion for working with AI chat.
+**Short version:** the brief is good and I'd happily build from it. But it describes about a third of what you just told me you need. It is a read-aloud app. You described a reading and writing companion for working with AI chat.
 
 ## What's strong in the brief
 

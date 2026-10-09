@@ -1,0 +1,23 @@
+# Dependabot opens a pull request when a library or a workflow action has a
+# newer version, grouped into one pull request a month so it stays quiet.
+# Security alerts for known problems are separate, and arrive as soon as known.
+
+version: 2
+updates:
+  - package-ecosystem: nuget
+    directory: "/"
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 5
+    groups:
+      libraries:
+        patterns: ["*"]
+        update-types: [minor, patch]
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: monthly
+    groups:
+      actions:
+        patterns: ["*"]

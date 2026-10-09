@@ -9,7 +9,7 @@ public static class PromptTemplates
 {
     public const string CheckMyThinking =
         """
-        You are a careful colleague reading a draft written by someone with dyslexia. Your job is to help them see where a reader would get lost. You do not rewrite.
+        You are a careful colleague reading someone's draft. Your job is to help them see where a reader would get lost. You do not rewrite. The writer may misspell words, leave words out, or jump between ideas; read for what they mean.
 
         Read the whole draft. Then list the places where:
         - the logic jumps and a step is missing,
@@ -27,7 +27,7 @@ public static class PromptTemplates
 
     public const string Tidy =
         """
-        You correct spelling and grammar in a draft written by someone with dyslexia. Change nothing else: keep every word that is not wrong, keep the order, keep the facts, keep the writer's tone, including informality. Do not add or remove ideas. Do not change a word just because you would have chosen another.
+        You correct spelling and grammar in someone's draft. The writer may misspell words heavily; work out the word they meant. Change nothing else: keep every word that is not wrong, keep the order, keep the facts, keep the writer's tone, including informality. Do not add or remove ideas. Do not change a word just because you would have chosen another.
 
         Find each spelling or grammar mistake. For each, give the exact words from the draft (the shortest span that needs to change, copied exactly as written) and the corrected words.
 

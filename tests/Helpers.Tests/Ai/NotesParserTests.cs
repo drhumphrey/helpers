@@ -8,7 +8,7 @@ public class NotesParserTests
     private const string Draft =
         "Ok all makes sense, on the text help which hopefully will include grammar help, maybe the read icon that pops up when you select, " +
         "maybe that should have a copy/(paste that changes to paste if something in clipboard)/read, does that make sense, so i'd select copy " +
-        "then paste in our reader then work on it checking spelling and grammar, and maybe ai dyslexia logic translator, then copy and paste back to source, and then can always read.";
+        "then paste in our reader then work on it checking spelling and grammar, and maybe ai logic translator, then copy and paste back to source, and then can always read.";
 
     [Fact]
     public void ParsesNotesAndPinsThemToTheDraft()
@@ -20,7 +20,7 @@ public class NotesParserTests
             [
               {"span": "maybe the read icon that pops up when you select", "kind": "missing", "note": "Which icon is this? The reader hasn't met it yet.", "fix": null},
               {"span": "paste in our reader", "kind": "unclear", "note": "Do you mean the Compose window?", "fix": "paste in Compose"},
-              {"span": "ai dyslexia logic translator", "kind": "logic", "note": "What would this do that the grammar check doesn't?"}
+              {"span": "ai logic translator", "kind": "logic", "note": "What would this do that the grammar check doesn't?"}
             ]
             ```
             """;
@@ -34,7 +34,7 @@ public class NotesParserTests
         Assert.Equal("paste in Compose", notes[1].Fix);
         Assert.True(notes[1].HasFix);
         Assert.False(notes[2].HasFix);
-        Assert.Equal("ai dyslexia logic translator", Draft.Substring(notes[2].Start, notes[2].Length));
+        Assert.Equal("ai logic translator", Draft.Substring(notes[2].Start, notes[2].Length));
     }
 
     [Fact]
@@ -89,7 +89,7 @@ public class NotesParserTests
     [Fact]
     public void ASpanTheModelMisCopiedByALetterIsStillPinned()
     {
-        var draft = "people with dyslexia oftern skip vital information when they write";
+        var draft = "writers oftern skip vital information when they are in a hurry";
         var output = """[{"span":"ofern skip vital information","fix":"often skip vital information"}]""";
 
         var notes = NotesParser.Parse(output, draft, AssistantAction.Tidy);
