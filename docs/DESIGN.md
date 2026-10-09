@@ -1,6 +1,6 @@
 # Helpers: design
 
-How the app looks and behaves on screen. Read this before milestone 3. The mockups live on a private canvas, one artboard per surface, each shown in light and dark: https://claude.ai/artifact/RWcm3AfAXcR2jMH3v7Unco (Dave's account; share from the page to let others in).
+How the app looks and behaves on screen. The first mockups were drawn on a private design canvas, one artboard per surface in light and dark; the app has since moved past them, and screenshots of what it looks like now are in [images/](images/).
 
 ## The look in one line
 

@@ -1,0 +1,27 @@
+name: An idea, or something that's hard to use
+description: Suggest a feature, or tell us what's awkward. Both are equally useful.
+labels: [idea]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Helpers is for people with dyslexia. If something is hard to read, hard to find or hard to understand, we want to know.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What's hard, or what would help?
+      placeholder: When the AI writes a long reply I lose my place, even with the highlight.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: Any idea how it could work?
+      description: Optional. Rough is fine.
+  - type: checkboxes
+    id: principles
+    attributes:
+      label: The project's rules
+      description: Helpers stays free, offline first and private. Ideas that need a paid service or send text away by default won't fit.
+      options:
+        - label: I've read the principles in the README

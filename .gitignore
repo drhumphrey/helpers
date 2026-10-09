@@ -30,3 +30,10 @@ models/
 # Secrets
 *.pfx
 *.snk
+
+# Personal, machine-local instructions for coding assistants
+CLAUDE.local.md
+.claude/settings.local.json
+
+# Interrupted downloads
+*.part

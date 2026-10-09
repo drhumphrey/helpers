@@ -1,0 +1,54 @@
+name: Something isn't working
+description: Tell us about a bug. Plain words are perfect.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time. Short answers are fine, and so are typos.
+
+        **Please don't paste private text.** If it only happens with certain text, make up a similar example.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      placeholder: I selected an email in Outlook and pressed Read. Nothing happened.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+      placeholder: I expected it to read the email.
+  - type: input
+    id: app
+    attributes:
+      label: Which app were you reading from, or sending to?
+      placeholder: Outlook, Chrome, VS Code, Teams…
+  - type: input
+    id: version
+    attributes:
+      label: Helpers version
+      description: Settings, then Privacy and licences, shows it at the top.
+      placeholder: "0.1.0"
+  - type: dropdown
+    id: windows
+    attributes:
+      label: Windows
+      options:
+        - Windows 11
+        - Windows 10
+        - Not sure
+  - type: dropdown
+    id: ai
+    attributes:
+      label: AI helper, if it's about Check my thinking, Tidy or Make a request
+      options:
+        - Not about the AI helper
+        - On this PC
+        - Claude in the cloud
+  - type: textarea
+    id: anything-else
+    attributes:
+      label: Anything else?
+      description: Screenshots help, as long as they show nothing private.
