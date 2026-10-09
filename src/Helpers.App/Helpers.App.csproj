@@ -28,4 +28,18 @@
     <ProjectReference Include="..\Helpers.Ai\Helpers.Ai.csproj" />
     <ProjectReference Include="..\Helpers.Windows\Helpers.Windows.csproj" />
   </ItemGroup>
+
+  <!--
+    LLamaSharp's CPU backend copies native libraries for every platform into the
+    output. A publish for one runtime only needs that runtime's folder, so the rest
+    (Linux, Mac, ARM: about 80 MB) are left out of the install.
+  -->
+  <Target Name="DropOtherPlatformNatives" AfterTargets="ComputeResolvedFilesToPublishList" Condition="'$(RuntimeIdentifier)' != ''">
+    <ItemGroup>
+      <!-- The package writes these paths with doubled separators (runtimes\\win-x64\...), so match loosely. -->
+      <_OtherPlatformNative Include="@(ResolvedFileToPublish)"
+                            Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('%(ResolvedFileToPublish.RelativePath)', '^runtimes(?>[\\/]+)(?!$(RuntimeIdentifier)[\\/])'))" />
+      <ResolvedFileToPublish Remove="@(_OtherPlatformNative)" />
+    </ItemGroup>
+  </Target>
 </Project>
