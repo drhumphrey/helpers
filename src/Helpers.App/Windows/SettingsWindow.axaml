@@ -195,7 +195,7 @@
           </Grid>
           <TextBlock Classes="hint" Text="Program names separated by commas. Password managers and remote desktop are excluded to start with." />
 
-          <TextBlock Classes="section" Text="SHORTCUT" />
+          <TextBlock Classes="section" Text="SHORTCUTS" />
           <Grid Classes="row" ColumnDefinitions="170,*">
             <TextBlock Classes="label" Text="Read the selection" />
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
@@ -206,7 +206,17 @@
           </Grid>
           <TextBlock Classes="hint" Text="Select text in any app and press it to hear it. With nothing selected it stops. Click the box and press new keys to change it." />
           <TextBlock Classes="hint" Text="{Binding HotkeyStatus}" IsVisible="{Binding HotkeyStatus, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
-          <TextBlock Classes="hint" Text="Ctrl+Alt is AltGr on some keyboards. If the shortcut types a character instead, pick another." />
+          <Grid Classes="row" ColumnDefinitions="170,*">
+            <TextBlock Classes="label" Text="Open Compose" />
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
+              <ToggleSwitch IsChecked="{Binding ComposeHotkeyEnabled}" OnContent="" OffContent="" />
+              <TextBox x:Name="ComposeHotkeyBox" Text="{Binding ComposeHotkeyText, Mode=OneWay}" Width="220" MinHeight="32" IsReadOnly="True"
+                       KeyDown="OnHotkeyKeyDown" Watermark="Click, then press keys" ToolTip.Tip="Click here and press the keys you want" />
+            </StackPanel>
+          </Grid>
+          <TextBlock Classes="hint" Text="Opens the Compose window, ready to send to the window you were in." />
+          <TextBlock Classes="hint" Text="{Binding ComposeHotkeyStatus}" IsVisible="{Binding ComposeHotkeyStatus, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+          <TextBlock Classes="hint" Text="Ctrl+Alt is AltGr on some keyboards. If a shortcut types a character instead, pick another." />
 
           <TextBlock Classes="section" Text="CLIPBOARD" />
           <Grid Classes="row" ColumnDefinitions="170,*">

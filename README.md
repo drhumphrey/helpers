@@ -17,7 +17,7 @@ AI assistants are brilliant, but working with them means reading a lot of long t
 
 **Read Aloud.** Select text in any app, click the small Read button that appears, and hear it in a natural offline voice. A compact player gives you pause, skip and speed. It understands the Markdown that AI chats produce, so code blocks and formatting symbols are not read out letter by letter.
 
-**Compose.** A scratchpad for writing to the AI. Spelling as you type, a button to hear your draft read back, and a Tidy button that fixes grammar and puts your thoughts in order without changing what you mean. Then one click sends it to the chat.
+**Compose.** A scratchpad for writing to the AI. Spelling as you type, a button to hear your draft read back, and one click to send it to the chat without pressing Enter for you. Open it with Ctrl+Alt+C from the window you want to send to. Coming next: a Tidy button that fixes grammar and puts your thoughts in order without changing what you mean.
 
 ## Try the prototype today
 

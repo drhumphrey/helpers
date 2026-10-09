@@ -24,6 +24,7 @@ public sealed class SettingsViewModel : ObservableObject
     private readonly Action<bool> _watchClipboard;
     private readonly Action _applyLook;
     private readonly Func<bool> _applyHotkey;
+    private readonly Func<bool> _applyComposeHotkey;
     private readonly Action _applyReadableText;
     private readonly Func<bool, bool> _setStartWithWindows;
 
@@ -51,6 +52,9 @@ public sealed class SettingsViewModel : ObservableObject
     private string _hotkeyText = string.Empty;
     private bool _hotkeyEnabled;
     private string _hotkeyStatus = string.Empty;
+    private string _composeHotkeyText = string.Empty;
+    private bool _composeHotkeyEnabled;
+    private string _composeHotkeyStatus = string.Empty;
     private bool _watchClipboardOn;
     private Choice<ReadingFont> _readingFont;
     private double _readingFontSize;
@@ -74,6 +78,7 @@ public sealed class SettingsViewModel : ObservableObject
         Action<bool> watchClipboard,
         Action applyLook,
         Func<bool> applyHotkey,
+        Func<bool> applyComposeHotkey,
         Action applyReadableText,
         Func<bool, bool> setStartWithWindows,
         bool startWithWindowsNow)
@@ -83,6 +88,7 @@ public sealed class SettingsViewModel : ObservableObject
         _watchClipboard = watchClipboard;
         _applyLook = applyLook;
         _applyHotkey = applyHotkey;
+        _applyComposeHotkey = applyComposeHotkey;
         _applyReadableText = applyReadableText;
         _setStartWithWindows = setStartWithWindows;
 
@@ -173,6 +179,8 @@ public sealed class SettingsViewModel : ObservableObject
         _excludedApps = string.Join(", ", settings.ExcludedApps);
         _hotkeyText = settings.ReadSelectionHotkey;
         _hotkeyEnabled = settings.ReadSelectionHotkeyEnabled;
+        _composeHotkeyText = settings.ComposeHotkey;
+        _composeHotkeyEnabled = settings.ComposeHotkeyEnabled;
 
         _startWithWindows = startWithWindowsNow;
     }
@@ -745,6 +753,57 @@ public sealed class SettingsViewModel : ObservableObject
     {
         get => _hotkeyStatus;
         private set => Set(ref _hotkeyStatus, value);
+    }
+
+    public string ComposeHotkeyText
+    {
+        get => _composeHotkeyText;
+        set
+        {
+            var gesture = Helpers.Core.Input.HotkeyGesture.Parse(value);
+            if (gesture is null)
+            {
+                ComposeHotkeyStatus = "That isn't a shortcut. Try something like Ctrl+Alt+C.";
+                return;
+            }
+
+            if (!gesture.HasModifier)
+            {
+                ComposeHotkeyStatus = "Add Ctrl, Alt, Shift or Win, or plain typing would trigger it.";
+                return;
+            }
+
+            if (gesture.ToString() == _hotkeyText)
+            {
+                ComposeHotkeyStatus = "That's the Read the selection shortcut. Pick a different one.";
+                return;
+            }
+
+            if (Set(ref _composeHotkeyText, gesture.ToString()))
+            {
+                _store.Update(s => s.ComposeHotkey = _composeHotkeyText);
+                ComposeHotkeyStatus = _applyComposeHotkey() ? string.Empty : "Windows refused that shortcut. Another app may own it.";
+            }
+        }
+    }
+
+    public bool ComposeHotkeyEnabled
+    {
+        get => _composeHotkeyEnabled;
+        set
+        {
+            if (Set(ref _composeHotkeyEnabled, value))
+            {
+                _store.Update(s => s.ComposeHotkeyEnabled = value);
+                ComposeHotkeyStatus = _applyComposeHotkey() ? string.Empty : "Windows refused that shortcut. Another app may own it.";
+            }
+        }
+    }
+
+    public string ComposeHotkeyStatus
+    {
+        get => _composeHotkeyStatus;
+        private set => Set(ref _composeHotkeyStatus, value);
     }
 
     // Start-up

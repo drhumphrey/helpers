@@ -137,3 +137,19 @@ One entry per milestone: what was built, what was measured, what didn't go to pl
 - The installer is not built locally because Inno Setup isn't installed on this PC and winget hangs here. CI builds it. A local `iscc` run is one command if it's ever installed.
 - Nothing is code-signed. SmartScreen will warn on first run; the README says so.
 - The v0.1.0 tag is Dave's call after testing milestones 5 and 6. Pushing it is what makes the release.
+
+## Milestone 8: Compose (9 October 2026, small hours)
+
+**Spike first, as the brief said.** The Windows spell checker through its COM API, declared by hand in `Helpers.Windows` with no extra package. On this PC the English (UK) checker is present, finds "recieve" and "tomorow", and suggests "receive" and "tomorrow". Three tests in a new `Helpers.Windows.Tests` project talk to the real checker and pass in well under a second; they do nothing on a machine without the UK English language pack, so CI stays green there.
+
+**Built:** `ISpellChecker` in Core, with `DraftSpelling` (the checker's errors, minus the user's own words, minus the word still being typed), `SpellingErrors` (pure helpers that keep the underlines in place between checks, with tests) and `UserDictionary` (one word per line in `%APPDATA%\Helpers\dictionary.txt`). `ITargetWindow` and `KnownApps` in Core; `TargetWindow` in Windows: remember the window, bring it to the front, Ctrl+V or Shift+Insert for terminals, the clipboard saved and put back, never Enter. The Compose window: the target in the header with "Use this window", the editor at reading size with wavy red underlines drawn by `SpellingUnderlines` over the text box, a right-click menu with suggestions, "Add to dictionary", "Ignore for now" and the usual edit items, then Read back, Copy and Send to chat, and a status line with the spelling state and "Draft saved". Tidy and Make a request are greyed with a hint until milestone 9. Drafts save two seconds after the last edit and on hide, and come back when Compose reopens. Window placement is remembered. A second global shortcut, Ctrl+Alt+C, opens Compose sending to the window that had focus; it is on by default like the first and lives in Settings under Shortcuts. Compose is in the tray menu and the quick menu. `--compose` is a dev switch.
+
+**Not to plan:**
+
+- The brief said to check the paragraph around the caret. The whole draft is checked instead, on a 350 ms pause after each keystroke or caret move: one COM call, well under a millisecond for a few paragraphs, and simpler to keep right. Worth revisiting only if someone pastes a book into Compose.
+- "Add to dictionary" writes to the app's own file, as the brief said. Those words are also handed to the checker as session ignores, so Windows' shared dictionary, which Edge and Mail use, is never changed by this app.
+- A `MenuFlyout` named in XAML gets no code-behind field because it is not in the visual tree, so the right-click menu is built in code.
+- Dave's PC was locked while this was built, so the Compose window has not been seen on a screen. It builds, 184 tests pass, and the process starts with the window up (the window title was checked), but the layout and the underlines are unverified until Dave opens it.
+- An automated review flagged the third-party release action in the Release workflow as unpinned. It is replaced by GitHub's own `gh release create`, so the workflow has no third-party actions beyond checkout and setup-dotnet.
+
+**Dave to check, from the brief's acceptance list:** type a sentence with three misspellings and red underlines appear; a right-click fixes one; Read back works; Send to chat pastes into the VS Code chat box without submitting; the clipboard is unchanged afterwards. Also worth a look: "Use this window", Ctrl+Alt+C from another app, the draft surviving a close, and what the Sending to line says for Chrome, Teams and Outlook.

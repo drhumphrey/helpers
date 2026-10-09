@@ -97,6 +97,20 @@ public sealed class AppSettings
 
     public bool ReadSelectionHotkeyEnabled { get; set; } = true;
 
+    /// <summary>The global shortcut that opens Compose, sending to the window that had focus.</summary>
+    public string ComposeHotkey { get; set; } = "Ctrl+Alt+C";
+
+    public bool ComposeHotkeyEnabled { get; set; } = true;
+
+    /// <summary>The unsent Compose draft, so closing the window loses nothing.</summary>
+    public string? ComposeDraft { get; set; }
+
+    public WindowPlacement? ComposePlacement { get; set; }
+
+    public double? ComposeWidth { get; set; }
+
+    public double? ComposeHeight { get; set; }
+
     /// <summary>Seconds after reading ends before the player hides. 0 keeps it open.</summary>
     public int PlayerHideAfterSeconds { get; set; } = 4;
 

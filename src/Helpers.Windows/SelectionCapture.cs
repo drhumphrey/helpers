@@ -18,11 +18,6 @@ public sealed class SelectionCapture : ISelectionSource
     private static readonly TimeSpan CtrlInsertWait = TimeSpan.FromMilliseconds(350);
     private static readonly TimeSpan CtrlCWait = TimeSpan.FromMilliseconds(1000);
 
-    private static readonly HashSet<string> TerminalProcesses = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "WindowsTerminal", "conhost", "cmd", "powershell", "pwsh", "Code", "Code - Insiders", "Cursor", "wt", "mintty", "alacritty", "wezterm-gui",
-    };
-
     private readonly SemaphoreSlim _gate = new(1, 1);
 
     public async Task<SelectionResult> CaptureAsync(CancellationToken cancellationToken)
@@ -49,7 +44,7 @@ public sealed class SelectionCapture : ISelectionSource
                 return uia;
             }
 
-            return await TryClipboardAsync(TerminalProcesses.Contains(process), cancellationToken).ConfigureAwait(false);
+            return await TryClipboardAsync(KnownApps.IsTerminal(process), cancellationToken).ConfigureAwait(false);
         }
         finally
         {

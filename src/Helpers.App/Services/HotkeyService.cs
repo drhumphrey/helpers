@@ -4,34 +4,47 @@ using Helpers.Windows;
 
 namespace Helpers.App.Services;
 
-/// <summary>Owns the message window and the one global shortcut. Re-registers when the setting changes.</summary>
+/// <summary>
+/// Owns the message window and the global shortcuts, one per name: "read"
+/// for the selection, "compose" for the Compose window. Each re-registers
+/// when its setting changes.
+/// </summary>
 public sealed class HotkeyService : IDisposable
 {
     private readonly MessageWindow _window = new();
-    private int _hotkeyId = -1;
+    private readonly Dictionary<string, int> _ids = new(StringComparer.Ordinal);
+    private readonly Dictionary<int, Action> _actions = new();
+    private readonly object _sync = new();
 
     public HotkeyService()
     {
         _window.Start();
         _window.HotkeyPressed += id =>
         {
-            if (id == _hotkeyId)
+            Action? action;
+            lock (_sync)
             {
-                Dispatcher.UIThread.Post(() => Pressed?.Invoke());
+                _actions.TryGetValue(id, out action);
+            }
+
+            if (action is not null)
+            {
+                Dispatcher.UIThread.Post(action);
             }
         };
     }
 
-    /// <summary>Raised on the UI thread.</summary>
-    public event Action? Pressed;
+    /// <summary>The message window's thread, for anything else that needs a message loop.</summary>
+    public MessageWindow Window => _window;
 
-    /// <summary>The shortcut currently registered, or null.</summary>
-    public HotkeyGesture? Current { get; private set; }
-
-    /// <summary>Registers the shortcut. Returns false if Windows refused it, usually because another app owns it.</summary>
-    public bool Apply(HotkeyGesture? gesture, bool enabled)
+    /// <summary>
+    /// Registers, or re-registers, one named shortcut. Off, missing or
+    /// modifier-less gestures just unregister. Returns false if Windows
+    /// refused the combination, usually because another app owns it.
+    /// </summary>
+    public bool Apply(string name, HotkeyGesture? gesture, bool enabled, Action onPressed)
     {
-        Unregister();
+        Unregister(name);
         if (!enabled || gesture is null || !gesture.HasModifier)
         {
             return true;
@@ -43,33 +56,44 @@ public sealed class HotkeyService : IDisposable
             return false;
         }
 
-        _hotkeyId = _window.RegisterHotkey(gesture.Ctrl, gesture.Alt, gesture.Shift, gesture.Win, key);
-        if (_hotkeyId > 0)
+        var id = _window.RegisterHotkey(gesture.Ctrl, gesture.Alt, gesture.Shift, gesture.Win, key);
+        if (id <= 0)
         {
-            Current = gesture;
-            return true;
+            return false;
         }
 
-        return false;
-    }
+        lock (_sync)
+        {
+            _ids[name] = id;
+            _actions[id] = onPressed;
+        }
 
-    /// <summary>The message window's thread, for anything else that needs a message loop.</summary>
-    public MessageWindow Window => _window;
+        return true;
+    }
 
     public void Dispose()
     {
-        Unregister();
+        foreach (var name in _ids.Keys.ToArray())
+        {
+            Unregister(name);
+        }
+
         _window.Dispose();
     }
 
-    private void Unregister()
+    private void Unregister(string name)
     {
-        if (_hotkeyId > 0)
+        int id;
+        lock (_sync)
         {
-            _window.UnregisterHotkey(_hotkeyId);
-            _hotkeyId = -1;
+            if (!_ids.Remove(name, out id))
+            {
+                return;
+            }
+
+            _actions.Remove(id);
         }
 
-        Current = null;
+        _window.UnregisterHotkey(id);
     }
 }

@@ -83,6 +83,14 @@ public partial class SettingsWindow : Window
         if (e.KeyModifiers.HasFlag(KeyModifiers.Meta)) parts.Add("Win");
         parts.Add(key);
 
-        _viewModel.HotkeyText = string.Join("+", parts);
+        var text = string.Join("+", parts);
+        if (sender is TextBox { Name: "ComposeHotkeyBox" })
+        {
+            _viewModel.ComposeHotkeyText = text;
+        }
+        else
+        {
+            _viewModel.HotkeyText = text;
+        }
     }
 }

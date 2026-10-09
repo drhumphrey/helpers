@@ -41,4 +41,23 @@ internal static class NativeMethods
 
     [DllImport("user32.dll", SetLastError = true)]
     public static extern bool GetWindowRect(nint hWnd, out RECT rect);
+
+    public const int SW_RESTORE = 9;
+
+    // Compose sends to another window: is it still there, is it minimised, bring it to the front.
+    [DllImport("user32.dll")]
+    public static extern bool IsWindow(nint hWnd);
+
+    [DllImport("user32.dll")]
+    public static extern bool IsIconic(nint hWnd);
+
+    [DllImport("user32.dll")]
+    public static extern bool ShowWindow(nint hWnd, int command);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    public static extern bool SetForegroundWindow(nint hWnd);
+
+    // The taskbar and desktop are recognised by class so Compose never targets them.
+    [DllImport("user32.dll", EntryPoint = "GetClassNameW", CharSet = CharSet.Unicode, SetLastError = true)]
+    public static extern int GetClassName(nint hWnd, StringBuilder className, int maxCount);
 }

@@ -48,10 +48,10 @@ jobs:
           & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" installer\Helpers.iss "/DVersion=${{ steps.version.outputs.version }}" "/DPublishDir=..\out\publish\win-x64"
 
       - name: Release
-        uses: softprops/action-gh-release@v2
-        with:
-          name: Helpers ${{ steps.version.outputs.version }}
-          generate_release_notes: true
-          files: |
-            out/Helpers-${{ steps.version.outputs.version }}-setup.exe
-            out/Helpers-${{ steps.version.outputs.version }}-win-x64.zip
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >
+          gh release create "${{ github.ref_name }}" --title "Helpers ${{ steps.version.outputs.version }}" --generate-notes
+          "out/Helpers-${{ steps.version.outputs.version }}-setup.exe"
+          "out/Helpers-${{ steps.version.outputs.version }}-win-x64.zip"

@@ -2,12 +2,16 @@ using System.Runtime.InteropServices;
 
 namespace Helpers.Windows;
 
-/// <summary>Sends keystrokes to whatever app has focus. Used only for the copy shortcut during selection capture.</summary>
+/// <summary>
+/// Sends keystrokes to whatever app has focus: the copy chord during selection
+/// capture, the paste chord for Compose's Send to chat. Never Enter.
+/// </summary>
 public static class KeyboardInput
 {
     private const ushort VK_CONTROL = 0x11;
     private const ushort VK_INSERT = 0x2D;
     private const ushort VK_C = 0x43;
+    private const ushort VK_V = 0x56;
     private const ushort VK_MENU = 0x12;
     private const ushort VK_SHIFT = 0x10;
     private const uint INPUT_KEYBOARD = 1;
@@ -18,6 +22,12 @@ public static class KeyboardInput
 
     /// <summary>Ctrl+C: the fallback for apps that ignore Ctrl+Insert. Never send to a terminal.</summary>
     public static void SendCtrlC() => SendChord(VK_CONTROL, VK_C);
+
+    /// <summary>Ctrl+V: paste, for Send to chat.</summary>
+    public static void SendCtrlV() => SendChord(VK_CONTROL, VK_V);
+
+    /// <summary>Shift+Insert: paste in terminals, where a shell may keep Ctrl+V for itself.</summary>
+    public static void SendShiftInsert() => SendChord(VK_SHIFT, VK_INSERT);
 
     /// <summary>True while any of the shortcut modifier keys is physically held down.</summary>
     public static bool ModifiersHeld() =>

@@ -24,6 +24,7 @@ public partial class App : Application
     private SelectionCapture? _selection;
     private InputMonitor? _input;
     private ReadButtonService? _readButton;
+    private ComposeController? _compose;
     private QuickMenuWindow? _quickMenu;
     private TrayIcon? _tray;
     private NativeMenuItem? _watchItem;
@@ -65,9 +66,10 @@ public partial class App : Application
             }
 
             _selection = new SelectionCapture();
+            _compose = new ComposeController(_settings, _reading, _toasts);
             _hotkeys = new HotkeyService();
-            _hotkeys.Pressed += () => _ = ReadSelectionAsync();
-            ApplyHotkey(settings);
+            ApplyReadHotkey();
+            ApplyComposeHotkey();
 
             // The mouse and keyboard hooks share the hotkey's message thread.
             _input = new InputMonitor(_hotkeys.Window);
@@ -93,6 +95,7 @@ public partial class App : Application
 
             desktop.Exit += (_, _) =>
             {
+                _compose?.Dispose();
                 _readButton?.Dispose();
                 _input?.Dispose();
                 _hotkeys?.Dispose();
@@ -175,6 +178,10 @@ public partial class App : Application
             {
                 ShowQuickMenu();
             }
+            else if (args[i] == "--compose")
+            {
+                _compose?.Open();
+            }
         }
     }
 
@@ -196,6 +203,9 @@ public partial class App : Application
 
         var showPlayer = new NativeMenuItem("Show player");
         showPlayer.Click += (_, _) => _reading?.ShowPlayer();
+
+        var compose = new NativeMenuItem("Compose…");
+        compose.Click += (_, _) => _compose?.Open();
 
         var settingsItem = new NativeMenuItem("Settings…");
         settingsItem.Click += (_, _) => ShowSettings();
@@ -221,6 +231,8 @@ public partial class App : Application
         menu.Items.Add(pause);
         menu.Items.Add(stop);
         menu.Items.Add(showPlayer);
+        menu.Items.Add(new NativeMenuItemSeparator());
+        menu.Items.Add(compose);
         menu.Items.Add(settingsItem);
         menu.Items.Add(new NativeMenuItemSeparator());
         menu.Items.Add(_pausePillItem);
@@ -256,6 +268,8 @@ public partial class App : Application
             new QuickMenuItem("Pause / Resume", () => _reading.TogglePause()),
             new QuickMenuItem("Stop", () => _reading.Stop()),
             new QuickMenuItem("Show player", () => _reading.ShowPlayer()),
+            QuickMenuItem.Separator,
+            new QuickMenuItem("Compose…", () => _compose?.Open()),
             QuickMenuItem.Separator,
             new QuickMenuItem("Watch clipboard", ToggleWatchClipboard, () => _settings.Current.WatchClipboard),
             new QuickMenuItem("Pause the Read button for 1 hour", TogglePillPause, () => _readButton?.IsPaused ?? false),
@@ -366,19 +380,39 @@ public partial class App : Application
         }
     }
 
-    /// <summary>Registers the shortcut from settings and tells the user if Windows refused it.</summary>
-    private bool ApplyHotkey(AppSettings settings)
+    /// <summary>Registers the read-selection shortcut from settings and tells the user if Windows refused it.</summary>
+    private bool ApplyReadHotkey()
     {
-        if (_hotkeys is null)
+        if (_hotkeys is null || _settings is null)
         {
             return false;
         }
 
+        var settings = _settings.Current;
         var gesture = Helpers.Core.Input.HotkeyGesture.Parse(settings.ReadSelectionHotkey);
-        var ok = _hotkeys.Apply(gesture, settings.ReadSelectionHotkeyEnabled);
+        var ok = _hotkeys.Apply("read", gesture, settings.ReadSelectionHotkeyEnabled, () => _ = ReadSelectionAsync());
         if (!ok)
         {
             _toasts?.Error($"Couldn't claim the shortcut {settings.ReadSelectionHotkey}. Another app may be using it.", "Open Settings", ShowSettings);
+        }
+
+        return ok;
+    }
+
+    /// <summary>Registers the Compose shortcut. Pressed, it opens Compose sending to the window that had focus.</summary>
+    private bool ApplyComposeHotkey()
+    {
+        if (_hotkeys is null || _settings is null)
+        {
+            return false;
+        }
+
+        var settings = _settings.Current;
+        var gesture = Helpers.Core.Input.HotkeyGesture.Parse(settings.ComposeHotkey);
+        var ok = _hotkeys.Apply("compose", gesture, settings.ComposeHotkeyEnabled, () => _compose?.Open());
+        if (!ok)
+        {
+            _toasts?.Error($"Couldn't claim the Compose shortcut {settings.ComposeHotkey}. Another app may be using it.", "Open Settings", ShowSettings);
         }
 
         return ok;
@@ -398,7 +432,8 @@ public partial class App : Application
                 _reading,
                 SetWatchClipboard,
                 ApplyLook,
-                () => ApplyHotkey(_settings.Current),
+                ApplyReadHotkey,
+                ApplyComposeHotkey,
                 () => ReadableText.Apply(this, _settings.Current),
                 SetStartWithWindows,
                 StartupRegistration.IsEnabled())

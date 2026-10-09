@@ -49,8 +49,67 @@ public static class ClipboardText
         return null;
     }
 
+    /// <summary>
+    /// Replaces the clipboard with plain text. Only Compose calls this, between
+    /// a <see cref="ClipboardSnapshot"/> and its restore. Returns false if the
+    /// clipboard was busy, in which case it is left as it was.
+    /// </summary>
+    public static bool TrySet(string text)
+    {
+        for (var attempt = 0; attempt < 5; attempt++)
+        {
+            if (OpenClipboard(0))
+            {
+                try
+                {
+                    var handle = GlobalAlloc(GMEM_MOVEABLE, (nuint)((text.Length + 1) * 2));
+                    if (handle == 0)
+                    {
+                        return false;
+                    }
+
+                    var pointer = GlobalLock(handle);
+                    if (pointer == 0)
+                    {
+                        GlobalFree(handle);
+                        return false;
+                    }
+
+                    try
+                    {
+                        Marshal.Copy(text.ToCharArray(), 0, pointer, text.Length);
+                        Marshal.WriteInt16(pointer, text.Length * 2, 0);
+                    }
+                    finally
+                    {
+                        GlobalUnlock(handle);
+                    }
+
+                    EmptyClipboard();
+                    if (SetClipboardData(CF_UNICODETEXT, handle) == 0)
+                    {
+                        GlobalFree(handle);
+                        return false;
+                    }
+
+                    return true;
+                }
+                finally
+                {
+                    CloseClipboard();
+                }
+            }
+
+            Thread.Sleep(30);
+        }
+
+        return false;
+    }
+
     /// <summary>A number Windows bumps every time the clipboard changes.</summary>
     public static uint SequenceNumber => GetClipboardSequenceNumber();
+
+    private const uint GMEM_MOVEABLE = 0x0002;
 
     [DllImport("user32.dll", SetLastError = true)]
     private static extern bool OpenClipboard(nint owner);
@@ -59,10 +118,22 @@ public static class ClipboardText
     private static extern bool CloseClipboard();
 
     [DllImport("user32.dll", SetLastError = true)]
+    private static extern bool EmptyClipboard();
+
+    [DllImport("user32.dll", SetLastError = true)]
     private static extern nint GetClipboardData(uint format);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern nint SetClipboardData(uint format, nint handle);
 
     [DllImport("user32.dll")]
     private static extern uint GetClipboardSequenceNumber();
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern nint GlobalAlloc(uint flags, nuint bytes);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern nint GlobalFree(nint handle);
 
     [DllImport("kernel32.dll", SetLastError = true)]
     private static extern nint GlobalLock(nint handle);
