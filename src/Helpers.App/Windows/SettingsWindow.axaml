@@ -39,7 +39,7 @@
     </Style>
   </windows:ShellWindow.Styles>
 
-  <TabControl Margin="8,0,8,8">
+  <TabControl x:Name="Tabs" Margin="8,0,8,8">
 
     <TabItem Header="Voice">
       <ScrollViewer Classes="page">
@@ -295,6 +295,69 @@
             <TextBlock Classes="label" Text="Messages appear on" />
             <ComboBox Grid.Column="1" ItemsSource="{Binding MessageScreens}" SelectedItem="{Binding MessagesOn}" HorizontalAlignment="Stretch" />
           </Grid>
+        </StackPanel>
+      </ScrollViewer>
+    </TabItem>
+
+    <TabItem Header="AI">
+      <ScrollViewer Classes="page">
+        <StackPanel Spacing="2">
+          <Grid Classes="row" ColumnDefinitions="170,*">
+            <TextBlock Classes="label" Text="AI helper" />
+            <ComboBox Grid.Column="1" ItemsSource="{Binding AiProviders}" SelectedItem="{Binding AiProviderChoice}" HorizontalAlignment="Stretch" />
+          </Grid>
+          <TextBlock Classes="hint" Text="Check my thinking, Tidy and Make a request need a language model. On this PC: a small model, free, nothing leaves the machine, slower. Claude: your own API key, pennies per use, and your draft goes to Anthropic." />
+
+          <TextBlock Classes="section" Text="CLAUDE IN THE CLOUD" />
+          <Grid Classes="row" ColumnDefinitions="170,*,Auto,Auto">
+            <TextBlock Classes="label" Text="API key" />
+            <TextBox Grid.Column="1" Text="{Binding CloudKeyEntry}" PasswordChar="•" MinHeight="32" Watermark="{Binding CloudKeyWatermark}" />
+            <Button Grid.Column="2" Content="Save" Click="OnSaveKey" Margin="10,0,0,0" MinHeight="32" />
+            <Button Grid.Column="3" Content="Remove" Click="OnRemoveKey" Margin="8,0,0,0" MinHeight="32" />
+          </Grid>
+          <TextBlock Classes="hint" Text="{Binding CloudKeyStatus}" IsVisible="{Binding CloudKeyStatus, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+          <TextBlock Classes="hint" Text="Kept in Windows Credential Manager, never in the settings file. Keys come from console.anthropic.com." />
+          <Grid Classes="row" ColumnDefinitions="170,*">
+            <TextBlock Classes="label" Text="Model" />
+            <TextBox Grid.Column="1" Text="{Binding CloudModel, UpdateSourceTrigger=LostFocus}" MinHeight="32" />
+          </Grid>
+          <TextBlock Classes="hint" Text="claude-haiku-4-5 is the cheapest and these are simple jobs. claude-sonnet-5-5 gives better notes at more cost." />
+          <TextBlock Classes="hint" Text="{Binding SpendText}" />
+          <TextBlock Classes="hint" Text="What leaves your PC: only when you press a button with the cloud mark, your draft and the instructions for that button go to Anthropic over an encrypted connection. No name, no history, nothing else. Nothing is sent otherwise." />
+
+          <TextBlock Classes="section" Text="ON THIS PC" />
+          <Grid Classes="row" ColumnDefinitions="170,*">
+            <TextBlock Classes="label" Text="Model" />
+            <ComboBox Grid.Column="1" ItemsSource="{Binding LocalModelChoices}" SelectedItem="{Binding LocalModelChoice}" HorizontalAlignment="Stretch" />
+          </Grid>
+          <Grid Classes="row" ColumnDefinitions="170,*,Auto">
+            <TextBlock Classes="label" Text="Status" />
+            <StackPanel Grid.Column="1" Spacing="6" VerticalAlignment="Center">
+              <TextBlock Classes="label" Text="{Binding LocalModelStatus}" />
+              <ProgressBar Minimum="0" Maximum="100" Value="{Binding DownloadProgress}" IsVisible="{Binding IsDownloading}" Height="6" />
+            </StackPanel>
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="10,0,0,0">
+              <Button Content="Download" Click="OnDownloadModel" IsVisible="{Binding !IsDownloading}" MinHeight="32" />
+              <Button Content="Cancel" Click="OnCancelDownload" IsVisible="{Binding IsDownloading}" MinHeight="32" />
+            </StackPanel>
+          </Grid>
+          <TextBlock Classes="hint" Text="{Binding LocalModelHint}" />
+          <Grid Classes="row" ColumnDefinitions="170,*">
+            <TextBlock Classes="label" Text="Unload when idle" />
+            <Grid Grid.Column="1" ColumnDefinitions="Auto,*">
+              <NumericUpDown Minimum="0" Maximum="240" Increment="5" Value="{Binding UnloadLocalAfterMinutes}" Width="120" FormatString="0" />
+              <TextBlock Grid.Column="1" Margin="10,0,0,0" Classes="label" Text="minutes. The model uses about 3 GB while loaded. 0 keeps it loaded." />
+            </Grid>
+          </Grid>
+
+          <TextBlock Classes="section" Text="INSTRUCTIONS" />
+          <Grid Classes="row" ColumnDefinitions="170,*,Auto">
+            <TextBlock Classes="label" Text="For" />
+            <ComboBox Grid.Column="1" ItemsSource="{Binding PromptActions}" SelectedItem="{Binding PromptActionChoice}" HorizontalAlignment="Stretch" />
+            <Button Grid.Column="2" Content="Reset" Click="OnResetPrompt" Margin="10,0,0,0" MinHeight="32" />
+          </Grid>
+          <TextBox Text="{Binding PromptText, UpdateSourceTrigger=LostFocus}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="170" FontSize="13" />
+          <TextBlock Classes="hint" Margin="0,4,0,0" Text="What the model is told before it sees your draft. Change it if the notes aren't the kind you want. Reset puts the original back." />
         </StackPanel>
       </ScrollViewer>
     </TabItem>

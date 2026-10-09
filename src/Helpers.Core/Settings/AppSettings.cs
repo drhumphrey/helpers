@@ -127,6 +127,9 @@ public sealed class AppSettings
 
     public ReadingSettings Reading { get; set; } = new();
 
+    /// <summary>The AI helper: which provider, which model, the prompts, this month's spend. Never the key.</summary>
+    public Helpers.Core.Ai.AiSettings Ai { get; set; } = new();
+
     /// <summary>Font for the user's own text: the reading view, the sentence bar, Compose.</summary>
     public ReadingFont ReadingFontChoice { get; set; } = ReadingFont.Lexend;
 

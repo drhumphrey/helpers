@@ -300,9 +300,9 @@ The principle: keep the voice local because it's free, private and fast. Use a l
 | Tidy | Fix spelling and grammar only. Keep every word that isn't wrong, every fact, and the user's voice. Don't reorder, don't add, don't remove. Output as a list of {span, fix}. | Compose |
 | Make a request | Rewrite notes as a clear instruction to a coding assistant. Keep every fact. Don't invent requirements. Use numbered steps if there are several asks. Mark anything unclear with [check]. | Compose |
 | Summarise | Give the main points in up to five short bullets, then one line saying what the reader needs to do, if anything. | Player, Compose |
+| Explain simply | Rewrite for a non-technical reader. Short sentences. No jargon. Keep it accurate. | Player, Compose |
 
 **Test material.** A handful of Dave's own messages from this project's chat, with his permission given on 9 October 2026, as fixtures for the prompt work. They are good examples: a missing word here, a step skipped there, exactly what a spell checker cannot see and a reader can.
-| Explain simply | Rewrite for a non-technical reader. Short sentences. No jargon. Keep it accurate. | Player, Compose |
 
 **Local provider (LLamaSharp).**
 

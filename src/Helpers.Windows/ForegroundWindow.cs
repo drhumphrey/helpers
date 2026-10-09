@@ -102,7 +102,13 @@ public static class ForegroundWindow
         {
             using var process = Process.GetProcessById((int)processId);
             var description = process.MainModule?.FileVersionInfo.FileDescription?.Trim();
-            return string.IsNullOrEmpty(description) ? processName : description;
+            if (string.IsNullOrEmpty(description))
+            {
+                return processName;
+            }
+
+            // Some packaged apps describe themselves by their file name.
+            return description.EndsWith(".exe", StringComparison.OrdinalIgnoreCase) ? description[..^4] : description;
         }
         catch (Exception ex) when (ex is ArgumentException or InvalidOperationException or System.ComponentModel.Win32Exception or NotSupportedException)
         {

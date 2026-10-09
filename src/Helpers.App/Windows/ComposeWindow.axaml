@@ -2,9 +2,10 @@
                      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                      xmlns:windows="using:Helpers.App.Windows"
                      xmlns:controls="using:Helpers.App.Controls"
+                     xmlns:ai="using:Helpers.Core.Ai"
                      x:Class="Helpers.App.Windows.ComposeWindow"
                      Title="Compose"
-                     Width="780" Height="580" MinWidth="560" MinHeight="400"
+                     Width="860" Height="600" MinWidth="760" MinHeight="420"
                      WindowStartupLocation="Manual"
                      Padding="20,2,20,12">
 
@@ -51,6 +52,48 @@
     <Style Selector="Border.editorFrame.focused">
       <Setter Property="BorderBrush" Value="{DynamicResource OverlayBorderBrush}" />
     </Style>
+    <Style Selector="Border.note">
+      <Setter Property="CornerRadius" Value="10" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="BorderBrush" Value="{DynamicResource LineBrush}" />
+      <Setter Property="Background" Value="{DynamicResource LineBrush}" />
+      <Setter Property="Padding" Value="12,10" />
+      <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="Border.note:pointerover">
+      <Setter Property="BorderBrush" Value="{DynamicResource AccentTextBrush}" />
+    </Style>
+    <Style Selector="TextBlock.kind">
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Foreground" Value="{DynamicResource AccentTextBrush}" />
+    </Style>
+    <Style Selector="TextBlock.span">
+      <Setter Property="FontSize" Value="13" />
+      <Setter Property="FontStyle" Value="Italic" />
+      <Setter Property="Foreground" Value="{DynamicResource MutedBrush}" />
+      <Setter Property="TextWrapping" Value="Wrap" />
+      <Setter Property="MaxLines" Value="2" />
+      <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+    </Style>
+    <Style Selector="TextBlock.noteText">
+      <Setter Property="FontSize" Value="15" />
+      <Setter Property="TextWrapping" Value="Wrap" />
+      <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+    </Style>
+    <Style Selector="TextBlock.result">
+      <Setter Property="FontFamily" Value="{DynamicResource ReadingFontFamily}" />
+      <Setter Property="FontSize" Value="{DynamicResource ReadingFontSize}" />
+      <Setter Property="LineHeight" Value="{DynamicResource ReadingLineHeight}" />
+      <Setter Property="TextWrapping" Value="Wrap" />
+      <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+    </Style>
+    <Style Selector="PathIcon.cloud">
+      <Setter Property="Width" Value="16" />
+      <Setter Property="Height" Value="16" />
+      <Setter Property="Margin" Value="0,0,6,0" />
+      <Setter Property="Foreground" Value="{DynamicResource AccentTextBrush}" />
+    </Style>
   </windows:ShellWindow.Styles>
 
   <Grid RowDefinitions="Auto,*,Auto,Auto">
@@ -65,19 +108,102 @@
               ToolTip.Tip="Press this, then click the window you want to send to. Compose comes back by itself." />
     </Grid>
 
-    <Border Grid.Row="1" x:Name="EditorFrame" Classes="editorFrame">
-      <Grid>
-        <TextBox x:Name="Editor" Classes="editor" Watermark="Type here. Win+H dictates." TextChanged="OnTextChanged" />
-        <controls:SpellingUnderlines x:Name="Underlines" />
-      </Grid>
-    </Border>
+    <Grid Grid.Row="1" ColumnDefinitions="*,Auto">
+      <Border x:Name="EditorFrame" Classes="editorFrame">
+        <Grid>
+          <TextBox x:Name="Editor" Classes="editor" Watermark="Type here. Win+H dictates." TextChanged="OnTextChanged" />
+          <controls:SpellingUnderlines x:Name="Underlines" />
+        </Grid>
+      </Border>
+
+      <!-- The AI helper's answer: notes pinned to the draft, or new text beside it. Never replaces the draft by itself. -->
+      <Border Grid.Column="1" x:Name="NotesPanel" Classes="editorFrame" Width="340" Margin="12,0,0,0" IsVisible="False">
+        <DockPanel LastChildFill="True">
+          <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="14,10,6,4">
+            <StackPanel>
+              <TextBlock x:Name="NotesTitle" FontSize="15" FontWeight="SemiBold" Text="Check my thinking" />
+              <TextBlock x:Name="NotesSubtitle" Classes="hint" Text="" />
+            </StackPanel>
+            <Button Grid.Column="1" Classes="chrome" Click="OnCloseNotes" ToolTip.Tip="Close">
+              <Path Stroke="{DynamicResource MutedBrush}" StrokeThickness="1.5" Data="M5 5L15 15M15 5L5 15" Width="20" Height="20" />
+            </Button>
+          </Grid>
+          <StackPanel DockPanel.Dock="Bottom" x:Name="ResultButtons" Orientation="Horizontal" Spacing="8" Margin="14,8,14,12" IsVisible="False">
+            <Button Content="Use this" Classes="main" Click="OnUseResult" ToolTip.Tip="Replace the draft with this. Ctrl+Z brings the draft back." />
+            <Button Content="Copy" Click="OnCopyResult" />
+            <Button Content="Read it" Click="OnReadResult" />
+          </StackPanel>
+          <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+            <StackPanel Margin="14,4,14,10" Spacing="10">
+
+              <StackPanel x:Name="CloudConfirm" IsVisible="False" Spacing="10">
+                <TextBlock x:Name="CloudConfirmText" Classes="noteText" />
+                <CheckBox x:Name="CloudDontAsk" Content="Don't ask again" FontSize="13" />
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <Button Content="Send it" Classes="main" Click="OnCloudConfirmed" />
+                  <Button Content="Not now" Click="OnCloseNotes" />
+                </StackPanel>
+              </StackPanel>
+
+              <StackPanel x:Name="Thinking" IsVisible="False" Spacing="8">
+                <ProgressBar IsIndeterminate="True" Height="4" />
+                <Grid ColumnDefinitions="*,Auto">
+                  <TextBlock x:Name="ThinkingText" Classes="hint" Text="Reading your draft…" />
+                  <Button Grid.Column="1" Classes="small" Content="Cancel" Click="OnCancelAi" />
+                </Grid>
+              </StackPanel>
+
+              <TextBlock x:Name="NotesMessage" Classes="noteText" IsVisible="False" />
+
+              <ItemsControl x:Name="NotesList">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate>
+                    <StackPanel Spacing="8" />
+                  </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="ai:WritingNote">
+                    <Border Classes="note" PointerPressed="OnNotePressed">
+                      <StackPanel Spacing="4">
+                        <TextBlock Classes="kind" Text="{Binding KindText}" />
+                        <TextBlock Classes="span" Text="{Binding Span}" IsVisible="{Binding IsAnchored}" />
+                        <TextBlock Classes="noteText" Text="{Binding Note}" />
+                        <Button Classes="small" Content="{Binding FixText}" IsVisible="{Binding HasFix}" Click="OnApplyNote" Margin="0,4,0,0" HorizontalAlignment="Left" />
+                      </StackPanel>
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+
+              <TextBlock x:Name="ResultText" Classes="result" IsVisible="False" />
+            </StackPanel>
+          </ScrollViewer>
+        </DockPanel>
+      </Border>
+    </Grid>
 
     <Grid Grid.Row="2" ColumnDefinitions="Auto,*,Auto" Margin="0,12,0,0">
+      <TextBlock Grid.Column="1" x:Name="AiHint" Classes="hint" Margin="10,0" />
       <StackPanel Orientation="Horizontal" Spacing="8">
         <Button Content="Read back" Click="OnReadBack" ToolTip.Tip="Hear the draft in the player's voice" />
-        <Button Content="Tidy" IsEnabled="False" />
-        <Button Content="Make a request" IsEnabled="False" />
-        <TextBlock Classes="hint" Text="Tidy and Make a request need an AI helper. Later version." MaxWidth="230" Margin="4,0,0,0" />
+        <Button x:Name="CheckButton" Click="OnCheckMyThinking" ToolTip.Tip="A reader's notes: where the logic jumps, what is missing, what is unclear. Never a rewrite.">
+          <StackPanel Orientation="Horizontal">
+            <PathIcon x:Name="CheckCloud" Classes="cloud" IsVisible="False" Data="M19.35 10.04A7.49 7.49 0 0 0 12 4C9.11 4 6.6 5.64 5.35 8.04A5.994 5.994 0 0 0 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z" />
+            <TextBlock Text="Check my thinking" />
+          </StackPanel>
+        </Button>
+        <Button x:Name="TidyButton" Click="OnTidy" ToolTip.Tip="Spelling and grammar only, each change marked">
+          <StackPanel Orientation="Horizontal">
+            <PathIcon x:Name="TidyCloud" Classes="cloud" IsVisible="False" Data="M19.35 10.04A7.49 7.49 0 0 0 12 4C9.11 4 6.6 5.64 5.35 8.04A5.994 5.994 0 0 0 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z" />
+            <TextBlock Text="Tidy" />
+          </StackPanel>
+        </Button>
+        <Button x:Name="RequestButton" Click="OnMakeARequest" ToolTip.Tip="Rewrite the draft as a clear request to a coding assistant">
+          <StackPanel Orientation="Horizontal">
+            <PathIcon x:Name="RequestCloud" Classes="cloud" IsVisible="False" Data="M19.35 10.04A7.49 7.49 0 0 0 12 4C9.11 4 6.6 5.64 5.35 8.04A5.994 5.994 0 0 0 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z" />
+            <TextBlock Text="Make a request" />
+          </StackPanel>
+        </Button>
       </StackPanel>
       <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
         <Button Content="Copy" Click="OnCopy" ToolTip.Tip="Put the draft on the clipboard" />

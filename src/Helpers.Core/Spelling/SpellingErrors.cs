@@ -93,6 +93,36 @@ public static class SpellingErrors
             return errors;
         }
 
+        var shifted = new List<SpellingError>(errors.Count);
+        foreach (var error in errors)
+        {
+            var (start, length) = ShiftRange(oldText, newText, error.Start, error.Length);
+            if (start >= 0)
+            {
+                shifted.Add(new SpellingError(start, length));
+            }
+        }
+
+        return shifted;
+    }
+
+    /// <summary>
+    /// One range through one edit: unchanged before the edit, moved after it,
+    /// and (-1, 0) when the edit touched it. Used for underlines and for the
+    /// AI helper's notes alike.
+    /// </summary>
+    public static (int Start, int Length) ShiftRange(string oldText, string newText, int start, int length)
+    {
+        if (start < 0 || length <= 0)
+        {
+            return (-1, 0);
+        }
+
+        if (oldText == newText)
+        {
+            return (start, length);
+        }
+
         var prefix = 0;
         var limit = Math.Min(oldText.Length, newText.Length);
         while (prefix < limit && oldText[prefix] == newText[prefix])
@@ -109,20 +139,18 @@ public static class SpellingErrors
 
         var oldChangeEnd = oldText.Length - suffix;
         var delta = newText.Length - oldText.Length;
+        var end = start + length;
 
-        var shifted = new List<SpellingError>(errors.Count);
-        foreach (var error in errors)
+        if (end <= prefix)
         {
-            if (error.End <= prefix)
-            {
-                shifted.Add(error);
-            }
-            else if (error.Start >= oldChangeEnd)
-            {
-                shifted.Add(error with { Start = error.Start + delta });
-            }
+            return (start, length);
         }
 
-        return shifted;
+        if (start >= oldChangeEnd)
+        {
+            return (start + delta, length);
+        }
+
+        return (-1, 0);
     }
 }

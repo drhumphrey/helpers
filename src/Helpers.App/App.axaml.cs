@@ -25,6 +25,7 @@ public partial class App : Application
     private InputMonitor? _input;
     private ReadButtonService? _readButton;
     private ComposeController? _compose;
+    private AssistantService? _assistant;
     private KokoroEngine? _engine;
     private QuickMenuWindow? _quickMenu;
     private TrayIcon? _tray;
@@ -68,7 +69,8 @@ public partial class App : Application
             }
 
             _selection = new SelectionCapture();
-            _compose = new ComposeController(_settings, _reading, _toasts);
+            _assistant = new AssistantService(_settings, new CredentialStore());
+            _compose = new ComposeController(_settings, _reading, _toasts, _assistant);
             _hotkeys = new HotkeyService();
             ApplyReadHotkey();
             ApplyComposeHotkey();
@@ -98,6 +100,7 @@ public partial class App : Application
             desktop.Exit += (_, _) =>
             {
                 _compose?.Dispose();
+                _assistant?.Dispose();
                 _readButton?.Dispose();
                 _input?.Dispose();
                 _hotkeys?.Dispose();
@@ -171,6 +174,23 @@ public partial class App : Application
             else if (args[i] == "--settings")
             {
                 ShowSettings();
+                if (i + 1 < args.Length && !args[i + 1].StartsWith("--", StringComparison.Ordinal))
+                {
+                    _settingsWindow?.SelectTab(args[++i]);
+                }
+            }
+            else if (args[i] == "--compose-check")
+            {
+                _compose?.OpenAndRun(Helpers.Core.Ai.AssistantAction.CheckMyThinking);
+            }
+            else if (args[i] == "--compose-tidy")
+            {
+                _compose?.OpenAndRun(Helpers.Core.Ai.AssistantAction.Tidy);
+            }
+            else if (args[i] == "--ai-test" && i + 2 < args.Length)
+            {
+                _ = AiTestAsync(args[i + 1], args[i + 2]);
+                i += 2;
             }
             else if (args[i] == "--expanded")
             {
@@ -193,6 +213,62 @@ public partial class App : Application
                 _readButton?.ShowForPreview();
             }
         }
+    }
+
+    /// <summary>
+    /// A developer check of the local model: downloads it if needed, runs Check
+    /// my thinking and Tidy on a file, and writes what came back and how long
+    /// it took to another file. Uses its own settings file, so nothing the user
+    /// chose is touched.
+    /// </summary>
+    private async Task AiTestAsync(string inputPath, string outputPath)
+    {
+        if (_toasts is null)
+        {
+            return;
+        }
+
+        var store = new SettingsStore(Path.Combine(Path.GetTempPath(), "helpers-ai-test-settings.json"));
+        store.Load();
+        store.Update(s => s.Ai.Provider = Helpers.Core.Ai.AiProvider.Local);
+        using var service = new AssistantService(store, new CredentialStore());
+        var log = new System.Text.StringBuilder();
+        try
+        {
+            var text = await File.ReadAllTextAsync(inputPath);
+            if (!service.LocalModelDownloaded)
+            {
+                var toast = _toasts.Progress("Downloading the local model for a test…");
+                await service.DownloadLocalModelAsync(new Progress<double>(fraction => toast.Fraction = fraction));
+                _toasts.Dismiss(toast);
+                log.AppendLine("downloaded");
+            }
+
+            foreach (var action in new[] { Helpers.Core.Ai.AssistantAction.CheckMyThinking, Helpers.Core.Ai.AssistantAction.Tidy })
+            {
+                var watch = Stopwatch.StartNew();
+                var result = await service.RunAsync(action, text, null, CancellationToken.None);
+                log.AppendLine($"== {action} in {watch.Elapsed.TotalSeconds:0.0} s");
+                log.AppendLine(result.Output);
+                var notes = Helpers.Core.Ai.NotesParser.Parse(result.Output, text, action);
+                log.AppendLine($"-- {notes.Count} notes parsed");
+                foreach (var note in notes)
+                {
+                    log.AppendLine($"   [{note.Kind}] at {note.Start}+{note.Length} \"{note.Span}\" -> {note.Note} | fix: {note.Fix ?? "none"}");
+                }
+            }
+
+            using var process = Process.GetCurrentProcess();
+            process.Refresh();
+            log.AppendLine($"working set {process.WorkingSet64 / 1_048_576:N0} MB with the model loaded");
+        }
+        catch (Exception ex)
+        {
+            log.AppendLine("ERROR " + ex);
+        }
+
+        await File.WriteAllTextAsync(outputPath, log.ToString());
+        _toasts.Info("AI test finished");
     }
 
     private TrayIcon BuildTrayIcon(IClassicDesktopStyleApplicationLifetime desktop, AppSettings settings)
@@ -446,7 +522,8 @@ public partial class App : Application
                 ApplyComposeHotkey,
                 () => ReadableText.Apply(this, _settings.Current),
                 SetStartWithWindows,
-                StartupRegistration.IsEnabled())
+                StartupRegistration.IsEnabled(),
+                _assistant!)
             {
                 MessagesFollowFocusChanged = follow =>
                 {

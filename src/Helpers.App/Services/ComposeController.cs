@@ -27,11 +27,14 @@ public sealed class ComposeController : IDisposable
     private CancellationTokenSource? _picking;
     private bool _sending;
 
-    public ComposeController(SettingsStore settings, ReadingController reading, ToastService toasts)
+    private readonly AssistantService _assistant;
+
+    public ComposeController(SettingsStore settings, ReadingController reading, ToastService toasts, AssistantService assistant)
     {
         _settings = settings;
         _reading = reading;
         _toasts = toasts;
+        _assistant = assistant;
 
         var dictionary = new UserDictionary(Path.Combine(SettingsStore.DefaultFolder(), "dictionary.txt"));
         dictionary.Load();
@@ -111,6 +114,13 @@ public sealed class ComposeController : IDisposable
         window.FocusEditor();
     }
 
+    /// <summary>Opens Compose and runs an AI action on the draft, for the developer switches.</summary>
+    public void OpenAndRun(Core.Ai.AssistantAction action)
+    {
+        Open();
+        _window?.RunAction(action);
+    }
+
     public void Dispose()
     {
         _picking?.Cancel();
@@ -129,7 +139,7 @@ public sealed class ComposeController : IDisposable
             return _window;
         }
 
-        var window = new ComposeWindow(_spelling);
+        var window = new ComposeWindow(_spelling, _assistant, _settings);
         window.Text = _settings.Current.ComposeDraft ?? string.Empty;
         window.ReadBackRequested += ReadBack;
         window.CopyRequested += text => Copy(text, announce: true);

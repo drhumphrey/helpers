@@ -1,6 +1,8 @@
 using System.Collections.ObjectModel;
 using Avalonia.Media;
+using Helpers.Ai;
 using Helpers.App.Services;
+using Helpers.Core.Ai;
 using Helpers.Core.Settings;
 using Helpers.Core.Speech;
 using Helpers.Core.Text;
@@ -81,8 +83,10 @@ public sealed class SettingsViewModel : ObservableObject
         Func<bool> applyComposeHotkey,
         Action applyReadableText,
         Func<bool, bool> setStartWithWindows,
-        bool startWithWindowsNow)
+        bool startWithWindowsNow,
+        AssistantService assistant)
     {
+        _assistant = assistant;
         _store = store;
         _reading = reading;
         _watchClipboard = watchClipboard;
@@ -183,6 +187,23 @@ public sealed class SettingsViewModel : ObservableObject
         _composeHotkeyEnabled = settings.ComposeHotkeyEnabled;
 
         _startWithWindows = startWithWindowsNow;
+
+        var ai = settings.Ai;
+        AiProviders =
+        [
+            new Choice<AiProvider>(AiProvider.None, "None"),
+            new Choice<AiProvider>(AiProvider.Local, "On this PC"),
+            new Choice<AiProvider>(AiProvider.Cloud, "Claude in the cloud"),
+        ];
+        _aiProvider = AiProviders.First(p => p.Value == ai.Provider);
+        _cloudModel = ai.CloudModel;
+        LocalModelChoices = LocalModels.All.Select(m => new Choice<string>(m.Name, $"{m.Name} ({m.SizeText})")).ToList();
+        _localModel = LocalModelChoices.FirstOrDefault(m => m.Value == ai.LocalModel) ?? LocalModelChoices[0];
+        _unloadLocalAfterMinutes = ai.UnloadLocalAfterMinutes;
+        PromptActions = AssistantActions.All.Select(a => new Choice<AssistantAction>(a, AssistantActions.Title(a))).ToList();
+        _promptAction = PromptActions[0];
+        _promptText = ai.PromptFor(_promptAction.Value);
+        RefreshAiStatus();
     }
 
     public IReadOnlyList<SpeechVoice> Voices { get; }
@@ -804,6 +825,276 @@ public sealed class SettingsViewModel : ObservableObject
     {
         get => _composeHotkeyStatus;
         private set => Set(ref _composeHotkeyStatus, value);
+    }
+
+    // The AI helper
+
+    private readonly AssistantService _assistant;
+    private Choice<AiProvider> _aiProvider;
+    private string _cloudKeyEntry = string.Empty;
+    private string _cloudKeyStatus = string.Empty;
+    private string _cloudModel;
+    private Choice<string> _localModel;
+    private string _localModelStatus = string.Empty;
+    private double _downloadProgress;
+    private bool _isDownloading;
+    private int _unloadLocalAfterMinutes;
+    private Choice<AssistantAction> _promptAction;
+    private string _promptText;
+
+    public IReadOnlyList<Choice<AiProvider>> AiProviders { get; }
+
+    public Choice<AiProvider> AiProviderChoice
+    {
+        get => _aiProvider;
+        set
+        {
+            if (Set(ref _aiProvider, value))
+            {
+                _store.Update(s => s.Ai.Provider = value.Value);
+                _assistant.Rebuild();
+                RefreshAiStatus();
+            }
+        }
+    }
+
+    public string CloudKeyEntry
+    {
+        get => _cloudKeyEntry;
+        set => Set(ref _cloudKeyEntry, value ?? string.Empty);
+    }
+
+    public string CloudKeyWatermark => _assistant.HasCloudKey ? "A key is saved. Paste a new one to replace it." : "sk-ant-…";
+
+    public string CloudKeyStatus
+    {
+        get => _cloudKeyStatus;
+        private set => Set(ref _cloudKeyStatus, value);
+    }
+
+    public void SaveCloudKey()
+    {
+        if (string.IsNullOrWhiteSpace(CloudKeyEntry))
+        {
+            CloudKeyStatus = "Paste the key first.";
+            return;
+        }
+
+        try
+        {
+            _assistant.SetCloudKey(CloudKeyEntry);
+            CloudKeyEntry = string.Empty;
+            CloudKeyStatus = "Key saved.";
+        }
+        catch (Exception ex)
+        {
+            CloudKeyStatus = ex.Message;
+        }
+
+        RefreshAiStatus();
+    }
+
+    public void RemoveCloudKey()
+    {
+        try
+        {
+            _assistant.SetCloudKey(null);
+            CloudKeyEntry = string.Empty;
+            CloudKeyStatus = "Key removed.";
+        }
+        catch (Exception ex)
+        {
+            CloudKeyStatus = ex.Message;
+        }
+
+        RefreshAiStatus();
+    }
+
+    public string CloudModel
+    {
+        get => _cloudModel;
+        set
+        {
+            var trimmed = (value ?? string.Empty).Trim();
+            if (trimmed.Length == 0)
+            {
+                trimmed = "claude-haiku-4-5";
+            }
+
+            if (Set(ref _cloudModel, trimmed))
+            {
+                _store.Update(s => s.Ai.CloudModel = trimmed);
+                _assistant.Rebuild();
+                Raise(nameof(SpendText));
+            }
+        }
+    }
+
+    public string SpendText
+    {
+        get
+        {
+            var ai = _store.Current.Ai;
+            if (ai.SpendInputTokens == 0 && ai.SpendOutputTokens == 0)
+            {
+                return "Nothing spent this month.";
+            }
+
+            var cost = CloudCost.EstimateUsd(ai.CloudModel, ai.SpendInputTokens, ai.SpendOutputTokens);
+            var known = CloudCost.IsKnown(ai.CloudModel) ? string.Empty : " The price of this model isn't known here, so this is a rough guess.";
+            return $"This month: {ai.SpendInputTokens:N0} tokens sent, {ai.SpendOutputTokens:N0} received, about {CloudCost.Describe(cost)}.{known}";
+        }
+    }
+
+    public IReadOnlyList<Choice<string>> LocalModelChoices { get; }
+
+    public Choice<string> LocalModelChoice
+    {
+        get => _localModel;
+        set
+        {
+            if (Set(ref _localModel, value))
+            {
+                _store.Update(s => s.Ai.LocalModel = value.Value);
+                _assistant.Rebuild();
+                RefreshAiStatus();
+            }
+        }
+    }
+
+    public string LocalModelStatus
+    {
+        get => _localModelStatus;
+        private set => Set(ref _localModelStatus, value);
+    }
+
+    public string LocalModelHint
+    {
+        get
+        {
+            var model = LocalModels.ByName(_store.Current.Ai.LocalModel);
+            var cpu = LlamaAssistant.CpuIsSupported ? string.Empty : " This PC's processor lacks AVX2, so the local model can't run here.";
+            return $"{model.Description} Downloaded once from Hugging Face to {_assistant.LocalModelsFolder}.{cpu}";
+        }
+    }
+
+    public double DownloadProgress
+    {
+        get => _downloadProgress;
+        private set => Set(ref _downloadProgress, value);
+    }
+
+    public bool IsDownloading
+    {
+        get => _isDownloading;
+        private set => Set(ref _isDownloading, value);
+    }
+
+    public async Task DownloadLocalModelAsync()
+    {
+        if (IsDownloading)
+        {
+            return;
+        }
+
+        IsDownloading = true;
+        DownloadProgress = 0;
+        try
+        {
+            await _assistant.DownloadLocalModelAsync(new Progress<double>(fraction =>
+            {
+                DownloadProgress = fraction * 100;
+                LocalModelStatus = $"Downloading, {fraction:P0}";
+            }));
+            LocalModelStatus = "Ready";
+        }
+        catch (OperationCanceledException)
+        {
+            LocalModelStatus = "Download cancelled";
+        }
+        catch (Exception ex)
+        {
+            LocalModelStatus = $"Download failed: {ex.Message}";
+        }
+        finally
+        {
+            IsDownloading = false;
+            RefreshAiStatus(keepStatus: true);
+        }
+    }
+
+    public void CancelDownload() => _assistant.CancelDownload();
+
+    public int UnloadLocalAfterMinutes
+    {
+        get => _unloadLocalAfterMinutes;
+        set
+        {
+            var clamped = Math.Clamp(value, 0, 240);
+            if (Set(ref _unloadLocalAfterMinutes, clamped))
+            {
+                _store.Update(s => s.Ai.UnloadLocalAfterMinutes = clamped);
+            }
+        }
+    }
+
+    public IReadOnlyList<Choice<AssistantAction>> PromptActions { get; }
+
+    public Choice<AssistantAction> PromptActionChoice
+    {
+        get => _promptAction;
+        set
+        {
+            if (Set(ref _promptAction, value))
+            {
+                _promptText = _store.Current.Ai.PromptFor(value.Value);
+                Raise(nameof(PromptText));
+            }
+        }
+    }
+
+    public string PromptText
+    {
+        get => _promptText;
+        set
+        {
+            var text = value ?? string.Empty;
+            if (!Set(ref _promptText, text))
+            {
+                return;
+            }
+
+            var action = _promptAction.Value;
+            _store.Update(s =>
+            {
+                if (string.IsNullOrWhiteSpace(text) || text == PromptTemplates.Default(action))
+                {
+                    s.Ai.Prompts.Remove(action.ToString());
+                }
+                else
+                {
+                    s.Ai.Prompts[action.ToString()] = text;
+                }
+            });
+            _assistant.Rebuild();
+        }
+    }
+
+    public void ResetPrompt() => PromptText = PromptTemplates.Default(_promptAction.Value);
+
+    /// <summary>Refreshes the AI page's read-only lines after a change.</summary>
+    public void RefreshAiStatus(bool keepStatus = false)
+    {
+        if (!keepStatus)
+        {
+            LocalModelStatus = _assistant.IsDownloading
+                ? "Downloading…"
+                : _assistant.LocalModelDownloaded ? "Ready" : "Not downloaded yet";
+        }
+
+        Raise(nameof(CloudKeyWatermark));
+        Raise(nameof(LocalModelHint));
+        Raise(nameof(SpendText));
     }
 
     // Start-up

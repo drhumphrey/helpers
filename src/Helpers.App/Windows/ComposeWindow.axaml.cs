@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using Avalonia;
 using Avalonia.Controls;
@@ -5,15 +6,18 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Threading;
+using Helpers.App.Services;
+using Helpers.Core.Ai;
 using Helpers.Core.Capture;
+using Helpers.Core.Settings;
 using Helpers.Core.Spelling;
 
 namespace Helpers.App.Windows;
 
 /// <summary>
 /// A plain window for writing to the AI: a big text box with spelling as you
-/// type, Read back, Copy and Send to chat. It hides rather than closes so the
-/// draft and the checker stay warm. The AI buttons arrive in a later milestone.
+/// type, Read back, Copy and Send to chat, and the AI helper's notes beside
+/// the draft. It hides rather than closes so the draft and the checker stay warm.
 /// </summary>
 public partial class ComposeWindow : ShellWindow
 {
@@ -22,6 +26,9 @@ public partial class ComposeWindow : ShellWindow
     private static readonly TimeSpan PlacementDelay = TimeSpan.FromMilliseconds(800);
 
     private readonly DraftSpelling _spelling;
+    private readonly AssistantService _assistant;
+    private readonly SettingsStore _settings;
+    private readonly ObservableCollection<WritingNote> _notes = [];
     private MenuFlyout _menu = new();
     private readonly DispatcherTimer _checkTimer;
     private readonly DispatcherTimer _draftTimer;
@@ -32,11 +39,20 @@ public partial class ComposeWindow : ShellWindow
     private bool _draftDirty;
     private bool _loading;
     private bool _opened;
+    private CancellationTokenSource? _aiRun;
+    private AssistantAction? _pendingAction;
+    private string _resultText = string.Empty;
 
-    public ComposeWindow(DraftSpelling spelling)
+    public ComposeWindow(DraftSpelling spelling, AssistantService assistant, SettingsStore settings)
     {
         _spelling = spelling;
+        _assistant = assistant;
+        _settings = settings;
         InitializeComponent();
+
+        NotesList.ItemsSource = _notes;
+        _assistant.Changed += RefreshAiState;
+        Closed += (_, _) => _assistant.Changed -= RefreshAiState;
 
         Underlines.Editor = Editor;
         Editor.ContextFlyout = _menu;
@@ -71,6 +87,7 @@ public partial class ComposeWindow : ShellWindow
         KeyDown += OnKeyDown;
 
         ShowSpellingState();
+        RefreshAiState();
     }
 
     public event Action<string>? ReadBackRequested;
@@ -240,8 +257,9 @@ public partial class ComposeWindow : ShellWindow
             return;
         }
 
-        // Keep the underlines in place while waiting for the next check.
+        // Keep the underlines and the notes in place while waiting for the next check.
         _errors = SpellingErrors.Shift(_errors, _errorsText, text);
+        ShiftNotes(_errorsText, text);
         _errorsText = text;
         _typingCaret = Editor.CaretIndex;
         Underlines.Errors = _errors;
@@ -441,6 +459,292 @@ public partial class ComposeWindow : ShellWindow
         Editor.Focus();
         CheckNow();
     }
+
+    // The AI helper: notes pinned to the draft, or new text beside it. Nothing replaces the draft by itself.
+
+    private void RefreshAiState()
+    {
+        var why = _assistant.WhyNotReady();
+        var ready = why is null;
+        CheckButton.IsEnabled = ready;
+        TidyButton.IsEnabled = ready;
+        RequestButton.IsEnabled = ready;
+
+        var cloud = ready && _assistant.SendsTextOffMachine;
+        CheckCloud.IsVisible = cloud;
+        TidyCloud.IsVisible = cloud;
+        RequestCloud.IsVisible = cloud;
+
+        AiHint.Text = why ?? (cloud ? "Buttons with the cloud mark send the draft to Anthropic." : string.Empty);
+        AiHint.IsVisible = AiHint.Text.Length > 0;
+    }
+
+    private void OnCheckMyThinking(object? sender, RoutedEventArgs e) => _ = StartAiAsync(AssistantAction.CheckMyThinking);
+
+    /// <summary>Runs an action as if its button had been pressed. For the developer switches.</summary>
+    public void RunAction(AssistantAction action) => _ = StartAiAsync(action);
+
+    private void OnTidy(object? sender, RoutedEventArgs e) => _ = StartAiAsync(AssistantAction.Tidy);
+
+    private void OnMakeARequest(object? sender, RoutedEventArgs e) => _ = StartAiAsync(AssistantAction.MakeARequest);
+
+    private async Task StartAiAsync(AssistantAction action)
+    {
+        var text = Text;
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            ShowPanel(action);
+            ShowMessage("Nothing to read yet. Type something first.");
+            return;
+        }
+
+        if (_assistant.SendsTextOffMachine && !_settings.Current.Ai.CloudConfirmed)
+        {
+            _pendingAction = action;
+            ShowPanel(action);
+            CloudConfirmText.Text =
+                $"This will send your draft ({text.Length:N0} characters) and the instructions for “{AssistantActions.Title(action)}” " +
+                "to Anthropic over an encrypted connection. Nothing else goes: no name, no other text, no history. The reply comes back here.";
+            CloudDontAsk.IsChecked = false;
+            CloudConfirm.IsVisible = true;
+            return;
+        }
+
+        await RunAiAsync(action, text);
+    }
+
+    private void OnCloudConfirmed(object? sender, RoutedEventArgs e)
+    {
+        if (CloudDontAsk.IsChecked == true)
+        {
+            _settings.Update(s => s.Ai.CloudConfirmed = true);
+        }
+
+        CloudConfirm.IsVisible = false;
+        if (_pendingAction is { } action)
+        {
+            _pendingAction = null;
+            _ = RunAiAsync(action, Text);
+        }
+    }
+
+    private async Task RunAiAsync(AssistantAction action, string text)
+    {
+        _aiRun?.Cancel();
+        var run = new CancellationTokenSource();
+        _aiRun = run;
+
+        ShowPanel(action);
+        Thinking.IsVisible = true;
+        ThinkingText.Text = _assistant.SendsTextOffMachine
+            ? "Asking Claude…"
+            : "Thinking on this PC. The first time takes a while, as the model loads…";
+
+        var streaming = !AssistantActions.ReturnsNotes(action);
+        var progress = new Progress<string>(partialText =>
+        {
+            if (streaming && !run.IsCancellationRequested)
+            {
+                ResultText.Text = partialText;
+                ResultText.IsVisible = true;
+            }
+        });
+
+        try
+        {
+            var result = await _assistant.RunAsync(action, text, progress, run.Token);
+            if (run.IsCancellationRequested)
+            {
+                return;
+            }
+
+            if (AssistantActions.ReturnsNotes(action))
+            {
+                var notes = NotesParser.Parse(result.Output, text, action);
+                _notes.Clear();
+                foreach (var note in notes)
+                {
+                    _notes.Add(note);
+                }
+
+                if (notes.Count == 0)
+                {
+                    ShowMessage(action == AssistantAction.Tidy
+                        ? "Nothing to fix. The spelling and grammar look fine."
+                        : "Nothing to note. It reads clearly.");
+                }
+            }
+            else
+            {
+                _resultText = result.Output.Trim();
+                ResultText.Text = _resultText;
+                ResultText.IsVisible = true;
+                ResultButtons.IsVisible = _resultText.Length > 0;
+            }
+
+            NotesSubtitle.Text = Subtitle(result);
+        }
+        catch (OperationCanceledException)
+        {
+            if (ReferenceEquals(_aiRun, run))
+            {
+                HidePanel();
+            }
+        }
+        catch (Exception ex)
+        {
+            ShowMessage($"Couldn't do that: {ex.Message}");
+        }
+        finally
+        {
+            Thinking.IsVisible = false;
+            if (ReferenceEquals(_aiRun, run))
+            {
+                _aiRun = null;
+            }
+
+            run.Dispose();
+        }
+    }
+
+    private string Subtitle(AssistantResult result)
+    {
+        if (!_assistant.SendsTextOffMachine || (result.InputTokens == 0 && result.OutputTokens == 0))
+        {
+            return _assistant.Name;
+        }
+
+        var model = _settings.Current.Ai.CloudModel;
+        var cost = CloudCost.EstimateUsd(model, result.InputTokens, result.OutputTokens);
+        return $"{_assistant.Name} · about {CloudCost.Describe(cost)}";
+    }
+
+    private void ShowPanel(AssistantAction action)
+    {
+        NotesPanel.IsVisible = true;
+        NotesTitle.Text = AssistantActions.Title(action);
+        NotesSubtitle.Text = _assistant.Name;
+        _notes.Clear();
+        _resultText = string.Empty;
+        NotesMessage.IsVisible = false;
+        ResultText.Text = string.Empty;
+        ResultText.IsVisible = false;
+        ResultButtons.IsVisible = false;
+        CloudConfirm.IsVisible = false;
+        Thinking.IsVisible = false;
+    }
+
+    private void ShowMessage(string text)
+    {
+        NotesMessage.Text = text;
+        NotesMessage.IsVisible = true;
+    }
+
+    private void HidePanel()
+    {
+        NotesPanel.IsVisible = false;
+        _notes.Clear();
+    }
+
+    private void OnCloseNotes(object? sender, RoutedEventArgs e)
+    {
+        _aiRun?.Cancel();
+        _pendingAction = null;
+        HidePanel();
+    }
+
+    private void OnCancelAi(object? sender, RoutedEventArgs e) => _aiRun?.Cancel();
+
+    /// <summary>Clicking a note shows where it points.</summary>
+    private void OnNotePressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (sender is not Border { DataContext: WritingNote note } || !note.IsAnchored || note.End > Text.Length)
+        {
+            return;
+        }
+
+        Editor.CaretIndex = note.End;
+        Editor.SelectionStart = note.Start;
+        Editor.SelectionEnd = note.End;
+        Editor.Focus();
+    }
+
+    /// <summary>Applies one note's fix through the editor's own path, so Ctrl+Z reverses it, then moves the other notes along.</summary>
+    private void OnApplyNote(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not Button { DataContext: WritingNote note } || !note.HasFix)
+        {
+            return;
+        }
+
+        e.Handled = true;
+        var text = Text;
+        var (start, length) = note.IsAnchored && note.End <= text.Length
+            ? (note.Start, note.Length)
+            : SpanAnchor.Find(text, note.Span, 0);
+        if (start < 0)
+        {
+            ShowMessage("Couldn't find those words in the draft any more.");
+            return;
+        }
+
+        var fix = note.Fix!;
+        Editor.CaretIndex = start;
+        Editor.SelectionStart = start;
+        Editor.SelectionEnd = start + length;
+        Editor.SelectedText = fix;
+
+        // The text-changed handler has already shifted the other notes; just drop this one.
+        var index = _notes.IndexOf(note);
+        if (index >= 0)
+        {
+            _notes.RemoveAt(index);
+        }
+
+        if (_notes.Count == 0)
+        {
+            ShowMessage("All done.");
+        }
+
+        Editor.CaretIndex = start + fix.Length;
+        CheckNow();
+    }
+
+    private void ShiftNotes(string oldText, string newText)
+    {
+        for (var i = 0; i < _notes.Count; i++)
+        {
+            var note = _notes[i];
+            if (!note.IsAnchored)
+            {
+                continue;
+            }
+
+            var (start, length) = SpellingErrors.ShiftRange(oldText, newText, note.Start, note.Length);
+            if (start != note.Start || length != note.Length)
+            {
+                _notes[i] = note with { Start = start, Length = length };
+            }
+        }
+    }
+
+    private void OnUseResult(object? sender, RoutedEventArgs e)
+    {
+        if (_resultText.Length == 0)
+        {
+            return;
+        }
+
+        Editor.SelectAll();
+        Editor.SelectedText = _resultText;
+        Editor.CaretIndex = _resultText.Length;
+        HidePanel();
+        CheckNow();
+    }
+
+    private void OnCopyResult(object? sender, RoutedEventArgs e) => CopyRequested?.Invoke(_resultText);
+
+    private void OnReadResult(object? sender, RoutedEventArgs e) => ReadBackRequested?.Invoke(_resultText);
 
     private void OnReadBack(object? sender, RoutedEventArgs e) => ReadBackRequested?.Invoke(Text);
 

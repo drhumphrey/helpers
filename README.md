@@ -17,7 +17,9 @@ AI assistants are brilliant, but working with them means reading a lot of long t
 
 **Read Aloud.** Select text in any app, click the small Read button that appears, and hear it in a natural offline voice. A compact player gives you pause, skip and speed. It understands the Markdown that AI chats produce, so code blocks and formatting symbols are not read out letter by letter.
 
-**Compose.** A scratchpad for writing to the AI. Spelling as you type, a button to hear your draft read back, and one click to send it to the chat without pressing Enter for you. Open it with Ctrl+Alt+C from the window you want to send to. Coming next: a Tidy button that fixes grammar and puts your thoughts in order without changing what you mean.
+**Compose.** A scratchpad for writing to the AI. Spelling as you type, a button to hear your draft read back, and one click to send it to the chat without pressing Enter for you. Open it with Ctrl+Alt+C from the window you want to send to, or press Edit on the Read button to bring selected text in and put it back when it's right.
+
+**Check my thinking.** A reader's notes on your draft: where the logic jumps, what's missing, which word is unclear. Questions and small fixes pinned to your words, never a rewrite, so your tone stays yours. Tidy fixes spelling and grammar with every change marked. Runs on a small model on your own PC for free, or on Claude with your own key.
 
 ## Try the prototype today
 

@@ -18,7 +18,30 @@ public partial class SettingsWindow : ShellWindow
         InitializeComponent();
     }
 
+    /// <summary>Opens the page with this header, such as "AI". Unknown names are ignored.</summary>
+    public void SelectTab(string header)
+    {
+        foreach (var item in Tabs.Items)
+        {
+            if (item is TabItem tab && string.Equals(tab.Header?.ToString(), header, StringComparison.OrdinalIgnoreCase))
+            {
+                Tabs.SelectedItem = tab;
+                return;
+            }
+        }
+    }
+
     private void OnPreview(object? sender, RoutedEventArgs e) => _viewModel.PreviewVoice();
+
+    private void OnSaveKey(object? sender, RoutedEventArgs e) => _viewModel.SaveCloudKey();
+
+    private void OnRemoveKey(object? sender, RoutedEventArgs e) => _viewModel.RemoveCloudKey();
+
+    private void OnDownloadModel(object? sender, RoutedEventArgs e) => _ = _viewModel.DownloadLocalModelAsync();
+
+    private void OnCancelDownload(object? sender, RoutedEventArgs e) => _viewModel.CancelDownload();
+
+    private void OnResetPrompt(object? sender, RoutedEventArgs e) => _viewModel.ResetPrompt();
 
     private void OnAddPronunciation(object? sender, RoutedEventArgs e) => _viewModel.AddPronunciation();
 
