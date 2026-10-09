@@ -50,6 +50,40 @@ public class SpellingErrorsTests
         Assert.Null(SpellingErrors.FindAt([Recieve, Tomorow], index));
     }
 
+    // "Please recieve the parcel tomorow. I"
+    //  0123456789012345678901234567890123456
+    [Theory]
+    [InlineData(7, 7, 7)]
+    [InlineData(10, 7, 7)]
+    [InlineData(14, 7, 7)]
+    [InlineData(0, 0, 6)]
+    [InlineData(6, 0, 6)]
+    [InlineData(35, 35, 1)]
+    [InlineData(36, 35, 1)]
+    public void FindsTheWordAroundAnIndexOrJustAfterIt(int index, int start, int length)
+    {
+        var text = "Please recieve the parcel tomorow. I";
+
+        Assert.Equal(new SpellingError(start, length), SpellingErrors.WordAt(text, index));
+    }
+
+    [Theory]
+    [InlineData("Please recieve the parcel tomorow. I", 34)]
+    [InlineData(" leading", 0)]
+    [InlineData("two  spaces", 4)]
+    [InlineData("", 0)]
+    public void NoWordWhenNothingTouchesTheIndex(string text, int index)
+    {
+        Assert.Null(SpellingErrors.WordAt(text, index));
+    }
+
+    [Fact]
+    public void WordsKeepTheirApostrophesAndHyphens()
+    {
+        Assert.Equal(new SpellingError(0, 5), SpellingErrors.WordAt("don't go", 2));
+        Assert.Equal(new SpellingError(4, 10), SpellingErrors.WordAt("the well-known one", 8));
+    }
+
     [Fact]
     public void ShiftsLaterErrorsWhenTextIsInsertedBeforeThem()
     {

@@ -7,7 +7,7 @@ using Helpers.Core.Text;
 namespace Helpers.App.Windows;
 
 /// <summary>A normal window; it takes focus because it holds controls to type into.</summary>
-public partial class SettingsWindow : Window
+public partial class SettingsWindow : ShellWindow
 {
     private readonly SettingsViewModel _viewModel;
 

@@ -25,6 +25,7 @@ public partial class App : Application
     private InputMonitor? _input;
     private ReadButtonService? _readButton;
     private ComposeController? _compose;
+    private KokoroEngine? _engine;
     private QuickMenuWindow? _quickMenu;
     private TrayIcon? _tray;
     private NativeMenuItem? _watchItem;
@@ -55,6 +56,7 @@ public partial class App : Application
 
             var modelsRoot = settings.ModelsFolder ?? SettingsStore.DefaultModelsFolder();
             var engine = new KokoroEngine(modelsRoot, Math.Clamp(Environment.ProcessorCount / 2, 2, 4));
+            _engine = engine;
             _reading = new ReadingController(engine, new NAudioOutput(), _settings, _toasts);
             _reading.SettingsRequested += ShowSettings;
 
@@ -181,6 +183,10 @@ public partial class App : Application
             else if (args[i] == "--compose")
             {
                 _compose?.Open();
+            }
+            else if (args[i] == "--first-run" && _engine is not null)
+            {
+                ShowFirstRun(_engine);
             }
         }
     }

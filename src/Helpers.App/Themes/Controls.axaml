@@ -1,0 +1,157 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <!--
+    Shared looks for the normal windows (Compose, Settings, First run), so they
+    match the player. Everything takes its colours from the vibe through
+    DynamicResource, so Calm and Custom get their own versions for free.
+    The overlays keep their own button classes (icon, pill, action, item).
+  -->
+
+  <!-- Text buttons: a quiet fill with the vibe's gradient outline, text centred. -->
+  <Style Selector="Button:not(.icon):not(.pill):not(.action):not(.item):not(.chrome)">
+    <Setter Property="MinHeight" Value="38" />
+    <Setter Property="Padding" Value="18,0" />
+    <Setter Property="CornerRadius" Value="10" />
+    <Setter Property="FontSize" Value="15" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Background" Value="{DynamicResource LineBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource OverlayBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+  </Style>
+  <Style Selector="Button:not(.icon):not(.pill):not(.action):not(.item):not(.chrome):pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource WordBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource OverlayBorderBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+  </Style>
+  <Style Selector="Button:not(.icon):not(.pill):not(.action):not(.item):not(.chrome):pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource LineBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource OverlayBorderBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource MutedBrush}" />
+  </Style>
+  <Style Selector="Button:not(.icon):not(.pill):not(.action):not(.item):not(.chrome):disabled /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderBrush" Value="{DynamicResource LineBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource DoneBrush}" />
+  </Style>
+
+  <!-- The one button that matters on a screen: the vibe's gradient. Not called "accent", which the Fluent theme styles itself in Windows blue. -->
+  <Style Selector="Button.main">
+    <Setter Property="Background" Value="{DynamicResource PrimaryBrush}" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="Foreground" Value="{DynamicResource PrimaryForegroundBrush}" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Padding" Value="22,0" />
+  </Style>
+  <Style Selector="Button.main:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource PrimaryBrush}" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="Foreground" Value="{DynamicResource PrimaryForegroundBrush}" />
+    <Setter Property="Opacity" Value="0.9" />
+  </Style>
+  <Style Selector="Button.main:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource PrimaryBrush}" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="Foreground" Value="{DynamicResource PrimaryForegroundBrush}" />
+    <Setter Property="Opacity" Value="0.75" />
+  </Style>
+
+  <!-- Choice chips, as on the first-run screen. -->
+  <Style Selector="ToggleButton.chip">
+    <Setter Property="MinHeight" Value="36" />
+    <Setter Property="Padding" Value="16,0" />
+    <Setter Property="CornerRadius" Value="999" />
+    <Setter Property="FontSize" Value="15" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Background" Value="{DynamicResource LineBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource OverlayBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.chip:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource WordBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource OverlayBorderBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.chip:checked /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource PrimaryBrush}" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="Foreground" Value="{DynamicResource PrimaryForegroundBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.chip:checked:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource PrimaryBrush}" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="Foreground" Value="{DynamicResource PrimaryForegroundBrush}" />
+    <Setter Property="Opacity" Value="0.9" />
+  </Style>
+
+  <!-- The minimise and close marks in a shell window's title row. -->
+  <Style Selector="Button.chrome">
+    <Setter Property="Width" Value="38" />
+    <Setter Property="Height" Value="32" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="CornerRadius" Value="8" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+  </Style>
+  <Style Selector="Button.chrome:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource LineBrush}" />
+  </Style>
+  <Style Selector="Button.chrome:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource WordBrush}" />
+  </Style>
+
+  <!--
+    A shell window: no system chrome, a transparent band for the glow, the
+    player's card, border and shadow, a slim title row that drags, and a
+    resize grip in the corner when the window can be resized. The content
+    sits inside a LayoutTransformControl so the user's size setting applies.
+  -->
+  <Style Selector="Window.shell">
+    <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <LayoutTransformControl Name="PART_Scaler">
+          <Border Name="PART_Card" Margin="16" CornerRadius="14" BorderThickness="1"
+                  BorderBrush="{DynamicResource OverlayBorderBrush}"
+                  Background="{DynamicResource OverlaySurfaceBrush}"
+                  BoxShadow="{DynamicResource OverlayGlow}">
+            <VisualLayerManager>
+              <DockPanel LastChildFill="True">
+                <Grid Name="PART_TitleBar" DockPanel.Dock="Top" Height="44" ColumnDefinitions="Auto,*,Auto,Auto" Margin="10,6,10,0" Background="Transparent">
+                  <Image Source="avares://Helpers.App/Assets/tray.png" Width="18" Height="18" Margin="8,0,10,0" VerticalAlignment="Center" />
+                  <TextBlock Grid.Column="1" Text="{TemplateBinding Title}" FontSize="14" Foreground="{DynamicResource MutedBrush}" VerticalAlignment="Center" />
+                  <Button Grid.Column="2" Name="PART_Minimise" Classes="chrome" ToolTip.Tip="Minimise">
+                    <Path Stroke="{DynamicResource MutedBrush}" StrokeThickness="1.5" Data="M5 10H15" Width="20" Height="20" />
+                  </Button>
+                  <Button Grid.Column="3" Name="PART_Close" Classes="chrome" ToolTip.Tip="Close">
+                    <Path Stroke="{DynamicResource MutedBrush}" StrokeThickness="1.5" Data="M5 5L15 15M15 5L5 15" Width="20" Height="20" />
+                  </Button>
+                </Grid>
+                <Panel>
+                  <ContentPresenter Name="PART_ContentPresenter"
+                                    Content="{TemplateBinding Content}"
+                                    ContentTemplate="{TemplateBinding ContentTemplate}"
+                                    Margin="{TemplateBinding Padding}"
+                                    HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                    VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+                  <Border Name="PART_Grip" Width="22" Height="22" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,4,4"
+                          Background="Transparent" Cursor="BottomRightCorner" ToolTip.Tip="Drag to resize"
+                          IsVisible="{TemplateBinding CanResize}">
+                    <Path Stroke="{DynamicResource MutedBrush}" StrokeThickness="1.5" Data="M4 18 18 4 M10 18 18 10 M16 18 18 16" />
+                  </Border>
+                </Panel>
+              </DockPanel>
+            </VisualLayerManager>
+          </Border>
+        </LayoutTransformControl>
+      </ControlTemplate>
+    </Setter>
+  </Style>
+
+</Styles>

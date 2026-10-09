@@ -27,6 +27,45 @@ public static class SpellingErrors
         return kept.Count == errors.Count ? errors : kept;
     }
 
+    /// <summary>
+    /// The word around a character index: letters, digits, apostrophes and
+    /// hyphens, as the checker sees words. An index just after a word counts
+    /// as on it. Null when the index is on a space or punctuation.
+    /// </summary>
+    public static SpellingError? WordAt(string text, int index)
+    {
+        if (string.IsNullOrEmpty(text))
+        {
+            return null;
+        }
+
+        var start = Math.Clamp(index, 0, text.Length);
+        if (start == text.Length || !IsWordChar(text[start]))
+        {
+            if (start == 0 || !IsWordChar(text[start - 1]))
+            {
+                return null;
+            }
+
+            start--;
+        }
+
+        var end = start;
+        while (start > 0 && IsWordChar(text[start - 1]))
+        {
+            start--;
+        }
+
+        while (end < text.Length && IsWordChar(text[end]))
+        {
+            end++;
+        }
+
+        return end > start ? new SpellingError(start, end - start) : null;
+    }
+
+    private static bool IsWordChar(char c) => char.IsLetterOrDigit(c) || c is '\'' or '’' or '-';
+
     /// <summary>The error covering a character index, or the one that ends exactly there, or null.</summary>
     public static SpellingError? FindAt(IReadOnlyList<SpellingError> errors, int index)
     {

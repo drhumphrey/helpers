@@ -7,7 +7,7 @@ using Helpers.Core.Speech;
 namespace Helpers.App.Windows;
 
 /// <summary>Shown once, on the first launch: pick a voice, confirm the Read button and start-up. Done.</summary>
-public partial class FirstRunWindow : Window
+public partial class FirstRunWindow : ShellWindow
 {
     private readonly IReadOnlyList<SpeechVoice> _voices;
     private readonly List<ToggleButton> _chips = [];

@@ -1,16 +1,19 @@
-<Window xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:controls="using:Helpers.App.Controls"
-        x:Class="Helpers.App.Windows.ComposeWindow"
-        Title="Compose"
-        Width="720" Height="520" MinWidth="520" MinHeight="380"
-        WindowStartupLocation="Manual">
+<windows:ShellWindow xmlns="https://github.com/avaloniaui"
+                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                     xmlns:windows="using:Helpers.App.Windows"
+                     xmlns:controls="using:Helpers.App.Controls"
+                     x:Class="Helpers.App.Windows.ComposeWindow"
+                     Title="Compose"
+                     Width="780" Height="580" MinWidth="560" MinHeight="400"
+                     WindowStartupLocation="Manual"
+                     Padding="20,2,20,12">
 
-  <Window.Styles>
+  <windows:ShellWindow.Styles>
     <Style Selector="TextBox.editor">
       <Setter Property="FontFamily" Value="{DynamicResource ReadingFontFamily}" />
       <Setter Property="FontSize" Value="{DynamicResource ReadingFontSize}" />
       <Setter Property="LineHeight" Value="{DynamicResource ReadingLineHeight}" />
+      <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
       <Setter Property="TextWrapping" Value="Wrap" />
       <Setter Property="AcceptsReturn" Value="True" />
       <Setter Property="Padding" Value="16,12" />
@@ -29,33 +32,28 @@
     </Style>
     <Style Selector="TextBlock.hint">
       <Setter Property="FontSize" Value="13" />
-      <Setter Property="Opacity" Value="0.7" />
+      <Setter Property="Foreground" Value="{DynamicResource MutedBrush}" />
       <Setter Property="VerticalAlignment" Value="Center" />
       <Setter Property="TextWrapping" Value="Wrap" />
     </Style>
-    <Style Selector="Button.tool">
-      <Setter Property="MinHeight" Value="36" />
-      <Setter Property="Padding" Value="14,0" />
-      <Setter Property="FontSize" Value="14" />
-    </Style>
     <Style Selector="Button.small">
-      <Setter Property="MinHeight" Value="26" />
-      <Setter Property="Padding" Value="10,0" />
+      <Setter Property="MinHeight" Value="28" />
+      <Setter Property="Padding" Value="12,0" />
       <Setter Property="FontSize" Value="13" />
     </Style>
     <Style Selector="Border.editorFrame">
-      <Setter Property="CornerRadius" Value="10" />
+      <Setter Property="CornerRadius" Value="12" />
       <Setter Property="BorderThickness" Value="1" />
       <Setter Property="BorderBrush" Value="{DynamicResource LineBrush}" />
       <Setter Property="Background" Value="{DynamicResource ReadingTintBrush}" />
       <Setter Property="ClipToBounds" Value="True" />
     </Style>
     <Style Selector="Border.editorFrame.focused">
-      <Setter Property="BorderBrush" Value="{DynamicResource AccentTextBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource OverlayBorderBrush}" />
     </Style>
-  </Window.Styles>
+  </windows:ShellWindow.Styles>
 
-  <Grid RowDefinitions="Auto,*,Auto,Auto" Margin="16,12,16,12">
+  <Grid RowDefinitions="Auto,*,Auto,Auto">
 
     <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,10">
       <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
@@ -63,7 +61,7 @@
                   Data="M2.01 21 23 12 2.01 3 2 10l15 2-15 2z" />
         <TextBlock x:Name="TargetLabel" FontSize="15" VerticalAlignment="Center" Text="Sending to: nothing yet" />
       </StackPanel>
-      <Button Grid.Column="1" x:Name="UseWindowButton" Content="Use this window" Click="OnUseThisWindow" MinHeight="32" Padding="12,0"
+      <Button Grid.Column="1" x:Name="UseWindowButton" Content="Use this window" Click="OnUseThisWindow" MinHeight="34"
               ToolTip.Tip="Press this, then click the window you want to send to. Compose comes back by itself." />
     </Grid>
 
@@ -76,19 +74,19 @@
 
     <Grid Grid.Row="2" ColumnDefinitions="Auto,*,Auto" Margin="0,12,0,0">
       <StackPanel Orientation="Horizontal" Spacing="8">
-        <Button Classes="tool" Content="Read back" Click="OnReadBack" ToolTip.Tip="Hear the draft in the player's voice" />
-        <Button Classes="tool" Content="Tidy" IsEnabled="False" />
-        <Button Classes="tool" Content="Make a request" IsEnabled="False" />
-        <TextBlock Classes="hint" Text="Tidy and Make a request need an AI helper. Later version." MaxWidth="200" />
+        <Button Content="Read back" Click="OnReadBack" ToolTip.Tip="Hear the draft in the player's voice" />
+        <Button Content="Tidy" IsEnabled="False" />
+        <Button Content="Make a request" IsEnabled="False" />
+        <TextBlock Classes="hint" Text="Tidy and Make a request need an AI helper. Later version." MaxWidth="230" Margin="4,0,0,0" />
       </StackPanel>
       <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
-        <Button Classes="tool" Content="Copy" Click="OnCopy" ToolTip.Tip="Put the draft on the clipboard" />
-        <Button Classes="tool accent" x:Name="SendButton" Content="Send to chat" Click="OnSend"
+        <Button Content="Copy" Click="OnCopy" ToolTip.Tip="Put the draft on the clipboard" />
+        <Button Classes="main" x:Name="SendButton" Content="Send to chat" Click="OnSend"
                 ToolTip.Tip="Pastes the draft into the window above. It never presses Enter; you do. Ctrl+Enter does the same." />
       </StackPanel>
     </Grid>
 
-    <Grid Grid.Row="3" ColumnDefinitions="*,Auto" Margin="0,10,0,0">
+    <Grid Grid.Row="3" ColumnDefinitions="*,Auto" Margin="0,10,26,0">
       <StackPanel Orientation="Horizontal" Spacing="10">
         <TextBlock x:Name="SpellingStatus" Classes="hint" />
         <Button x:Name="LanguageButton" Classes="small" Content="Open Windows language settings" IsVisible="False" Click="OnOpenLanguageSettings" />
@@ -97,4 +95,4 @@
     </Grid>
 
   </Grid>
-</Window>
+</windows:ShellWindow>

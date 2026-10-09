@@ -15,7 +15,7 @@ namespace Helpers.App.Windows;
 /// type, Read back, Copy and Send to chat. It hides rather than closes so the
 /// draft and the checker stay warm. The AI buttons arrive in a later milestone.
 /// </summary>
-public partial class ComposeWindow : Window
+public partial class ComposeWindow : ShellWindow
 {
     private static readonly TimeSpan CheckDelay = TimeSpan.FromMilliseconds(350);
     private static readonly TimeSpan DraftDelay = TimeSpan.FromSeconds(2);
@@ -29,6 +29,7 @@ public partial class ComposeWindow : Window
     private IReadOnlyList<SpellingError> _errors = [];
     private string _errorsText = string.Empty;
     private int _menuIndex = -1;
+    private int _typingCaret = -1;
     private bool _draftDirty;
     private bool _loading;
     private bool _opened;
@@ -106,6 +107,7 @@ public partial class ComposeWindow : Window
 
             _errors = [];
             _errorsText = value;
+            _typingCaret = -1;
             Underlines.Errors = _errors;
             _draftDirty = false;
             _draftTimer.Stop();
@@ -113,6 +115,9 @@ public partial class ComposeWindow : Window
             RestartCheck();
         }
     }
+
+    /// <summary>The title row's close mark hides, like the window's own close, so the draft and checker stay warm.</summary>
+    protected override void RequestClose() => HideKeepingDraft();
 
     /// <summary>Shows which window Send will paste into.</summary>
     public void SetTarget(ITargetWindow? target)
@@ -207,6 +212,7 @@ public partial class ComposeWindow : Window
         // Keep the underlines in place while waiting for the next check.
         _errors = SpellingErrors.Shift(_errors, _errorsText, text);
         _errorsText = text;
+        _typingCaret = Editor.CaretIndex;
         Underlines.Errors = _errors;
 
         RestartCheck();
@@ -236,8 +242,12 @@ public partial class ComposeWindow : Window
             return;
         }
 
+        // The word under the caret is left alone only while it is being typed. A caret
+        // that got there by a click, including the right-click that opens the menu,
+        // must not make an underline vanish.
         var text = Text;
-        _errors = _spelling.Check(text, Editor.CaretIndex);
+        var typing = Editor.CaretIndex == _typingCaret ? _typingCaret : -1;
+        _errors = _spelling.Check(text, typing);
         _errorsText = text;
         Underlines.Errors = _errors;
     }
@@ -294,7 +304,7 @@ public partial class ComposeWindow : Window
         var text = Text;
         var index = _menuIndex >= 0 ? _menuIndex : Editor.CaretIndex;
         _menuIndex = -1;
-        var error = _spelling.IsAvailable ? SpellingErrors.FindAt(_errors, index) : null;
+        var error = _spelling.IsAvailable ? SpellingErrors.FindAt(_errors, index) ?? MisspeltWordAt(text, index) : null;
 
         if (error is not null && error.End <= text.Length)
         {
@@ -346,6 +356,22 @@ public partial class ComposeWindow : Window
         _menu.Items.Add(copy);
         _menu.Items.Add(paste);
         _menu.Items.Add(selectAll);
+    }
+
+    /// <summary>
+    /// A second opinion for the menu: ask the checker about the word under the
+    /// pointer directly, so the menu is right even if the underlines are a
+    /// pause behind the text.
+    /// </summary>
+    private SpellingError? MisspeltWordAt(string text, int index)
+    {
+        var word = SpellingErrors.WordAt(text, index);
+        if (word is null)
+        {
+            return null;
+        }
+
+        return _spelling.Check(DraftSpelling.WordAt(text, word), -1).Count > 0 ? word : null;
     }
 
     /// <summary>Swaps one word through the box's own editing path, so Ctrl+Z undoes it.</summary>

@@ -1,43 +1,35 @@
-<Window xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        x:Class="Helpers.App.Windows.FirstRunWindow"
-        Title="Welcome to Helpers"
-        Width="560" SizeToContent="Height" CanResize="False"
-        WindowStartupLocation="CenterScreen">
+<windows:ShellWindow xmlns="https://github.com/avaloniaui"
+                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                     xmlns:windows="using:Helpers.App.Windows"
+                     x:Class="Helpers.App.Windows.FirstRunWindow"
+                     Title="Welcome to Helpers"
+                     Width="600" SizeToContent="Height" CanResize="False"
+                     WindowStartupLocation="CenterScreen"
+                     Padding="24,0,24,20">
 
-  <Window.Styles>
-    <Style Selector="ToggleButton.chip">
-      <Setter Property="MinHeight" Value="36" />
-      <Setter Property="Padding" Value="14,0" />
-      <Setter Property="CornerRadius" Value="999" />
-      <Setter Property="FontSize" Value="15" />
-    </Style>
-    <Style Selector="ToggleButton.chip:checked /template/ ContentPresenter">
-      <Setter Property="Background" Value="{DynamicResource PrimaryBrush}" />
-      <Setter Property="Foreground" Value="{DynamicResource PrimaryForegroundBrush}" />
-    </Style>
+  <windows:ShellWindow.Styles>
     <Style Selector="TextBlock.label">
       <Setter Property="FontSize" Value="13" />
-      <Setter Property="Opacity" Value="0.7" />
-      <Setter Property="Margin" Value="0,16,0,8" />
+      <Setter Property="Foreground" Value="{DynamicResource MutedBrush}" />
+      <Setter Property="Margin" Value="0,18,0,8" />
     </Style>
     <Style Selector="TextBlock.hint">
       <Setter Property="FontSize" Value="13" />
-      <Setter Property="Opacity" Value="0.7" />
+      <Setter Property="Foreground" Value="{DynamicResource MutedBrush}" />
       <Setter Property="TextWrapping" Value="Wrap" />
     </Style>
-  </Window.Styles>
+  </windows:ShellWindow.Styles>
 
-  <StackPanel Margin="28,22,28,24">
+  <StackPanel>
     <TextBlock Text="Welcome to Helpers" FontSize="26" FontWeight="SemiBold" />
     <TextBlock Classes="hint" Margin="0,4,0,0" Text="Two things to choose. You can change both later in Settings." />
 
     <TextBlock Classes="label" Text="1. PICK A VOICE" />
     <WrapPanel x:Name="VoiceChips" />
-    <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,12,0,0">
-      <Button Content="Hear it" Click="OnPreview" MinHeight="34" />
-      <TextBlock Classes="hint" VerticalAlignment="Center" Text="The voice downloads in the background the first time. About 350 MB, once." />
-    </StackPanel>
+    <Grid ColumnDefinitions="Auto,*" Margin="0,10,0,0">
+      <Button Content="Hear it" Click="OnPreview" />
+      <TextBlock Grid.Column="1" Classes="hint" VerticalAlignment="Center" Margin="12,0,0,0" Text="The voice downloads in the background the first time. About 350 MB, once." />
+    </Grid>
 
     <TextBlock Classes="label" Text="2. HOW TO START READING" />
     <Grid ColumnDefinitions="*,Auto" Margin="0,2">
@@ -45,18 +37,18 @@
         <TextBlock Text="Show a Read button when I select text" FontSize="15" />
         <TextBlock Classes="hint" Text="A small button appears next to your mouse. Nothing is read until you click it. Ctrl+Alt+Space reads a selection too." />
       </StackPanel>
-      <ToggleSwitch Grid.Column="1" x:Name="ReadButtonSwitch" IsChecked="True" OnContent="" OffContent="" VerticalAlignment="Top" />
+      <ToggleSwitch Grid.Column="1" x:Name="ReadButtonSwitch" IsChecked="True" OnContent="" OffContent="" VerticalAlignment="Top" Margin="12,0,0,0" />
     </Grid>
     <Grid ColumnDefinitions="*,Auto" Margin="0,12,0,0">
       <StackPanel>
         <TextBlock Text="Start with Windows" FontSize="15" />
         <TextBlock Classes="hint" Text="Sits in the tray from sign-in. Uses no CPU until you read." />
       </StackPanel>
-      <ToggleSwitch Grid.Column="1" x:Name="StartupSwitch" OnContent="" OffContent="" VerticalAlignment="Top" />
+      <ToggleSwitch Grid.Column="1" x:Name="StartupSwitch" OnContent="" OffContent="" VerticalAlignment="Top" Margin="12,0,0,0" />
     </Grid>
 
     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10" Margin="0,24,0,0">
-      <Button Content="Done" Click="OnDone" MinHeight="38" Padding="20,0" Classes="accent" />
+      <Button Content="Done" Click="OnDone" Classes="main" />
     </StackPanel>
   </StackPanel>
-</Window>
+</windows:ShellWindow>
