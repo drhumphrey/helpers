@@ -211,3 +211,15 @@ Dave asked for the AI set-up the same evening ("so I can clean up whatever's in 
 **Security housekeeping for a public repository:** GitHub's CodeQL code scanning on every push, pull request and weekly, covering the C# and the workflow files, and Dependabot for library and action updates, grouped monthly.
 
 **Smaller install.** LLamaSharp's CPU backend copies its native libraries for every platform into the output: Linux, Mac and ARM as well as Windows x64, about 80 MB the Windows install never uses. The app project now leaves them out of a publish for one runtime. The match had to allow for the package writing its paths with doubled separators (`runtimes\win-x64\...`); the first attempt dropped the Windows libraries too, caught because the local AI test failed to find them. Measured: the publish went from 268 MB to 191 MB; the local AI and the voice both load from it.
+
+## Handover to a personal PC (10 October 2026, just after midnight)
+
+Dave is moving the project off the first PC, where it lived in a Dropbox folder, onto his own computer, cloned from GitHub. Everything that had lived only in the chat or in the assistant's notes is now in the repository:
+
+- `docs/STATUS.md`: what's built, what the maintainer has tried, what nobody has tried yet, known issues, what isn't built, the next steps in order, and the open decisions.
+- `docs/DEVELOPING.md`: setting up a new PC, where every file lives in the repository and on the PC, all the developer switches, how to check each part by hand, the release steps, how to update a model's checksum, and every trap found while building, grouped by builds, Avalonia, Windows, AI and PowerShell.
+- `tools/screenshots`: the scripts used for the README pictures, now one command (`capture.ps1`) that backs up the settings, plants a made-up draft, mutes the voice, captures each window by its exact title, puts the settings back byte for byte, and writes cleaned images. Run once end to end on this PC: settings identical afterwards. Its first run missed the Read button, which hides after three seconds; it now starts looking straight away.
+- `CLAUDE.md` now points to the status and the handbook first, and carries the rules for an assistant on a real PC: no synthetic input, screenshots of the app's own windows only, settings backed up and put back.
+- The brief's Dropbox note is replaced with "keep the checkout out of synced folders".
+
+On the first PC the app was moved out of the project folder into `%LOCALAPPDATA%\Programs\Helpers`, where the installer would put it, and the Start with Windows entry now points there, so the project folder can be deleted without breaking the app.

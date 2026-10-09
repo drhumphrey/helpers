@@ -424,7 +424,8 @@ Demo each one before starting the next.
 - **Windows spell check:** needs the en-GB language features installed in Windows. Without them the checker reports no errors at all, which looks like perfect spelling. Detect it and say so.
 - **LLamaSharp backends:** reference exactly one backend package (`LLamaSharp.Backend.Cpu`). Mixing backends causes native load failures.
 - **Qwen3 thinking:** on by default and makes short tasks slow. Turn it off.
-- **Dropbox:** the checkout lives in Dropbox. Git internals and build output are excluded with an NTFS stream Dropbox honours. When a new project is added, build it once, then mark its folders: `Set-Content -Path <folder> -Stream com.dropbox.ignored -Value 1` for its `bin` and `obj`. Dropbox shows a grey minus badge on ignored folders.
+- **Synced folders:** keep the checkout out of Dropbox and OneDrive. The first checkout lived in Dropbox, with `.git`, `bin`, `obj` and `out` excluded through an NTFS stream Dropbox honours (`Set-Content -Path <folder> -Stream com.dropbox.ignored -Value 1`). From October 2026 the project is cloned from GitHub into an ordinary folder instead.
+- **More:** `docs/DEVELOPING.md` lists every trap found while building, from Avalonia quirks to PowerShell argument quoting.
 
 ## macOS version (milestone 11, after v0.2)
 

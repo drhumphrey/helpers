@@ -113,7 +113,7 @@ The full notes are in [docs/PRIVACY.md](docs/PRIVACY.md). Every component the ap
 
 ## Status
 
-This is an early version. It works well on the PCs it has been tested on, and it will have rough edges.
+This is an early version. It works well on the PCs it has been tested on, and it will have rough edges. [docs/STATUS.md](docs/STATUS.md) has the detail: what's been tried, what hasn't, and known issues.
 
 **Done:** reading aloud, the Read button, the player, Compose, Send to chat, the AI helpers on your PC and on Claude, the word tools, settings, the installer.
 
@@ -135,7 +135,7 @@ dotnet test Helpers.slnx
 dotnet run --project src/Helpers.App
 ```
 
-To make a release, push a tag such as `v0.2.0`. The Release workflow tests, publishes, builds the installer with Inno Setup, and attaches the installer, the zip and a version file to a GitHub release.
+[docs/DEVELOPING.md](docs/DEVELOPING.md) covers setting up a new PC, the developer switches, and the traps found so far. To make a release, push a tag such as `v0.2.0`. The Release workflow tests, publishes, builds the installer with Inno Setup, and attaches the installer, the zip and a version file to a GitHub release.
 
 | Folder | What's in it |
 |---|---|
@@ -145,8 +145,8 @@ To make a release, push a tag such as `v0.2.0`. The Release workflow tests, publ
 | `src/Helpers.Windows` | Windows-only parts: selection capture, hooks, the clipboard, the spell checker, Credential Manager. |
 | `src/Helpers.App` | The Avalonia app: tray, Read button, player, Compose, Settings. |
 | `tests/` | Unit tests. |
-| `docs/` | The [brief](docs/BRIEF.md), the [design notes](docs/DESIGN.md), the [build log](docs/MILESTONES.md), privacy and licences. |
-| `tools/` | Developer tools: `EngineSpike` checks the voice, `ReadingDump` prints what the reader would say for a file. |
+| `docs/` | The [status](docs/STATUS.md), the [developer handbook](docs/DEVELOPING.md), the [brief](docs/BRIEF.md), the [design notes](docs/DESIGN.md), the [build log](docs/MILESTONES.md), privacy and licences. |
+| `tools/` | Developer tools: `EngineSpike` checks the voice, `ReadingDump` prints what the reader would say for a file, `screenshots` takes the pictures in this README. |
 | `prototype/` | The original AutoHotkey proof of concept. |
 
 ## Contributing

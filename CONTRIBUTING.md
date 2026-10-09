@@ -51,7 +51,7 @@ dotnet run --project src/Helpers.App
 - New dependencies need agreeing first, in an issue. Say what it's for, its licence, and whether it uses the network. It must be compatible with the GPL v3.
 - [docs/BRIEF.md](docs/BRIEF.md) holds the decisions already made. Its "Decisions already made" table is binding. If you want to change one, open an issue first.
 
-Handy switches for checking your work without clicking through the app:
+[docs/DEVELOPING.md](docs/DEVELOPING.md) has the full set-up, where everything lives, how to release, and the traps already found. Handy switches for checking your work without clicking through the app (the full list is there too):
 
 | Switch | What it does |
 |---|---|
