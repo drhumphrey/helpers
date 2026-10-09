@@ -33,6 +33,8 @@ public partial class SettingsWindow : ShellWindow
 
     private void OnPreview(object? sender, RoutedEventArgs e) => _viewModel.PreviewVoice();
 
+    private void OnCheckForUpdates(object? sender, RoutedEventArgs e) => _ = _viewModel.CheckForUpdatesNowAsync();
+
     private void OnOpenRepo(object? sender, RoutedEventArgs e) => Services.Links.Open("https://github.com/drhumphrey/helpers");
 
     private void OnOpenPrivacy(object? sender, RoutedEventArgs e) => Services.Links.Open("https://github.com/drhumphrey/helpers/blob/main/docs/PRIVACY.md");

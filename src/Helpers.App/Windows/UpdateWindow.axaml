@@ -1,0 +1,35 @@
+<windows:ShellWindow xmlns="https://github.com/avaloniaui"
+                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                     xmlns:windows="using:Helpers.App.Windows"
+                     x:Class="Helpers.App.Windows.UpdateWindow"
+                     Title="A new version"
+                     Width="540" SizeToContent="Height" CanResize="False"
+                     WindowStartupLocation="CenterScreen"
+                     Padding="24,0,24,20">
+
+  <windows:ShellWindow.Styles>
+    <Style Selector="TextBlock.hint">
+      <Setter Property="FontSize" Value="13" />
+      <Setter Property="Foreground" Value="{DynamicResource MutedBrush}" />
+      <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+    <Style Selector="TextBlock.body">
+      <Setter Property="FontSize" Value="15" />
+      <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+      <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+  </windows:ShellWindow.Styles>
+
+  <StackPanel Spacing="8">
+    <TextBlock x:Name="Headline" FontSize="24" FontWeight="SemiBold" TextWrapping="Wrap" />
+    <TextBlock x:Name="Versions" Classes="hint" />
+    <TextBlock x:Name="Notes" Classes="body" Margin="0,6,0,0" />
+    <TextBlock x:Name="Method" Classes="hint" Margin="0,6,0,0" />
+    <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,16,0,0">
+      <Button x:Name="UpdateButton" Classes="main" Content="Update now" Click="OnUpdate" />
+      <Button Content="Open the download page" Click="OnOpenPage" />
+      <Button Content="Skip this version" Click="OnSkip" />
+      <Button Content="Not now" Click="OnNotNow" />
+    </StackPanel>
+  </StackPanel>
+</windows:ShellWindow>

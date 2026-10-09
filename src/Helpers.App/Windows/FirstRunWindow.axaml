@@ -22,7 +22,7 @@
 
   <StackPanel>
     <TextBlock Text="Welcome to Helpers" FontSize="26" FontWeight="SemiBold" />
-    <TextBlock Classes="hint" Margin="0,4,0,0" Text="Two things to choose. You can change both later in Settings." />
+    <TextBlock Classes="hint" Margin="0,4,0,0" Text="Three things to choose. You can change them all later in Settings." />
 
     <TextBlock Classes="label" Text="1. PICK A VOICE" />
     <WrapPanel x:Name="VoiceChips" />
@@ -45,6 +45,15 @@
         <TextBlock Classes="hint" Text="Sits in the tray from sign-in. Uses no CPU until you read." />
       </StackPanel>
       <ToggleSwitch Grid.Column="1" x:Name="StartupSwitch" OnContent="" OffContent="" VerticalAlignment="Top" Margin="12,0,0,0" />
+    </Grid>
+
+    <TextBlock Classes="label" Text="3. ONE THING THAT WOULD USE THE INTERNET" />
+    <Grid ColumnDefinitions="*,Auto" Margin="0,2">
+      <StackPanel>
+        <TextBlock Text="Check for a new version once a day" FontSize="15" />
+        <TextBlock Classes="hint" Text="Asks GitHub for the latest version number, once a day. That is the only thing this app would ever send anywhere on its own, and only if you say yes. Off, it never does." />
+      </StackPanel>
+      <ToggleSwitch Grid.Column="1" x:Name="UpdatesSwitch" OnContent="" OffContent="" VerticalAlignment="Top" Margin="12,0,0,0" />
     </Grid>
 
     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10" Margin="0,24,0,0">

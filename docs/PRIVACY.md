@@ -4,7 +4,8 @@ What the app touches, what it keeps, what it sends, and a look at every componen
 
 ## The short version
 
-- Nothing phones home. No telemetry, no crash reports, no update checks. If you want to know about a new version, look at GitHub.
+- Nothing phones home. No telemetry, no crash reports. No update checks unless you switch them on.
+- **The update check is opt-in.** The first-run screen asks; the Privacy page has the switch. On, the app asks GitHub for the latest release's version file once a day, a while after it starts. GitHub sees your IP address and the app's version in the request, nothing else. A new version is offered in a message, never installed by itself. "Update now" downloads the installer, checks it against the checksum in the version file, and runs it quietly. Decided by Dave on 9 October 2026, opt-in "specially as we're doing the free approach".
 - The voice, the local AI model and the dictionary are each downloaded once, over HTTPS, when you first use that feature, and checked against a checksum built into the app. After that they never touch the network.
 - **Local AI keeps everything local.** The model runs on your processor through llama.cpp. The model file cannot make network connections; nothing in the app sends your text anywhere while "On this PC" is chosen.
 - **Claude in the cloud sends your text to Anthropic.** Only when you have chosen Claude in Settings, pasted your own key, and pressed a button that carries the cloud mark. What goes: your draft and the instructions for that button. What does not: your name, other text, history, anything from other apps. The app pins the address to api.anthropic.com so an environment variable cannot redirect it. Anthropic's handling of what you send is governed by their API terms and privacy policy, not by this app; read them before pasting a key.
@@ -66,4 +67,4 @@ The app is GPL-3.0-or-later. MIT, BSD-2-Clause and Apache-2.0 code can be combin
 
 - Anthropic's API terms can change. The Settings page links to them rather than quoting them.
 - Hugging Face and GitHub are trusted for the one-off downloads because the checksums are fixed in the app; a changed file is refused, not used.
-- A future update check, if ever added, would be a network call and would need to be opt-in and listed here.
+- The update check is the one network call the app makes on its own, and only when opted in. It fetches one small JSON file from GitHub and nothing more. The installer it can download is checked against the checksum in that file; once installers are code-signed, the signature should be checked too.

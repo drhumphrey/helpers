@@ -84,9 +84,12 @@ public sealed class SettingsViewModel : ObservableObject
         Action applyReadableText,
         Func<bool, bool> setStartWithWindows,
         bool startWithWindowsNow,
-        AssistantService assistant)
+        AssistantService assistant,
+        UpdateService updates)
     {
         _assistant = assistant;
+        _updates = updates;
+        _checkForUpdates = store.Current.Updates.CheckForUpdates;
         _store = store;
         _reading = reading;
         _watchClipboard = watchClipboard;
@@ -1083,6 +1086,48 @@ public sealed class SettingsViewModel : ObservableObject
     public void ResetPrompt() => PromptText = PromptTemplates.Default(_promptAction.Value);
 
     // Privacy and licences
+
+    private readonly UpdateService _updates;
+    private bool _checkForUpdates;
+    private string _updateStatus = string.Empty;
+
+    public bool CheckForUpdates
+    {
+        get => _checkForUpdates;
+        set
+        {
+            if (Set(ref _checkForUpdates, value))
+            {
+                _store.Update(s =>
+                {
+                    s.Updates.CheckForUpdates = value;
+                    s.Updates.Asked = true;
+                });
+                _updates.Start();
+                Raise(nameof(LastCheckedText));
+            }
+        }
+    }
+
+    public string LastCheckedText => _updates.LastCheckedUtc is { } at
+        ? $"Last checked {at.ToLocalTime():d MMMM, HH:mm}."
+        : "Not checked yet.";
+
+    public string UpdateStatus
+    {
+        get => _updateStatus;
+        private set => Set(ref _updateStatus, value);
+    }
+
+    public async Task CheckForUpdatesNowAsync()
+    {
+        UpdateStatus = "Checking…";
+        await _updates.CheckNowAsync();
+        UpdateStatus = string.Empty;
+        Raise(nameof(LastCheckedText));
+    }
+
+    public string CurrentVersionText => $"You have {UpdateService.CurrentVersion}.";
 
     public IReadOnlyList<Helpers.Core.ThirdPartyComponent> Notices => Helpers.Core.ThirdPartyNotices.Components;
 

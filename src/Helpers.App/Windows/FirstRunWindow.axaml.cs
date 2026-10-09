@@ -40,8 +40,8 @@ public partial class FirstRunWindow : ShellWindow
 
     public event Action<SpeechVoice>? PreviewRequested;
 
-    /// <summary>Raised on Done with the choices made.</summary>
-    public event Action<SpeechVoice, bool, bool>? Finished;
+    /// <summary>Raised on Done with the choices made: voice, Read button, start with Windows, check for updates.</summary>
+    public event Action<SpeechVoice, bool, bool, bool>? Finished;
 
     private void Choose(SpeechVoice voice)
     {
@@ -58,7 +58,7 @@ public partial class FirstRunWindow : ShellWindow
 
     private void OnDone(object? sender, RoutedEventArgs e)
     {
-        Finished?.Invoke(_chosen, ReadButtonSwitch.IsChecked == true, StartupSwitch.IsChecked == true);
+        Finished?.Invoke(_chosen, ReadButtonSwitch.IsChecked == true, StartupSwitch.IsChecked == true, UpdatesSwitch.IsChecked == true);
         Close();
     }
 }

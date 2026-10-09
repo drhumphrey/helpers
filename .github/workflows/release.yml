@@ -47,6 +47,21 @@ jobs:
         run: |
           & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" installer\Helpers.iss "/DVersion=${{ steps.version.outputs.version }}" "/DPublishDir=..\out\publish\win-x64"
 
+      - name: Version file for the app's opt-in update check
+        shell: pwsh
+        run: |
+          $v = "${{ steps.version.outputs.version }}"
+          $base = "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}"
+          $info = [ordered]@{
+            version = $v
+            notes = "See the release page for what changed."
+            page = "https://github.com/${{ github.repository }}/releases/tag/${{ github.ref_name }}"
+            installer = [ordered]@{ url = "$base/Helpers-$v-setup.exe"; sha256 = (Get-FileHash "out/Helpers-$v-setup.exe" -Algorithm SHA256).Hash.ToLower() }
+            zip = [ordered]@{ url = "$base/Helpers-$v-win-x64.zip"; sha256 = (Get-FileHash "out/Helpers-$v-win-x64.zip" -Algorithm SHA256).Hash.ToLower() }
+          }
+          $info | ConvertTo-Json -Depth 4 | Set-Content out/version.json -Encoding utf8
+          Get-Content out/version.json
+
       - name: Release
         shell: pwsh
         env:
@@ -55,3 +70,4 @@ jobs:
           gh release create "${{ github.ref_name }}" --title "Helpers ${{ steps.version.outputs.version }}" --generate-notes
           "out/Helpers-${{ steps.version.outputs.version }}-setup.exe"
           "out/Helpers-${{ steps.version.outputs.version }}-win-x64.zip"
+          "out/version.json"

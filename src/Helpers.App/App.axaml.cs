@@ -27,6 +27,7 @@ public partial class App : Application
     private ComposeController? _compose;
     private AssistantService? _assistant;
     private WordToolsService? _words;
+    private UpdateService? _updates;
     private KokoroEngine? _engine;
     private QuickMenuWindow? _quickMenu;
     private TrayIcon? _tray;
@@ -72,6 +73,8 @@ public partial class App : Application
             _selection = new SelectionCapture();
             _assistant = new AssistantService(_settings, new CredentialStore());
             _words = new WordToolsService(_settings, _reading, _toasts);
+            _updates = new UpdateService(_settings, _toasts);
+            _updates.Start();
             _compose = new ComposeController(_settings, _reading, _toasts, _assistant, _words);
             _hotkeys = new HotkeyService();
             ApplyReadHotkey();
@@ -102,6 +105,7 @@ public partial class App : Application
             desktop.Exit += (_, _) =>
             {
                 _compose?.Dispose();
+                _updates?.Dispose();
                 _words?.Dispose();
                 _assistant?.Dispose();
                 _readButton?.Dispose();
@@ -138,18 +142,22 @@ public partial class App : Application
             _reading.SetVoice(voice);
             _reading.Read($"Hello, I'm {voice.DisplayName}. Select some text anywhere and I will read it to you.");
         };
-        window.Finished += (voice, readButton, startup) =>
+        window.Finished += (voice, readButton, startup, updates) =>
         {
             _settings.Update(s =>
             {
                 s.VoiceId = voice.Id;
                 s.ReadButtonEnabled = readButton;
                 s.FirstRunDone = true;
+                s.Updates.CheckForUpdates = updates;
+                s.Updates.Asked = true;
             });
             if (startup != StartupRegistration.IsEnabled())
             {
                 SetStartWithWindows(startup);
             }
+
+            _updates?.Start();
         };
         window.Show();
     }
@@ -547,7 +555,8 @@ public partial class App : Application
                 () => ReadableText.Apply(this, _settings.Current),
                 SetStartWithWindows,
                 StartupRegistration.IsEnabled(),
-                _assistant!)
+                _assistant!,
+                _updates!)
             {
                 MessagesFollowFocusChanged = follow =>
                 {
