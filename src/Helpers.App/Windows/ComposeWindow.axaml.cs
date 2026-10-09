@@ -22,13 +22,12 @@ public partial class ComposeWindow : ShellWindow
     private static readonly TimeSpan PlacementDelay = TimeSpan.FromMilliseconds(800);
 
     private readonly DraftSpelling _spelling;
-    private readonly MenuFlyout _menu = new();
+    private MenuFlyout _menu = new();
     private readonly DispatcherTimer _checkTimer;
     private readonly DispatcherTimer _draftTimer;
     private readonly DispatcherTimer _placementTimer;
     private IReadOnlyList<SpellingError> _errors = [];
     private string _errorsText = string.Empty;
-    private int _menuIndex = -1;
     private int _typingCaret = -1;
     private bool _draftDirty;
     private bool _loading;
@@ -41,8 +40,8 @@ public partial class ComposeWindow : ShellWindow
 
         Underlines.Editor = Editor;
         Editor.ContextFlyout = _menu;
-        _menu.Opening += OnMenuOpening;
         Editor.AddHandler(PointerPressedEvent, OnEditorPointerPressed, RoutingStrategies.Tunnel);
+        Editor.AddHandler(KeyDownEvent, OnEditorKeyDown, RoutingStrategies.Tunnel);
         Editor.GotFocus += (_, _) => EditorFrame.Classes.Add("focused");
         Editor.LostFocus += (_, _) => EditorFrame.Classes.Remove("focused");
         Editor.PropertyChanged += (_, e) =>
@@ -290,20 +289,38 @@ public partial class ComposeWindow : ShellWindow
     }
 
     // The right-click menu: suggestions for the word under the pointer, then the usual editing items.
+    //
+    // The menu is built on the press, before Avalonia opens it on the release. A flyout
+    // creates its presenter before raising Opening, and items added in Opening never
+    // reach that presenter, so the menu opened as an empty sliver when built there.
+    // A fresh flyout each time also means a cached presenter can never show stale items.
 
     private void OnEditorPointerPressed(object? sender, PointerPressedEventArgs e)
     {
-        var point = e.GetCurrentPoint(Editor);
-        _menuIndex = point.Properties.IsRightButtonPressed ? Underlines.IndexAt(e.GetPosition(Underlines)) : -1;
+        if (e.GetCurrentPoint(Editor).Properties.IsRightButtonPressed)
+        {
+            PrepareMenu(Underlines.IndexAt(e.GetPosition(Underlines)));
+        }
     }
 
-    private void OnMenuOpening(object? sender, EventArgs e)
+    /// <summary>The keyboard's way in: the Menu key or Shift+F10 open the menu at the caret.</summary>
+    private void OnEditorKeyDown(object? sender, KeyEventArgs e)
     {
-        _menu.Items.Clear();
+        if (e.Key == Key.Apps || (e.Key == Key.F10 && e.KeyModifiers.HasFlag(KeyModifiers.Shift)))
+        {
+            PrepareMenu(Editor.CaretIndex);
+        }
+    }
 
+    private void PrepareMenu(int index)
+    {
+        var menu = new MenuFlyout();
         var text = Text;
-        var index = _menuIndex >= 0 ? _menuIndex : Editor.CaretIndex;
-        _menuIndex = -1;
+        if (index < 0)
+        {
+            index = Editor.CaretIndex;
+        }
+
         var error = _spelling.IsAvailable ? SpellingErrors.FindAt(_errors, index) ?? MisspeltWordAt(text, index) : null;
 
         if (error is not null && error.End <= text.Length)
@@ -312,7 +329,7 @@ public partial class ComposeWindow : ShellWindow
             var suggestions = _spelling.Suggest(word);
             if (suggestions.Count == 0)
             {
-                _menu.Items.Add(new MenuItem { Header = "No suggestions", IsEnabled = false });
+                menu.Items.Add(new MenuItem { Header = "No suggestions", IsEnabled = false });
             }
 
             foreach (var suggestion in suggestions)
@@ -321,10 +338,10 @@ public partial class ComposeWindow : ShellWindow
                 var replacement = suggestion;
                 var range = error;
                 item.Click += (_, _) => Replace(range, replacement);
-                _menu.Items.Add(item);
+                menu.Items.Add(item);
             }
 
-            _menu.Items.Add(new Separator());
+            menu.Items.Add(new Separator());
 
             var add = new MenuItem { Header = $"Add \"{word}\" to dictionary" };
             add.Click += (_, _) =>
@@ -332,7 +349,7 @@ public partial class ComposeWindow : ShellWindow
                 _spelling.AddToDictionary(word);
                 CheckNow();
             };
-            _menu.Items.Add(add);
+            menu.Items.Add(add);
 
             var ignore = new MenuItem { Header = "Ignore for now" };
             ignore.Click += (_, _) =>
@@ -340,8 +357,8 @@ public partial class ComposeWindow : ShellWindow
                 _spelling.Ignore(word);
                 CheckNow();
             };
-            _menu.Items.Add(ignore);
-            _menu.Items.Add(new Separator());
+            menu.Items.Add(ignore);
+            menu.Items.Add(new Separator());
         }
 
         var cut = new MenuItem { Header = "Cut", InputGesture = new KeyGesture(Key.X, KeyModifiers.Control) };
@@ -352,10 +369,13 @@ public partial class ComposeWindow : ShellWindow
         paste.Click += (_, _) => Editor.Paste();
         var selectAll = new MenuItem { Header = "Select all", InputGesture = new KeyGesture(Key.A, KeyModifiers.Control) };
         selectAll.Click += (_, _) => Editor.SelectAll();
-        _menu.Items.Add(cut);
-        _menu.Items.Add(copy);
-        _menu.Items.Add(paste);
-        _menu.Items.Add(selectAll);
+        menu.Items.Add(cut);
+        menu.Items.Add(copy);
+        menu.Items.Add(paste);
+        menu.Items.Add(selectAll);
+
+        _menu = menu;
+        Editor.ContextFlyout = menu;
     }
 
     /// <summary>
