@@ -30,6 +30,7 @@ public partial class ComposeWindow : Window
     private string _errorsText = string.Empty;
     private int _menuIndex = -1;
     private bool _draftDirty;
+    private bool _loading;
     private bool _opened;
 
     public ComposeWindow(DraftSpelling spelling)
@@ -86,16 +87,30 @@ public partial class ComposeWindow : Window
     /// <summary>Raised when the window has settled somewhere new, in screen pixels and client size.</summary>
     public event Action<PixelPoint, Size>? PlacementChanged;
 
+    /// <summary>The whole draft. Setting it is a load, not an edit: nothing is saved and a fresh check starts.</summary>
     public string Text
     {
         get => Editor.Text ?? string.Empty;
         set
         {
-            Editor.Text = value;
-            Editor.CaretIndex = value.Length;
+            _loading = true;
+            try
+            {
+                Editor.Text = value;
+                Editor.CaretIndex = value.Length;
+            }
+            finally
+            {
+                _loading = false;
+            }
+
+            _errors = [];
+            _errorsText = value;
+            Underlines.Errors = _errors;
             _draftDirty = false;
             _draftTimer.Stop();
             DraftStatus.Text = string.Empty;
+            RestartCheck();
         }
     }
 
@@ -181,14 +196,18 @@ public partial class ComposeWindow : Window
 
     private void OnTextChanged(object? sender, TextChangedEventArgs e)
     {
+        // The box raises this after the fact, so a load echoes here once the loading flag is down;
+        // the content is already known then, and nothing changed.
         var text = Text;
-        if (!ReferenceEquals(text, _errorsText))
+        if (_loading || string.Equals(text, _errorsText, StringComparison.Ordinal))
         {
-            // Keep the underlines in place while waiting for the next check.
-            _errors = SpellingErrors.Shift(_errors, _errorsText, text);
-            _errorsText = text;
-            Underlines.Errors = _errors;
+            return;
         }
+
+        // Keep the underlines in place while waiting for the next check.
+        _errors = SpellingErrors.Shift(_errors, _errorsText, text);
+        _errorsText = text;
+        Underlines.Errors = _errors;
 
         RestartCheck();
 

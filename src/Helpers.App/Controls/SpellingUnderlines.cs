@@ -40,6 +40,7 @@ public sealed class SpellingUnderlines : Control
             {
                 _editor.TemplateApplied -= OnTemplateApplied;
                 _editor.SizeChanged -= OnChanged;
+                _editor.LayoutUpdated -= OnEditorLayoutUpdated;
                 DetachParts();
             }
 
@@ -48,6 +49,7 @@ public sealed class SpellingUnderlines : Control
             {
                 _editor.TemplateApplied += OnTemplateApplied;
                 _editor.SizeChanged += OnChanged;
+                _editor.LayoutUpdated += OnEditorLayoutUpdated;
                 FindParts();
             }
 
@@ -84,6 +86,11 @@ public sealed class SpellingUnderlines : Control
 
     public override void Render(DrawingContext context)
     {
+        if (_presenter is null || _scroller is null)
+        {
+            FindParts();
+        }
+
         if (_editor is null || _presenter?.TextLayout is null || _scroller is null || _errors.Count == 0)
         {
             return;
@@ -147,6 +154,11 @@ public sealed class SpellingUnderlines : Control
         FindParts();
     }
 
+    /// <summary>
+    /// The presenter and scroller live inside the box's template, and the
+    /// scroller's own template is applied a layout pass later than the box's,
+    /// so this is called until both have been found.
+    /// </summary>
     private void FindParts()
     {
         if (_editor is null)
@@ -154,16 +166,34 @@ public sealed class SpellingUnderlines : Control
             return;
         }
 
-        _presenter = _editor.GetVisualDescendants().OfType<TextPresenter>().FirstOrDefault();
-        _scroller = _editor.GetVisualDescendants().OfType<ScrollViewer>().FirstOrDefault();
-        if (_scroller is not null)
+        if (_scroller is null)
         {
-            _scroller.ScrollChanged += OnScrollChanged;
+            _scroller = _editor.GetVisualDescendants().OfType<ScrollViewer>().FirstOrDefault();
+            if (_scroller is not null)
+            {
+                _scroller.ScrollChanged += OnScrollChanged;
+            }
         }
 
-        if (_presenter is not null)
+        if (_presenter is null)
         {
-            _presenter.LayoutUpdated += OnChanged;
+            _presenter = _editor.GetVisualDescendants().OfType<TextPresenter>().FirstOrDefault();
+            if (_presenter is not null)
+            {
+                _presenter.LayoutUpdated += OnChanged;
+            }
+        }
+    }
+
+    private void OnEditorLayoutUpdated(object? sender, EventArgs e)
+    {
+        if (_presenter is null || _scroller is null)
+        {
+            FindParts();
+            if (_presenter is not null && _scroller is not null)
+            {
+                InvalidateVisual();
+            }
         }
     }
 
