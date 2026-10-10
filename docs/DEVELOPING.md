@@ -137,7 +137,7 @@ Then delete `out/publish/win-x64/*.pdb`. With Inno Setup installed: `iscc instal
 - A freshly published folder can be briefly locked by antivirus. Retry after a few seconds. A shell sitting inside the folder also stops it being deleted.
 - LLamaSharp's CPU backend copies native libraries for every platform; the app project leaves out all but the target runtime's. The package writes its paths with doubled separators (`runtimes\\win-x64\...`), so the match is a loose pattern.
 - `AVLN3001` warnings from Avalonia's XAML compiler are harmless.
-- Smart App Control, if it's on, can block a freshly built unsigned DLL. `dotnet test` then says "No test is available" for that project; the test host's `--diag` log says "An Application Control policy has blocked this file", and the Code Integrity event log names the file. On the second PC it blocked `Helpers.Windows.Tests.dll` and nothing else. It has no exclusions; the choice is to live with it or turn it off.
+- Smart App Control, if it's on, blocks unsigned files it doesn't trust, freshly built ones and NuGet build tools included. On the second PC it blocked a test DLL (`dotnet test` then says "No test is available"), Avalonia 12.1.4's source generator (the build then fails with every named control missing, CS0103) and the app's own DLL (the app doesn't start). The test host's `--diag` log says "An Application Control policy has blocked this file", and the Code Integrity event log names each file. It has no exclusions; on a development PC, turn it off.
 - On Windows, don't type bare `python`: the Microsoft Store alias can hang.
 
 **Avalonia 12**
