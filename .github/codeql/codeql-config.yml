@@ -1,0 +1,19 @@
+# Settings for code scanning (.github/workflows/codeql.yml): GitHub's security
+# and quality checks, minus three that flag the app's design rather than
+# problems in it.
+
+queries:
+  - uses: security-and-quality
+
+query-filters:
+  # Helpers.Windows exists to call into Windows. These two flag every
+  # declaration of a Windows function and every call to one.
+  - exclude:
+      id: cs/unmanaged-code
+  - exclude:
+      id: cs/call-to-unmanaged-code
+  # Flags every Path.Combine in case a later part is a full path. The paths
+  # are built from the app's own folders and names, and the archives the app
+  # unpacks are checked against built-in checksums first.
+  - exclude:
+      id: cs/path-combine

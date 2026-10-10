@@ -53,6 +53,7 @@ Version 0.1.0 is released on GitHub (10 October 2026) and works on the PC it was
 - Syllables come from hyphenation patterns, so a few split oddly ("in·form·a·tion").
 - The app isn't code-signed, so Windows SmartScreen warns on first run.
 - The v0.1.0 installer offers to install for all users. A copy installed that way never offers Update now. Fixed for the next release, which installs per-user only.
+- Code scanning lists 49 style notes, mostly broad catches and LINQ suggestions: a tidy-up list, not bugs.
 - The local AI is refused on processors without AVX2, though the library ships a fallback build that might work on older ones. Worth testing before relaxing the check.
 - FlaUI brings in about 25 MB of Windows Forms. Calling UI Automation directly would remove it.
 - Kokoro has no text normaliser. Numbers, dates and money are handled by rules in `NumberSpeech`; each new oddity heard becomes a rule with a test.
@@ -67,8 +68,8 @@ Version 0.1.0 is released on GitHub (10 October 2026) and works on the PC it was
 ## Next, in order
 
 1. **Try the update check** once a newer version is released.
-2. **On GitHub:** turn on private vulnerability reporting (Settings, Code security), and add topics.
-3. **Dependabot:** five pull requests are open. The test-tool ones can merge once green. Run the app on the five-library group before merging it.
+2. **On GitHub:** add topics. Private vulnerability reporting, Dependabot alerts and secret scanning with push protection are on.
+3. **Dependabot:** #2 (Avalonia 12.1.4) and #1 (actions/checkout 7, actions/setup-dotnet 6) are in the development copy for Dave to try; merge them once he's happy. The test-tool updates (#3 to #5) are merged.
 4. **Try everything under "Not tried yet"**, fix what turns up, and log it.
 5. **Code signing.** SignPath's free open-source plan now that the repository is public, or Microsoft Trusted Signing.
 6. **Summarise and Explain simply** buttons, and the player's result card.

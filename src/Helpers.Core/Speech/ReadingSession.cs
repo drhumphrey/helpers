@@ -79,7 +79,13 @@ public sealed class ReadingSession : IDisposable
 
     public SpeechVoice Voice
     {
-        get => _voice;
+        get
+        {
+            lock (_sync)
+            {
+                return _voice;
+            }
+        }
         set
         {
             lock (_sync)
@@ -97,7 +103,13 @@ public sealed class ReadingSession : IDisposable
 
     public float Speed
     {
-        get => _speed;
+        get
+        {
+            lock (_sync)
+            {
+                return _speed;
+            }
+        }
         set
         {
             lock (_sync)

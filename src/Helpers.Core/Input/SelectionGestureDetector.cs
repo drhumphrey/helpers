@@ -13,8 +13,8 @@ public readonly record struct GesturePoint(int X, int Y)
 {
     public double DistanceTo(GesturePoint other)
     {
-        var dx = X - other.X;
-        var dy = Y - other.Y;
+        var dx = (double)X - other.X;
+        var dy = (double)Y - other.Y;
         return Math.Sqrt(dx * dx + dy * dy);
     }
 }

@@ -2,6 +2,7 @@ name: Code scanning
 
 # GitHub's CodeQL looks for security problems in the C# code and in these
 # workflow files. Results appear under the repository's Security tab.
+# Which checks run is set in .github/codeql/codeql-config.yml.
 
 on:
   push:
@@ -38,7 +39,7 @@ jobs:
         with:
           languages: ${{ matrix.language }}
           build-mode: ${{ matrix.build-mode }}
-          queries: security-and-quality
+          config-file: ./.github/codeql/codeql-config.yml
 
       - uses: github/codeql-action/analyze@v3
         with:
