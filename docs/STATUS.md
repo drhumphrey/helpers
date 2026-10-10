@@ -21,7 +21,7 @@ Version 0.1.0 is released on GitHub (10 October 2026) and works on the PC it was
 | 10 | Claude provider, key storage, cost shown, first-use confirmation | Built early, as part of 9 |
 | Extras | Word tools, Privacy and licences page, opt-in update check, code scanning, Dependabot | Done |
 
-261 Core tests and 3 Windows tests pass. Every push builds and is scanned on GitHub.
+261 Core tests and 3 Windows tests pass, on both PCs. Every push builds and is scanned on GitHub.
 
 ## Tried by the maintainer
 
@@ -31,6 +31,7 @@ Version 0.1.0 is released on GitHub (10 October 2026) and works on the PC it was
 - Messages on the main monitor with three monitors at different scaling.
 - Compose's look, spelling underlines and the right-click menu, after the fixes.
 - The welcome screen and the Settings pages, after the fixes for text running off the edge.
+- A second PC: v0.1.0 installed and ran; the development copy builds, passes every test, and runs from the build folder.
 
 ## Not tried yet
 
@@ -40,10 +41,9 @@ Version 0.1.0 is released on GitHub (10 October 2026) and works on the PC it was
 - **Check my thinking** and **Tidy** on real writing, in daily use.
 - **Claude** in the cloud. No key has been entered yet.
 - **Word tools** in daily use.
-- **The update check** end to end. It needs a newer release than the one installed to find anything.
+- **The update check** end to end. It needs a newer release than the one installed to find anything. The second PC runs the development copy only, so install the older version there first.
 - **Start with Windows** after a real sign-in, from the installed location.
 - From the acceptance list: Word, PDFs in a browser and Acrobat, Notepad, Explorer renaming, Windows Terminal, the Claude desktop app.
-- A second PC.
 
 ## Known issues and limits
 
@@ -52,6 +52,7 @@ Version 0.1.0 is released on GitHub (10 October 2026) and works on the PC it was
 - Output device names are cut at 31 characters.
 - Syllables come from hyphenation patterns, so a few split oddly ("in·form·a·tion").
 - The app isn't code-signed, so Windows SmartScreen warns on first run.
+- The v0.1.0 installer offers to install for all users. A copy installed that way never offers Update now. Fixed for the next release, which installs per-user only.
 - The local AI is refused on processors without AVX2, though the library ships a fallback build that might work on older ones. Worth testing before relaxing the check.
 - FlaUI brings in about 25 MB of Windows Forms. Calling UI Automation directly would remove it.
 - Kokoro has no text normaliser. Numbers, dates and money are handled by rules in `NumberSpeech`; each new oddity heard becomes a rule with a test.
@@ -65,16 +66,15 @@ Version 0.1.0 is released on GitHub (10 October 2026) and works on the PC it was
 
 ## Next, in order
 
-1. **Install v0.1.0 on the second PC** from the [Releases page](https://github.com/drhumphrey/helpers/releases), and set up the development copy there ([DEVELOPING.md](DEVELOPING.md)).
-2. **Try the update check** once a newer version is released.
-3. **On GitHub:** turn on private vulnerability reporting (Settings, Code security), and add topics.
-4. **Dependabot:** five pull requests are open. The test-tool ones can merge once green. Run the app on the five-library group before merging it.
-5. **Try everything under "Not tried yet"**, fix what turns up, and log it.
-6. **Code signing.** SignPath's free open-source plan now that the repository is public, or Microsoft Trusted Signing.
-7. **Summarise and Explain simply** buttons, and the player's result card.
-8. **A browser extension** for Chrome and Edge, to put Read and Edit on the right-click menu.
-9. **A product name.** "Helpers" is a working title.
-10. **macOS.**
+1. **Try the update check** once a newer version is released.
+2. **On GitHub:** turn on private vulnerability reporting (Settings, Code security), and add topics.
+3. **Dependabot:** five pull requests are open. The test-tool ones can merge once green. Run the app on the five-library group before merging it.
+4. **Try everything under "Not tried yet"**, fix what turns up, and log it.
+5. **Code signing.** SignPath's free open-source plan now that the repository is public, or Microsoft Trusted Signing.
+6. **Summarise and Explain simply** buttons, and the player's result card.
+7. **A browser extension** for Chrome and Edge, to put Read and Edit on the right-click menu.
+8. **A product name.** "Helpers" is a working title.
+9. **macOS.**
 
 ## Decisions still open
 

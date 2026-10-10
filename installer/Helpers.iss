@@ -21,7 +21,6 @@ DefaultDirName={localappdata}\Programs\Helpers
 DefaultGroupName=Helpers
 DisableProgramGroupPage=yes
 PrivilegesRequired=lowest
-PrivilegesRequiredOverridesAllowed=dialog
 OutputDir=..\out
 OutputBaseFilename=Helpers-{#Version}-setup
 SetupIconFile=..\src\Helpers.App\Assets\app.ico

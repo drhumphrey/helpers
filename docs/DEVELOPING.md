@@ -5,7 +5,7 @@ Everything needed to pick the project up on a fresh PC and carry on: setting up,
 ## Setting up a new PC
 
 1. Install [Git](https://git-scm.com/download/win), the [.NET 10 SDK](https://dotnet.microsoft.com/download), and [VS Code](https://code.visualstudio.com/) with the C# Dev Kit extension. Use the direct installers; `winget` has hung on one PC while refreshing its index.
-2. Clone somewhere that isn't synced by Dropbox or OneDrive, for example `C:\Code\helpers`:
+2. Clone somewhere that isn't synced by Dropbox, OneDrive or Google Drive, for example `C:\Code\helpers`:
 
    ```
    git clone https://github.com/drhumphrey/helpers.git
@@ -160,6 +160,11 @@ Then delete `out/publish/win-x64/*.pdb`. With Inno Setup installed: `iscc instal
 - The window in front can be the lock screen, Start or search. Those are never a target for sending text.
 - Windows' Snipping Tool overlay looks exactly like a text selection to the mouse hook. It's excluded in code.
 - Electron apps (VS Code, Teams, Claude desktop) give a full UI Automation tree only when they think assistive technology is running. Don't rely on it there; the clipboard route covers them.
+
+**Installer**
+
+- Inno Setup's install-mode dialog offered "Install for all users". That registers the app machine-wide while the files still go in one user's folder, and the update check only recognises a per-user install. The dialog is gone; every install is per-user.
+- The uninstaller ends every `Helpers.App.exe` by name, including a development copy run from `bin`.
 
 **AI**
 
