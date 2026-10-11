@@ -69,6 +69,27 @@ public static class UpdateCheck
         return a is not null && b is not null && a > b;
     }
 
+    /// <summary>
+    /// The arguments for cmd.exe that run the installer quietly once the app has gone, then start
+    /// the app again, whether or not the install worked. The whole line sits in one more pair of
+    /// quotes under /s: without them cmd strips the first and last quote of any line with more
+    /// than two, and the line falls apart. Null for a path cmd can't be trusted with: a quote
+    /// would end the quoting early, and a percent sign could be read as a variable.
+    /// </summary>
+    public static string? HandOverArguments(string installerPath, string? appPath)
+    {
+        if (string.IsNullOrWhiteSpace(installerPath) || IsUnsafeForCmd(installerPath) || (appPath is not null && IsUnsafeForCmd(appPath)))
+        {
+            return null;
+        }
+
+        var install = $"\"{installerPath}\" /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /CLOSEAPPLICATIONS";
+        var line = string.IsNullOrWhiteSpace(appPath) ? install : $"{install} & start \"\" \"{appPath}\"";
+        return $"/s /c \"{line}\"";
+    }
+
+    private static bool IsUnsafeForCmd(string path) => path.Contains('"') || path.Contains('%');
+
     public static Version? ParseVersion(string? text)
     {
         if (string.IsNullOrWhiteSpace(text))

@@ -99,7 +99,7 @@ The full acceptance list, app by app, is in [BRIEF.md](BRIEF.md).
 
 ## Releasing
 
-1. Set the version in `Directory.Build.props` (`<Version>`), commit and push.
+1. Set the version in `Directory.Build.props` (`<Version>`), write the notes in `docs/releases/v<version>.md`, commit and push. The Release workflow refuses a tag that doesn't match the version there.
 2. Tag and push the tag:
 
    ```
@@ -119,6 +119,8 @@ dotnet publish src/Helpers.App --configuration Release --runtime win-x64 --self-
 Then delete `out/publish/win-x64/*.pdb`. With Inno Setup installed: `iscc installer\Helpers.iss /DVersion=0.2.0 /DPublishDir=..\out\publish\win-x64`.
 
 **When a downloaded model changes**, its checksum in the code must change too, or the download is refused: the voice in `src/Helpers.Speech/KokoroEngine.cs`, the local models in `src/Helpers.Ai/LocalModels.cs`, the dictionary in `src/Helpers.Core/Words/WordNet.cs`. Take the SHA-256 from the publisher (GitHub release assets show a digest; Hugging Face shows it on the file page) and check it against your own download.
+
+**Trying an update without a release.** The quiet install and restart can be tried on one PC: publish as above, build two installers with different `/DVersion` values, install the first with `/VERYSILENT /MERGETASKS="!startup"`, start it, then run `cmd.exe` with the arguments `UpdateCheck.HandOverArguments` gives for the second installer and the installed exe, and close the app. The uninstall entry should then show the second version, and the app should start again within half a minute. Remove it with `unins000.exe /VERYSILENT` in the install folder. Stop the development copy first, because the uninstaller ends every `Helpers.App.exe`.
 
 ## Dependabot and code scanning
 
@@ -158,6 +160,7 @@ Then delete `out/publish/win-x64/*.pdb`. With Inno Setup installed: `iscc instal
 - NAudio 3 renamed `WaveOutEvent` to `WaveOut`, removed `DesiredLatency`, and needs a `-windows` target framework.
 - Output device names from WinMM are cut at 31 characters. WASAPI would give full names.
 - Low-level hooks are removed silently if the callback is slow. The hooks only note the event; all work happens elsewhere.
+- `cmd /c` strips the first and last quote of a line with more than two, so `"installer" /args & start "" "app"` falls apart ("The filename, directory name, or volume label syntax is incorrect"). Use `/s /c` with the whole line in one more pair of quotes, as `UpdateCheck.HandOverArguments` does.
 - Ctrl+C in a terminal means "interrupt". Selection capture sends Ctrl+Insert first and never Ctrl+C to a terminal; pasting into a terminal uses Shift+Insert.
 - The clipboard must always be put back. `ClipboardSnapshot` saves every copyable format first.
 - The window in front can be the lock screen, Start or search. Those are never a target for sending text.

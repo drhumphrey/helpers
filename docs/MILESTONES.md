@@ -254,3 +254,15 @@ Tagged and released at Dave's word. Before the tag: the release workflow was giv
 **Not to plan:** Smart App Control is on on the second PC, and it began blocking freshly built and newly downloaded files: the Windows test DLL first ("An Application Control policy has blocked this file", in the test host's `--diag` log and the Code Integrity event log), then the Core test DLL, Avalonia 12.1.4's source generator, so #2 can't build there, and finally the app's own DLL, so the development copy couldn't start. Not the updates: GitHub ran all 264 tests on the merged result, #2 built there, and code scanning went from 265 open alerts to the 49 style notes. Smart App Control is Dave's call.
 
 **Then (11 October 2026).** Dave turned Smart App Control off. Everything builds on the second PC and all 264 tests pass there. Dependabot had replaced #2 with #6, Avalonia 12.1.4 alone, since the test runner was already newer. Dave tried the development copy on #6 and #1 and was happy, so both are merged and #2 is closed. Dependabot is caught up.
+
+## The update path, tried (11 October 2026)
+
+**Found:** the update check had never been tried end to end, and its last step couldn't have worked. Update now hands over to `cmd.exe` to run the installer once the app has gone, then start the app again. That line had six quotes, and with more than two `cmd /c` strips the first and the last, so the line fell apart; tried with harmless commands, cmd said "The filename, directory name, or volume label syntax is incorrect". In 0.1.0, Update now closes the app and installs nothing. Also, the What's new window added its button handlers again each time it was shown, so a second toast could start two downloads.
+
+**Fixed:** `UpdateCheck.HandOverArguments` in Core builds the line under `/s`, with the whole of it in one more pair of quotes. It refuses a path with a quote or a percent sign, which cmd would misread; the app then offers the download page. Tests for both. The window is wired once, and a second Update now while a download runs is ignored.
+
+**Version control:** 0.1.1 is set in `Directory.Build.props`, and the release workflow now refuses a tag that doesn't match it, so a build from source always says which version it is. The notes are in `docs/releases/v0.1.1.md`, and tell 0.1.0 users to install by hand.
+
+**Tried on the second PC:** a Release publish, and two installers built from it with Inno Setup, labelled 0.1.1 and 0.1.2. 0.1.1 installed quietly for the user only: a per-user uninstall entry, nothing machine-wide, and no start-up entry with the task left out, which confirms yesterday's installer fix. With 0.1.1 running, the exact hand-over line ran the 0.1.2 installer while the app closed. Windows recorded 0.1.2, and the app started again 23 seconds after the hand-over. The test copy was uninstalled afterwards; settings unchanged, downloads kept.
+
+**Not tried:** the check and the download against a real GitHub release. That needs 0.1.1 installed and a newer version published.

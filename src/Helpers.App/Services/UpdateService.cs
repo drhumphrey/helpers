@@ -26,6 +26,7 @@ public sealed class UpdateService : IDisposable
     private readonly DispatcherTimer _timer;
     private UpdateWindow? _window;
     private bool _busy;
+    private bool _updating;
 
     public UpdateService(SettingsStore settings, ToastService toasts)
     {
@@ -151,11 +152,16 @@ public sealed class UpdateService : IDisposable
 
     private void ShowWindow(ReleaseInfo info)
     {
-        _window ??= new UpdateWindow();
+        // Wired once per window: showing it again from a second toast must not add a second download.
+        if (_window is null)
+        {
+            _window = new UpdateWindow();
+            _window.UpdateRequested += release => _ = UpdateNowAsync(release);
+            _window.SkipRequested += release => _settings.Update(s => s.Updates.SkippedVersion = release.Version);
+            _window.Closed += (_, _) => _window = null;
+        }
+
         _window.Show(info, CurrentVersion, InstallerRegistration.IsInstalled());
-        _window.UpdateRequested += release => _ = UpdateNowAsync(release);
-        _window.SkipRequested += release => _settings.Update(s => s.Updates.SkippedVersion = release.Version);
-        _window.Closed += (_, _) => _window = null;
     }
 
     /// <summary>Downloads the installer, checks it against the checksum, runs it silently, and starts the new version.</summary>
@@ -167,6 +173,12 @@ public sealed class UpdateService : IDisposable
             return;
         }
 
+        if (_updating)
+        {
+            return;
+        }
+
+        _updating = true;
         var toast = _toasts.Progress($"Downloading Helpers {release.Version}…");
         var path = Path.Combine(Path.GetTempPath(), $"Helpers-{release.Version}-setup.exe");
         try
@@ -207,9 +219,14 @@ public sealed class UpdateService : IDisposable
             }
 
             // Run the installer silently once this app has gone, then start the new version.
-            var exe = Environment.ProcessPath ?? string.Empty;
-            var script = $"\"{path}\" /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /CLOSEAPPLICATIONS & start \"\" \"{exe}\"";
-            Process.Start(new ProcessStartInfo("cmd.exe", "/c " + script)
+            var arguments = UpdateCheck.HandOverArguments(path, Environment.ProcessPath);
+            if (arguments is null)
+            {
+                _toasts.Error("Couldn't start the installer from here.", "Open the download page", () => Links.Open(release.Page));
+                return;
+            }
+
+            Process.Start(new ProcessStartInfo("cmd.exe", arguments)
             {
                 UseShellExecute = false,
                 CreateNoWindow = true,
@@ -224,6 +241,7 @@ public sealed class UpdateService : IDisposable
         finally
         {
             _toasts.Dismiss(toast);
+            _updating = false;
         }
     }
 }

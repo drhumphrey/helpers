@@ -74,4 +74,35 @@ public class UpdateCheckTests
         Assert.True(UpdateCheck.IsDue(now.AddHours(-23), now));
         Assert.True(UpdateCheck.IsDue(now.AddDays(-3), now));
     }
+
+    [Fact]
+    public void HandsOverToTheInstallerWithTheWholeLineQuotedForCmd()
+    {
+        var arguments = UpdateCheck.HandOverArguments(
+            @"C:\Users\Jo Bloggs\AppData\Local\Temp\Helpers-0.2.0-setup.exe",
+            @"C:\Users\Jo Bloggs\AppData\Local\Programs\Helpers\Helpers.App.exe");
+
+        Assert.Equal(
+            "/s /c \"\"C:\\Users\\Jo Bloggs\\AppData\\Local\\Temp\\Helpers-0.2.0-setup.exe\" /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /CLOSEAPPLICATIONS"
+            + " & start \"\" \"C:\\Users\\Jo Bloggs\\AppData\\Local\\Programs\\Helpers\\Helpers.App.exe\"\"",
+            arguments);
+    }
+
+    [Fact]
+    public void HandsOverWithoutARestartWhenTheAppPathIsUnknown()
+    {
+        var arguments = UpdateCheck.HandOverArguments(@"C:\Temp\Helpers-0.2.0-setup.exe", null);
+
+        Assert.Equal("/s /c \"\"C:\\Temp\\Helpers-0.2.0-setup.exe\" /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /CLOSEAPPLICATIONS\"", arguments);
+    }
+
+    [Theory]
+    [InlineData(@"C:\Temp\100%\Helpers-0.2.0-setup.exe", @"C:\Apps\Helpers.App.exe")]
+    [InlineData(@"C:\Temp\Helpers-0.2.0-setup.exe", @"C:\Users\%USERNAME%\Helpers.App.exe")]
+    [InlineData("C:\\Temp\\odd\"name.exe", @"C:\Apps\Helpers.App.exe")]
+    [InlineData("", @"C:\Apps\Helpers.App.exe")]
+    public void RefusesPathsCmdCantBeTrustedWith(string installer, string app)
+    {
+        Assert.Null(UpdateCheck.HandOverArguments(installer, app));
+    }
 }

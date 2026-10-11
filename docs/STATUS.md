@@ -21,7 +21,7 @@ Version 0.1.0 is released on GitHub (10 October 2026) and works on the PC it was
 | 10 | Claude provider, key storage, cost shown, first-use confirmation | Built early, as part of 9 |
 | Extras | Word tools, Privacy and licences page, opt-in update check, code scanning, Dependabot | Done |
 
-261 Core tests and 3 Windows tests pass, on both PCs. Every push builds and is scanned on GitHub.
+267 Core tests and 3 Windows tests pass, on both PCs. Every push builds and is scanned on GitHub.
 
 ## Tried by the maintainer
 
@@ -41,7 +41,7 @@ Version 0.1.0 is released on GitHub (10 October 2026) and works on the PC it was
 - **Check my thinking** and **Tidy** on real writing, in daily use.
 - **Claude** in the cloud. No key has been entered yet.
 - **Word tools** in daily use.
-- **The update check** end to end. It needs a newer release than the one installed to find anything. The second PC runs the development copy only, so install the older version there first.
+- **The update check** against a real release. The quiet install and restart were tried with two local installers on the second PC; the check and the download need 0.1.1 installed and a newer release published.
 - **Start with Windows** after a real sign-in, from the installed location.
 - From the acceptance list: Word, PDFs in a browser and Acrobat, Notepad, Explorer renaming, Windows Terminal, the Claude desktop app.
 
@@ -52,6 +52,7 @@ Version 0.1.0 is released on GitHub (10 October 2026) and works on the PC it was
 - Output device names are cut at 31 characters.
 - Syllables come from hyphenation patterns, so a few split oddly ("in·form·a·tion").
 - The app isn't code-signed, so Windows SmartScreen warns on first run.
+- In 0.1.0, Update now can't start the installer, so it closes the app without updating. Fixed in 0.1.1.
 - The v0.1.0 installer offers to install for all users. A copy installed that way never offers Update now. Fixed for the next release, which installs per-user only.
 - Code scanning lists 49 style notes, mostly broad catches and LINQ suggestions: a tidy-up list, not bugs.
 - On a PC with Smart App Control on, Windows may block the unsigned app outright rather than warn. Code signing would help. On the second PC it blocked development builds until it was turned off ([DEVELOPING.md](DEVELOPING.md)).
@@ -68,7 +69,7 @@ Version 0.1.0 is released on GitHub (10 October 2026) and works on the PC it was
 
 ## Next, in order
 
-1. **Try the update check** once a newer version is released.
+1. **Release 0.1.1.** The version is set and the notes are written; the tag is Dave's call. Copies of 0.1.0 can't update themselves, so they need 0.1.1 installed by hand. Try the update check for real when the next version comes.
 2. **On GitHub:** add topics. Private vulnerability reporting, Dependabot alerts and secret scanning with push protection are on.
 3. **Try everything under "Not tried yet"**, fix what turns up, and log it.
 4. **Code signing.** SignPath's free open-source plan now that the repository is public, or Microsoft Trusted Signing.
