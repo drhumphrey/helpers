@@ -18,6 +18,8 @@ Nothing Helpers ships is signed yet. This page says why that matters, what the o
 
 ## The plan
 
+**Decided 11 October 2026:** ship unsigned for now. From 0.1.1, every release file has a build attestation instead: a record, signed by GitHub, that the file was built from this repository by its release workflow. Anyone can check one with `gh attestation verify <file> --repo drhumphrey/helpers`, and they're listed at [github.com/drhumphrey/helpers/attestations](https://github.com/drhumphrey/helpers/attestations). It proves where a file came from; it doesn't stop the Windows warnings.
+
 1. **Now:** nothing to buy. Get ready: two-factor sign-in on GitHub (SignPath requires it), and the product name is already "Helpers", which SignPath requires to match.
 2. **When Helpers has visible use** (stars, downloads, issues from people other than the maintainer): apply to SignPath at [signpath.org/apply](https://signpath.org/apply). Once accepted, add the policy section below to the README and the release notes, and the signing steps to the release workflow.
 3. **If signing is wanted sooner:** a Certum certificate, used by hand on the maintainer's PC for each release.

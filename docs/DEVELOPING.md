@@ -107,7 +107,7 @@ The full acceptance list, app by app, is in [BRIEF.md](BRIEF.md).
    git push origin v0.2.0
    ```
 
-3. The Release workflow tests, publishes a self-contained win-x64 build, drops debug symbols and other platforms' native libraries, zips it, builds the installer with Inno Setup, writes `version.json` with the SHA-256 of both files, and attaches all three to a GitHub release with generated notes. About ten minutes.
+3. The Release workflow tests, publishes a self-contained win-x64 build, drops debug symbols and other platforms' native libraries, zips it, builds the installer with Inno Setup, writes `version.json` with the SHA-256 of both files, records a build attestation for all three (anyone can check one with `gh attestation verify <file> --repo drhumphrey/helpers`), and attaches them to a GitHub release with the notes from `docs/releases`. About ten minutes.
 4. Copies with the update check switched on see the new version within a day.
 
 To build the same thing locally:

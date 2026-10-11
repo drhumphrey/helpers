@@ -72,7 +72,7 @@ Version 0.1.0 is released on GitHub (10 October 2026) and works on the PC it was
 1. **Release 0.1.1.** The version is set and the notes are written; the tag is Dave's call. Copies of 0.1.0 can't update themselves, so they need 0.1.1 installed by hand. Try the update check for real when the next version comes.
 2. **On GitHub:** add topics. Private vulnerability reporting, Dependabot alerts and secret scanning with push protection are on.
 3. **Try everything under "Not tried yet"**, fix what turns up, and log it.
-4. **Code signing.** No free route is open yet ([CODE-SIGNING.md](CODE-SIGNING.md)). Get ready now and apply to SignPath once Helpers has visible use, or buy a Certum certificate and sign each release by hand. Dave's call.
+4. **Code signing.** Unsigned for now, with build attestations instead. Apply to SignPath once Helpers has visible use ([CODE-SIGNING.md](CODE-SIGNING.md)).
 5. **Summarise and Explain simply** buttons, and the player's result card.
 6. **A browser extension** for Chrome and Edge, to put Read and Edit on the right-click menu.
 7. **A product name.** "Helpers" is a working title.
@@ -81,5 +81,6 @@ Version 0.1.0 is released on GitHub (10 October 2026) and works on the PC it was
 ## Decisions still open
 
 - The product name.
-- When to release, and whether to sign before or after the first release.
-- The signing route.
+- How to promote it.
+
+Decided 11 October 2026: ship unsigned for now, with a build attestation on every release file from 0.1.1, and come back to SignPath once Helpers has visible use.

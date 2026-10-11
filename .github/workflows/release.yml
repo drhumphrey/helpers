@@ -6,6 +6,10 @@ on:
 
 permissions:
   contents: write
+  # For the build attestation: a short-lived signing certificate, and somewhere to keep the record.
+  id-token: write
+  attestations: write
+  artifact-metadata: write
 
 # Values from the event (the tag name, the repository) reach the scripts only through
 # environment variables, never pasted into the script text, so a tag name can't inject code.
@@ -85,6 +89,17 @@ jobs:
           }
           $info | ConvertTo-Json -Depth 4 | Set-Content out/version.json -Encoding utf8
           Get-Content out/version.json
+
+      # A signed record, kept by GitHub, that these exact files were built here, by this workflow,
+      # from this tag. The app isn't code-signed yet; this lets anyone check a download all the same:
+      #   gh attestation verify Helpers-x.y.z-setup.exe --repo drhumphrey/helpers
+      - name: Attest where the files came from
+        uses: actions/attest@v4
+        with:
+          subject-path: |
+            out/Helpers-*-setup.exe
+            out/Helpers-*-win-x64.zip
+            out/version.json
 
       - name: Release
         shell: pwsh
