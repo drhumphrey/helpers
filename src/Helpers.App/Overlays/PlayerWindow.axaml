@@ -4,7 +4,7 @@
                         xmlns:vm="using:Helpers.App.ViewModels"
                         x:Class="Helpers.App.Overlays.PlayerWindow"
                         x:DataType="vm:PlayerViewModel"
-                        Title="Helpers player"
+                        Title="Unmuddle player"
                         SizeToContent="WidthAndHeight">
 
   <overlays:OverlayWindow.Styles>

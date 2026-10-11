@@ -31,7 +31,7 @@ public struct RECT { public int Left, Top, Right, Bottom; }
 
 [void][Click.Native]::SetProcessDpiAwarenessContext([System.IntPtr]::new(-4))
 
-$app = Get-Process Helpers.App -ErrorAction SilentlyContinue
+$app = Get-Process Unmuddle -ErrorAction SilentlyContinue
 if (-not $app) { Write-Output 'app not running'; exit 1 }
 $hwnd = [Click.Native]::FindWindow([System.IntPtr]::Zero, $Title)
 if ($hwnd -eq [System.IntPtr]::Zero) { Write-Output 'no window'; exit 1 }

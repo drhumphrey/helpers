@@ -12,9 +12,9 @@ public class UpdateCheckTests
             {
               "version": "0.2.0",
               "notes": "Compose, the AI helper and the word tools.",
-              "page": "https://github.com/drhumphrey/helpers/releases/tag/v0.2.0",
-              "installer": { "url": "https://github.com/drhumphrey/helpers/releases/download/v0.2.0/Helpers-0.2.0-setup.exe", "sha256": "ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789" },
-              "zip": { "url": "https://github.com/drhumphrey/helpers/releases/download/v0.2.0/Helpers-0.2.0-win-x64.zip", "sha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef" }
+              "page": "https://github.com/drhumphrey/unmuddle/releases/tag/v0.2.0",
+              "installer": { "url": "https://github.com/drhumphrey/unmuddle/releases/download/v0.2.0/Unmuddle-0.2.0-setup.exe", "sha256": "ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789" },
+              "zip": { "url": "https://github.com/drhumphrey/unmuddle/releases/download/v0.2.0/Unmuddle-0.2.0-win-x64.zip", "sha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef" }
             }
             """;
 
@@ -79,26 +79,26 @@ public class UpdateCheckTests
     public void HandsOverToTheInstallerWithTheWholeLineQuotedForCmd()
     {
         var arguments = UpdateCheck.HandOverArguments(
-            @"C:\Users\Jo Bloggs\AppData\Local\Temp\Helpers-0.2.0-setup.exe",
-            @"C:\Users\Jo Bloggs\AppData\Local\Programs\Helpers\Helpers.App.exe");
+            @"C:\Users\Jo Bloggs\AppData\Local\Temp\Unmuddle-0.2.0-setup.exe",
+            @"C:\Users\Jo Bloggs\AppData\Local\Programs\Unmuddle\Unmuddle.exe");
 
         Assert.Equal(
-            "/s /c \"\"C:\\Users\\Jo Bloggs\\AppData\\Local\\Temp\\Helpers-0.2.0-setup.exe\" /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /CLOSEAPPLICATIONS"
-            + " & start \"\" \"C:\\Users\\Jo Bloggs\\AppData\\Local\\Programs\\Helpers\\Helpers.App.exe\"\"",
+            "/s /c \"\"C:\\Users\\Jo Bloggs\\AppData\\Local\\Temp\\Unmuddle-0.2.0-setup.exe\" /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /CLOSEAPPLICATIONS"
+            + " & start \"\" \"C:\\Users\\Jo Bloggs\\AppData\\Local\\Programs\\Unmuddle\\Unmuddle.exe\"\"",
             arguments);
     }
 
     [Fact]
     public void HandsOverWithoutARestartWhenTheAppPathIsUnknown()
     {
-        var arguments = UpdateCheck.HandOverArguments(@"C:\Temp\Helpers-0.2.0-setup.exe", null);
+        var arguments = UpdateCheck.HandOverArguments(@"C:\Temp\Unmuddle-0.2.0-setup.exe", null);
 
-        Assert.Equal("/s /c \"\"C:\\Temp\\Helpers-0.2.0-setup.exe\" /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /CLOSEAPPLICATIONS\"", arguments);
+        Assert.Equal("/s /c \"\"C:\\Temp\\Unmuddle-0.2.0-setup.exe\" /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /CLOSEAPPLICATIONS\"", arguments);
     }
 
     [Theory]
-    [InlineData(@"C:\Temp\100%\Helpers-0.2.0-setup.exe", @"C:\Apps\Helpers.App.exe")]
-    [InlineData(@"C:\Temp\Helpers-0.2.0-setup.exe", @"C:\Users\%USERNAME%\Helpers.App.exe")]
+    [InlineData(@"C:\Temp\100%\Unmuddle-0.2.0-setup.exe", @"C:\Apps\Helpers.App.exe")]
+    [InlineData(@"C:\Temp\Unmuddle-0.2.0-setup.exe", @"C:\Users\%USERNAME%\Helpers.App.exe")]
     [InlineData("C:\\Temp\\odd\"name.exe", @"C:\Apps\Helpers.App.exe")]
     [InlineData("", @"C:\Apps\Helpers.App.exe")]
     public void RefusesPathsCmdCantBeTrustedWith(string installer, string app)

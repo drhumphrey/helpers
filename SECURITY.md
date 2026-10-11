@@ -1,6 +1,6 @@
 # Security
 
-Helpers reads text from other apps, watches the mouse, can paste into other windows, and can hold an API key. We take that seriously.
+Unmuddle reads text from other apps, watches the mouse, can paste into other windows, and can hold an API key. We take that seriously.
 
 ## Reporting a problem
 
@@ -12,7 +12,7 @@ Please include:
 
 - What the problem is, and what someone could do with it.
 - How to make it happen, step by step.
-- The version of Helpers and of Windows.
+- The version of Unmuddle and of Windows.
 
 We'll reply within a week, keep you told how the fix is going, and credit you when it's released, unless you'd rather not be named.
 

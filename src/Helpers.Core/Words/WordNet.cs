@@ -308,7 +308,7 @@ public static class WordNetDownload
         var zip = Path.Combine(folder, "english-wordnet-2025.zip.part");
 
         using var http = new HttpClient { Timeout = Timeout.InfiniteTimeSpan };
-        http.DefaultRequestHeaders.UserAgent.ParseAdd("Helpers/0.1 (+https://github.com/drhumphrey/helpers)");
+        http.DefaultRequestHeaders.UserAgent.ParseAdd($"{HelpersInfo.Name} (+{HelpersInfo.RepositoryUrl})");
 
         try
         {

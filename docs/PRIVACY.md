@@ -24,10 +24,10 @@ What the app touches, what it keeps, what it sends, and a look at every componen
 
 | What | Where |
 |---|---|
-| Settings, including the unsent Compose draft and your month's token counts | `%APPDATA%\Helpers\settings.json` |
-| Your dictionary words | `%APPDATA%\Helpers\dictionary.txt` |
-| The voice (about 350 MB), the local AI model (about 2.5 GB) and the dictionary data (about 10 MB) | `%LOCALAPPDATA%\Helpers\models` |
-| The Claude API key | Windows Credential Manager, under "Helpers/anthropic-api-key" |
+| Settings, including the unsent Compose draft and your month's token counts | `%APPDATA%\Unmuddle\settings.json` |
+| Your dictionary words | `%APPDATA%\Unmuddle\dictionary.txt` |
+| The voice (about 350 MB), the local AI model (about 2.5 GB) and the dictionary data (about 10 MB) | `%LOCALAPPDATA%\Unmuddle\models` |
+| The Claude API key | Windows Credential Manager, under "Unmuddle/anthropic-api-key" |
 
 Nothing else. No logs that contain your text.
 

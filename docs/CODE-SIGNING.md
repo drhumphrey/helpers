@@ -1,6 +1,6 @@
 # Code signing
 
-Nothing Helpers ships is signed yet. This page says why that matters, what the options are, and the plan. Researched 11 October 2026; prices and rules change, so check the sources before acting.
+Nothing Unmuddle ships is signed yet. This page says why that matters, what the options are, and the plan. Researched 11 October 2026; prices and rules change, so check the sources before acting.
 
 ## Why it matters
 
@@ -18,10 +18,10 @@ Nothing Helpers ships is signed yet. This page says why that matters, what the o
 
 ## The plan
 
-**Decided 11 October 2026:** ship unsigned for now. From 0.1.1, every release file has a build attestation instead: a record, signed by GitHub, that the file was built from this repository by its release workflow. Anyone can check one with `gh attestation verify <file> --repo drhumphrey/helpers`, and they're listed at [github.com/drhumphrey/helpers/attestations](https://github.com/drhumphrey/helpers/attestations). It proves where a file came from; it doesn't stop the Windows warnings.
+**Decided 11 October 2026:** ship unsigned for now. From 0.2.0, every release file has a build attestation instead: a record, signed by GitHub, that the file was built from this repository by its release workflow. Anyone can check one with `gh attestation verify <file> --repo drhumphrey/unmuddle`, and they're listed at [github.com/drhumphrey/unmuddle/attestations](https://github.com/drhumphrey/unmuddle/attestations). It proves where a file came from; it doesn't stop the Windows warnings.
 
-1. **Now:** nothing to buy. Get ready: two-factor sign-in on GitHub (SignPath requires it), and the product name is already "Helpers", which SignPath requires to match.
-2. **When Helpers has visible use** (stars, downloads, issues from people other than the maintainer): apply to SignPath at [signpath.org/apply](https://signpath.org/apply). Once accepted, add the policy section below to the README and the release notes, and the signing steps to the release workflow.
+1. **Now:** nothing to buy. Get ready: two-factor sign-in on GitHub (SignPath requires it), and the product name is already "Unmuddle", which SignPath requires to match.
+2. **When Unmuddle has visible use** (stars, downloads, issues from people other than the maintainer): apply to SignPath at [signpath.org/apply](https://signpath.org/apply). Once accepted, add the policy section below to the README and the release notes, and the signing steps to the release workflow.
 3. **If signing is wanted sooner:** a Certum certificate, used by hand on the maintainer's PC for each release.
 
 The choice is Dave's.
@@ -43,12 +43,12 @@ On the home page and the download page, once accepted:
 >
 > Free code signing provided by [SignPath.io](https://signpath.io), certificate by [SignPath Foundation](https://signpath.org).
 >
-> Committers and reviewers: [members](https://github.com/drhumphrey/helpers/graphs/contributors). Approvers: [owner](https://github.com/drhumphrey).
+> Committers and reviewers: [members](https://github.com/drhumphrey/unmuddle/graphs/contributors). Approvers: [owner](https://github.com/drhumphrey).
 >
 > Privacy: [docs/PRIVACY.md](PRIVACY.md). This program sends nothing to other computers unless the person using it asks it to.
 
-SignPath's other rules, from its [terms](https://signpath.org/terms): an OSI licence with no proprietary parts, actively maintained, already released in the form to be signed, an installer that can uninstall, and the same product name and version across a build. Helpers meets these today.
+SignPath's other rules, from its [terms](https://signpath.org/terms): an OSI licence with no proprietary parts, actively maintained, already released in the form to be signed, an installer that can uninstall, and the same product name and version across a build. Unmuddle meets these today.
 
 ## Not checked
 
-What SignPath's application form asks, how long it takes, whether one person can hold every role, whether it would sign Inno's uninstaller, and whether Microsoft's cloud already knows the libraries Helpers ships.
+What SignPath's application form asks, how long it takes, whether one person can hold every role, whether it would sign Inno's uninstaller, and whether Microsoft's cloud already knows the libraries Unmuddle ships.

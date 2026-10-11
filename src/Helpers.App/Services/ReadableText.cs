@@ -23,8 +23,8 @@ public static class ReadableText
 
         app.Resources[FontKey] = settings.ReadingFontChoice switch
         {
-            ReadingFont.Lexend => new FontFamily("avares://Helpers.App/Assets/Fonts#Lexend"),
-            ReadingFont.AtkinsonHyperlegible => new FontFamily("avares://Helpers.App/Assets/Fonts#Atkinson Hyperlegible"),
+            ReadingFont.Lexend => new FontFamily("avares://Unmuddle/Assets/Fonts#Lexend"),
+            ReadingFont.AtkinsonHyperlegible => new FontFamily("avares://Unmuddle/Assets/Fonts#Atkinson Hyperlegible"),
             _ => FontFamily.Default,
         };
         app.Resources[SizeKey] = size;

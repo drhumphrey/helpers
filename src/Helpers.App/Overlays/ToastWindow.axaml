@@ -4,7 +4,7 @@
                         xmlns:services="using:Helpers.App.Services"
                         x:Class="Helpers.App.Overlays.ToastWindow"
                         x:DataType="services:ToastService"
-                        Title="Helpers messages"
+                        Title="Unmuddle messages"
                         SizeToContent="WidthAndHeight">
 
   <overlays:OverlayWindow.Styles>

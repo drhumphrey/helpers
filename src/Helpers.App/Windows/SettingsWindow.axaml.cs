@@ -2,6 +2,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Helpers.App.ViewModels;
+using Helpers.Core;
 using Helpers.Core.Text;
 
 namespace Helpers.App.Windows;
@@ -35,9 +36,9 @@ public partial class SettingsWindow : ShellWindow
 
     private void OnCheckForUpdates(object? sender, RoutedEventArgs e) => _ = _viewModel.CheckForUpdatesNowAsync();
 
-    private void OnOpenRepo(object? sender, RoutedEventArgs e) => Services.Links.Open("https://github.com/drhumphrey/helpers");
+    private void OnOpenRepo(object? sender, RoutedEventArgs e) => Services.Links.Open(HelpersInfo.RepositoryUrl);
 
-    private void OnOpenPrivacy(object? sender, RoutedEventArgs e) => Services.Links.Open("https://github.com/drhumphrey/helpers/blob/main/docs/PRIVACY.md");
+    private void OnOpenPrivacy(object? sender, RoutedEventArgs e) => Services.Links.Open(HelpersInfo.RepositoryUrl + "/blob/main/docs/PRIVACY.md");
 
     private void OnOpenAnthropicPrivacy(object? sender, RoutedEventArgs e) => Services.Links.Open("https://www.anthropic.com/legal/privacy");
 

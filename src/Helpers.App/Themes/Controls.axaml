@@ -149,7 +149,7 @@
             <VisualLayerManager>
               <DockPanel LastChildFill="True">
                 <Grid Name="PART_TitleBar" DockPanel.Dock="Top" Height="44" ColumnDefinitions="Auto,*,Auto,Auto" Margin="10,6,10,0" Background="Transparent">
-                  <Image Source="avares://Helpers.App/Assets/tray.png" Width="18" Height="18" Margin="8,0,10,0" VerticalAlignment="Center" />
+                  <Image Source="avares://Unmuddle/Assets/tray.png" Width="18" Height="18" Margin="8,0,10,0" VerticalAlignment="Center" />
                   <TextBlock Grid.Column="1" Text="{TemplateBinding Title}" FontSize="14" Foreground="{DynamicResource MutedBrush}" VerticalAlignment="Center" />
                   <Button Grid.Column="2" Name="PART_Minimise" Classes="chrome" ToolTip.Tip="Minimise">
                     <Path Stroke="{DynamicResource MutedBrush}" StrokeThickness="1.5" Data="M5 10H15" Width="20" Height="20" />

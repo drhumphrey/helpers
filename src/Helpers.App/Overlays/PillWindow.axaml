@@ -2,7 +2,7 @@
                         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                         xmlns:overlays="using:Helpers.App.Overlays"
                         x:Class="Helpers.App.Overlays.PillWindow"
-                        Title="Helpers read button"
+                        Title="Unmuddle read button"
                         SizeToContent="WidthAndHeight">
 
   <overlays:OverlayWindow.Styles>

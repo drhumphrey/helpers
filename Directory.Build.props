@@ -8,9 +8,9 @@
     <Deterministic>true</Deterministic>
     <NeutralLanguage>en-GB</NeutralLanguage>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
-    <Version>0.1.1</Version>
-    <Product>Helpers</Product>
-    <Company>Helpers contributors</Company>
+    <Version>0.2.0</Version>
+    <Product>Unmuddle</Product>
+    <Company>Unmuddle contributors</Company>
     <Copyright>Licensed under the GNU GPL v3</Copyright>
     <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
   </PropertyGroup>

@@ -6,7 +6,7 @@
                      xmlns:core="using:Helpers.Core"
                      x:Class="Helpers.App.Windows.SettingsWindow"
                      x:DataType="vm:SettingsViewModel"
-                     Title="Helpers settings"
+                     Title="Unmuddle settings"
                      Width="720" Height="760" MinWidth="640" MinHeight="560"
                      WindowStartupLocation="CenterScreen"
                      Padding="6,0,6,10">

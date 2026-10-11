@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using Helpers.Core;
 
 namespace Helpers.Ai;
 
@@ -72,7 +73,7 @@ public static class LocalModels
     private static async Task FetchAsync(LocalModel model, string path, string temp, IProgress<double>? progress, CancellationToken cancellationToken)
     {
         using var http = new HttpClient { Timeout = Timeout.InfiniteTimeSpan };
-        http.DefaultRequestHeaders.UserAgent.ParseAdd("Helpers/0.1 (+https://github.com/drhumphrey/helpers)");
+        http.DefaultRequestHeaders.UserAgent.ParseAdd($"{HelpersInfo.Name} (+{HelpersInfo.RepositoryUrl})");
 
         try
         {

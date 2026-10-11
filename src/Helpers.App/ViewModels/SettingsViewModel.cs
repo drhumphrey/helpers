@@ -1002,7 +1002,7 @@ public sealed class SettingsViewModel : ObservableObject
     /// <summary>Download shows only when there is something to download.</summary>
     public bool CanDownload => !_isDownloading && !_assistant.LocalModelDownloaded;
 
-    /// <summary>"%LOCALAPPDATA%\Helpers\models\llm" or "%APPDATA%\Helpers\settings.json" rather than a path with the user's name in it.</summary>
+    /// <summary>"%LOCALAPPDATA%\Unmuddle\models\llm" or "%APPDATA%\Unmuddle\settings.json" rather than a path with the user's name in it.</summary>
     private static string FriendlyPath(string path)
     {
         var local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
@@ -1158,7 +1158,7 @@ public sealed class SettingsViewModel : ObservableObject
         get
         {
             var version = typeof(SettingsViewModel).Assembly.GetName().Version?.ToString(3) ?? "0.1";
-            return $"Helpers {version}. Free software under the GNU GPL v3 or later: free for everyone, no tiers, no paid extras, no telemetry.";
+            return $"Unmuddle {version}. Free software under the GNU GPL v3 or later: free for everyone, no tiers, no paid extras, no telemetry.";
         }
     }
 

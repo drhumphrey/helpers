@@ -1,4 +1,4 @@
-# Helpers: design
+# Unmuddle: design
 
 How the app looks and behaves on screen. The first mockups were drawn on a private design canvas, one artboard per surface in light and dark; the app has since moved past them, and screenshots of what it looks like now are in [images/](images/).
 
@@ -115,7 +115,7 @@ Rules that apply to all of them:
 
 ## Open items
 
-- The product name, and with it the tray icon. "Helpers" is the working title.
+- The tray icon, now the product is called Unmuddle (decided 11 October 2026).
 - Whether the compact player should show the next sentence faintly under the current one. Try it at milestone 3.
 
 ## Vibes

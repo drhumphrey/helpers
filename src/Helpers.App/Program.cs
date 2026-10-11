@@ -1,5 +1,8 @@
 using Avalonia;
 using Avalonia.Media;
+using Helpers.App.Services;
+using Helpers.Core.Settings;
+using Helpers.Windows;
 
 namespace Helpers.App;
 
@@ -9,8 +12,16 @@ internal static class Program
     // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
     // yet and stuff might break.
     [STAThread]
-    public static void Main(string[] args) => BuildAvaloniaApp()
-        .StartWithClassicDesktopLifetime(args);
+    public static void Main(string[] args)
+    {
+        // The first versions were called Helpers. Before anything reads its settings, carry the
+        // folders, the saved key and the start-up entry across to the Unmuddle names.
+        DataFolderMigration.MoveBoth();
+        CredentialStore.MovePrevious(AssistantService.KeyName);
+        StartupRegistration.MovePrevious();
+
+        BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+    }
 
     // Avalonia configuration, don't remove; also used by visual designer.
     public static AppBuilder BuildAvaloniaApp()
@@ -22,7 +33,7 @@ internal static class Program
             .With(new FontManagerOptions
             {
                 // Lexend, bundled under Assets/Fonts (SIL Open Font Licence), for all app text.
-                DefaultFamilyName = "avares://Helpers.App/Assets/Fonts#Lexend",
+                DefaultFamilyName = "avares://Unmuddle/Assets/Fonts#Lexend",
                 FontFallbacks = [new FontFallback { FontFamily = new FontFamily("Segoe UI") }],
             })
             .LogToTrace();

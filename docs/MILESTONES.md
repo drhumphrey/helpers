@@ -283,3 +283,23 @@ Dave: "so far everything works well", and asked for more of a summary and a how-
 **Code signing,** researched: no free route is open yet. SignPath's free plan wants visible use first, and has turned down projects with far more downloads; Microsoft's service takes individuals only in the US and Canada; a Certum certificate works now but signs by hand. Two catches for any route: Inno Setup's temporary installer file needs signing too, and about 70 of the libraries Helpers ships are unsigned, which Smart App Control may block whatever the installer carries. The options, sources and plan are in `docs/CODE-SIGNING.md`; the choice is Dave's.
 
 **Dave's call, the same day:** unsigned for now, and leave it at that. Instead, the release workflow now records a build attestation for the installer, the zip and `version.json` with GitHub's `actions/attest` (v4): a record, signed through GitHub, that each file was built from this repository by its release workflow, which anyone can check with `gh attestation verify`. The 0.1.1 notes say how. It runs for the first time with the 0.1.1 release; if it fails, the release stops before anything is published.
+
+## Renamed Unmuddle (11 October 2026)
+
+Dave chose the name after looking at a few. Hark was the favourite until a search found a well-funded AI assistant already called that. "Making Sense" is an everyday phrase, and a software company, so it became the line instead: **Unmuddle, making sense of what you read and write**. "Helpers" stays as the code's name for its solution, projects and namespaces.
+
+**What users see:** every window title, the tray, the messages, the welcome screen, the About line, the installer, the Start menu, and the program itself, now `Unmuddle.exe`. `HelpersInfo` holds the name, the line and the repository address; the links, the update address and the downloads' user agent come from it. The version is 0.2.0, which takes in the update fix that was going to be 0.1.1, and the 0.1.1 notes became the 0.2.0 notes.
+
+**Moving existing copies across:** before anything reads its settings, `Program.Main` moves `%APPDATA%\Helpers` and `%LOCALAPPDATA%\Helpers` to the Unmuddle names, only when the new folder doesn't exist and never as a merge. It also moves the saved Claude key from `Helpers/anthropic-api-key` to `Unmuddle/anthropic-api-key`, removing the old one only once the new one is saved, and swaps the start-up entry. `DataFolderMigration` in Core has tests. The installer keeps the old AppId, so it replaces a Helpers install rather than sitting beside it; it installs to `Programs\Unmuddle`, closes a running Helpers first, and removes the old program and Start menu folders.
+
+**Tried on the second PC:**
+
+- The development copy's first start as Unmuddle moved Dave's real settings (byte for byte), his dictionary and 2.73 GB of downloads. The voice and AI settings carried on.
+- Helpers 0.1.0, downloaded from its release and checked against its checksum, was installed quietly and not started. The locally built Unmuddle 0.2.0 installer then upgraded it: one entry in Apps, now "Unmuddle 0.2.0", the old program and Start menu folders gone, nothing added to start-up. The release build ran. It was uninstalled afterwards, with the data kept.
+- 275 tests pass. The pictures that showed the old name were retaken.
+
+**Not to plan:**
+
+- The program's name is the assembly name, and every `avares://` resource address uses it, so they all moved to `avares://Unmuddle/`.
+- The first scripted replacements in the docs and the capture script failed on the backslashes in paths, and were redone from a file.
+- The look on the second PC was Calm by the time of the rename (it was Custom earlier that night), so the retaken pictures came out blue beside the others. The capture script now sets the same Custom look for every picture.

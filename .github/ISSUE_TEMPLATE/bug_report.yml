@@ -28,7 +28,7 @@ body:
   - type: input
     id: version
     attributes:
-      label: Helpers version
+      label: Unmuddle version
       description: Settings, then Privacy and licences, shows it at the top.
       placeholder: "0.1.0"
   - type: dropdown

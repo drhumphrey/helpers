@@ -1,20 +1,20 @@
-# Helpers
+# Unmuddle
 
-**Free tools that help you read, write and think things through, especially with AI.** Hear any text read aloud. Write back with confidence. Keep your text on your own PC.
+**Making sense of what you read and write.** Free tools that help you read, write and think things through, especially with AI. Hear any text read aloud. Write back with confidence. Keep your text on your own PC.
 
-[![Build](https://github.com/drhumphrey/helpers/actions/workflows/build.yml/badge.svg)](https://github.com/drhumphrey/helpers/actions/workflows/build.yml)
+[![Build](https://github.com/drhumphrey/unmuddle/actions/workflows/build.yml/badge.svg)](https://github.com/drhumphrey/unmuddle/actions/workflows/build.yml)
 [![Licence: GPL v3](https://img.shields.io/badge/licence-GPL%20v3-blue.svg)](LICENSE)
 ![Windows 10 and 11](https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4)
 
 ![The reading view: an AI reply read aloud, with the current sentence and word highlighted](docs/images/player.png)
 
-**New to Helpers?** The [how-to guide](docs/GUIDE.md) shows every part, step by step, with pictures.
+**New to Unmuddle?** The [how-to guide](docs/GUIDE.md) shows every part, step by step, with pictures.
 
 ## Why
 
 AI assistants are brilliant. Working with them means reading a lot of long text and typing a lot of careful requests. That's hard work when you're tired, short on time, not a natural typist, writing in a second language, or simply better at thinking out loud than putting thoughts in order on the page.
 
-Helpers takes that strain off. It sits in the tray and helps in three ways:
+Unmuddle takes that strain off. It sits in the tray and helps in three ways:
 
 - **Hear it.** Select any text and hear it read in a natural voice.
 - **Write it.** Write your reply in a calm space with spelling help and a read-back.
@@ -86,8 +86,8 @@ Right-click any word in Compose and choose **Look up**.
 
 ## Install
 
-1. Download the latest version from the [Releases page](https://github.com/drhumphrey/helpers/releases). Pick the installer (`Helpers-x.y.z-setup.exe`) or the zip.
-2. Run it. The installer puts Helpers in your user folder. It doesn't need admin rights.
+1. Download the latest version from the [Releases page](https://github.com/drhumphrey/unmuddle/releases). Pick the installer (`Unmuddle-x.y.z-setup.exe`) or the zip.
+2. Run it. The installer puts Unmuddle in your user folder. It doesn't need admin rights.
 3. Windows may say "Windows protected your PC", because the app isn't signed yet. Choose **More info**, then **Run anyway**.
 4. A welcome screen asks you to pick a voice. That's it.
 
@@ -124,7 +124,8 @@ This is an early version. It works well on the PCs it has been tested on, and it
 - Code signing, so Windows stops warning.
 - A browser extension, to put Read and Edit on the right-click menu in Chrome and Edge.
 - A Mac version.
-- A proper name. "Helpers" is a working title.
+
+Unmuddle was called Helpers until version 0.2.0. If you used it then, your settings and downloads move across by themselves.
 
 ## Building from source
 
@@ -159,6 +160,6 @@ Found a security problem? Please read [SECURITY.md](SECURITY.md) and report it p
 
 ## Licence
 
-Helpers is free software under the [GNU General Public License v3](LICENSE) or later. It comes with no warranty; see sections 15 and 16 of the licence. It's built on many other open-source projects, listed with their licences in [docs/THIRD-PARTY-NOTICES.md](docs/THIRD-PARTY-NOTICES.md).
+Unmuddle is free software under the [GNU General Public License v3](LICENSE) or later. It comes with no warranty; see sections 15 and 16 of the licence. It's built on many other open-source projects, listed with their licences in [docs/THIRD-PARTY-NOTICES.md](docs/THIRD-PARTY-NOTICES.md).
 
-Helpers is a general reading and writing tool. It isn't a medical device and doesn't diagnose or treat anything. AI notes can be wrong; you decide what to change.
+Unmuddle is a general reading and writing tool. It isn't a medical device and doesn't diagnose or treat anything. AI notes can be wrong; you decide what to change.

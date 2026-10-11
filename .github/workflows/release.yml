@@ -59,7 +59,7 @@ jobs:
         shell: pwsh
         env:
           VERSION: ${{ steps.version.outputs.version }}
-        run: Compress-Archive -Path out/publish/win-x64/* -DestinationPath "out/Helpers-$env:VERSION-win-x64.zip"
+        run: Compress-Archive -Path out/publish/win-x64/* -DestinationPath "out/Unmuddle-$env:VERSION-win-x64.zip"
 
       # GitHub's Windows images include Inno Setup 6. Nothing is downloaded here: if it's ever
       # missing, the release stops rather than fetching a build tool from a public feed.
@@ -84,21 +84,21 @@ jobs:
             version = $v
             notes = "See the release page for what changed."
             page = "https://github.com/$env:REPOSITORY/releases/tag/$env:REF_NAME"
-            installer = [ordered]@{ url = "$base/Helpers-$v-setup.exe"; sha256 = (Get-FileHash "out/Helpers-$v-setup.exe" -Algorithm SHA256).Hash.ToLower() }
-            zip = [ordered]@{ url = "$base/Helpers-$v-win-x64.zip"; sha256 = (Get-FileHash "out/Helpers-$v-win-x64.zip" -Algorithm SHA256).Hash.ToLower() }
+            installer = [ordered]@{ url = "$base/Unmuddle-$v-setup.exe"; sha256 = (Get-FileHash "out/Unmuddle-$v-setup.exe" -Algorithm SHA256).Hash.ToLower() }
+            zip = [ordered]@{ url = "$base/Unmuddle-$v-win-x64.zip"; sha256 = (Get-FileHash "out/Unmuddle-$v-win-x64.zip" -Algorithm SHA256).Hash.ToLower() }
           }
           $info | ConvertTo-Json -Depth 4 | Set-Content out/version.json -Encoding utf8
           Get-Content out/version.json
 
       # A signed record, kept by GitHub, that these exact files were built here, by this workflow,
       # from this tag. The app isn't code-signed yet; this lets anyone check a download all the same:
-      #   gh attestation verify Helpers-x.y.z-setup.exe --repo drhumphrey/helpers
+      #   gh attestation verify Unmuddle-x.y.z-setup.exe --repo drhumphrey/unmuddle
       - name: Attest where the files came from
         uses: actions/attest@v4
         with:
           subject-path: |
-            out/Helpers-*-setup.exe
-            out/Helpers-*-win-x64.zip
+            out/Unmuddle-*-setup.exe
+            out/Unmuddle-*-win-x64.zip
             out/version.json
 
       - name: Release
@@ -108,11 +108,11 @@ jobs:
           VERSION: ${{ steps.version.outputs.version }}
         run: |
           $v = $env:VERSION
-          $files = @("out/Helpers-$v-setup.exe", "out/Helpers-$v-win-x64.zip", "out/version.json")
+          $files = @("out/Unmuddle-$v-setup.exe", "out/Unmuddle-$v-win-x64.zip", "out/version.json")
           $notes = "docs/releases/v$v.md"
           if (Test-Path $notes) {
-            gh release create $env:REF_NAME --title "Helpers $v" --notes-file $notes @files
+            gh release create $env:REF_NAME --title "Unmuddle $v" --notes-file $notes @files
           } else {
-            gh release create $env:REF_NAME --title "Helpers $v" --generate-notes @files
+            gh release create $env:REF_NAME --title "Unmuddle $v" --generate-notes @files
           }
           if ($LASTEXITCODE -ne 0) { throw "gh release create failed with $LASTEXITCODE" }

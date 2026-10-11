@@ -1,6 +1,6 @@
 # Helpers: build brief 2.0
 
-Working title: **Helpers**. A small tray app that helps people read, write and think things through when working with AI assistants such as Claude, Claude Code and ChatGPT: for anyone who finds a wall of text or a careful request hard work. Windows 10/11 first; macOS is a stated goal (see below).
+Working title: **Helpers**. Now called **Unmuddle** (decided 11 October 2026); this brief keeps the working title it was written with. A small tray app that helps people read, write and think things through when working with AI assistants such as Claude, Claude Code and ChatGPT: for anyone who finds a wall of text or a careful request hard work. Windows 10/11 first; macOS is a stated goal (see below).
 
 It does three jobs:
 
@@ -60,7 +60,7 @@ Prerequisites on the dev machine: the .NET 10 SDK (`winget install Microsoft.Dot
 
 These are decided below so work can start. Overrule any of them.
 
-- **Product name.** "Helpers" is the working title and the solution name. The tray app needs a friendlier name before v0.1 ships.
+- **Product name.** Resolved 11 October 2026: **Unmuddle**, "making sense of what you read and write", chosen by Dave. "Helpers" stays as the solution, project and namespace name in the code.
 - **Publish v0.1 early.** The plan releases the reading half on its own as v0.1 before Compose exists. I think that is right: it's useful on day one.
 - **Five AI actions.** Check my thinking, Tidy, Make a request, Summarise and Explain simply. All are prompt templates behind the same plumbing, so each extra one costs little. Cut any you don't want. Dave's steer on 9 October 2026: the help that matters most to a writer who finds writing hard is not spelling and grammar, which inline checkers already do, but a reader saying "I don't follow this bit" or "something is missing here", without rewriting.
 - **Dropbox.** Resolved 8 October 2026: the checkout stays in Dropbox, but `.git` and every `bin` and `obj` folder are marked as Dropbox-ignored, so Dropbox never touches git internals or build output. See Gotchas for the command to run when a project is added.

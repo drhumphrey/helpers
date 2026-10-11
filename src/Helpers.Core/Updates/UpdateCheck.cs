@@ -15,9 +15,9 @@ public sealed record ReleaseInfo(string Version, string Notes, string Page, Rele
 /// </summary>
 public static class UpdateCheck
 {
-    public const string VersionUrl = "https://github.com/drhumphrey/helpers/releases/latest/download/version.json";
+    public const string VersionUrl = HelpersInfo.RepositoryUrl + "/releases/latest/download/version.json";
 
-    public const string ReleasesPage = "https://github.com/drhumphrey/helpers/releases";
+    public const string ReleasesPage = HelpersInfo.RepositoryUrl + "/releases";
 
     /// <summary>A little under a day, so a daily launch at the same time still counts.</summary>
     public static readonly TimeSpan Interval = TimeSpan.FromHours(23);

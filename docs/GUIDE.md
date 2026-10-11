@@ -1,6 +1,6 @@
-# How to use Helpers
+# How to use Unmuddle
 
-Helpers sits in the corner of your screen and helps you read, write and think things through. This guide shows each part, one step at a time.
+Unmuddle sits in the corner of your screen and helps you read, write and think things through. This guide shows each part, one step at a time.
 
 ## At a glance
 
@@ -12,25 +12,25 @@ Helpers sits in the corner of your screen and helps you read, write and think th
 | Fix something you've already written | Select it, press **Edit**, fix it in Compose, then press **Put it back**. |
 | Get a reader's notes on your draft | Press **Check my thinking** in Compose. |
 | Look up a word | Right-click it in Compose and choose **Look up**. |
-| Change how anything works | Click the Helpers icon by the clock, then **Settings**. |
+| Change how anything works | Click the Unmuddle icon by the clock, then **Settings**. |
 
 ## Getting started
 
-Download Helpers from the [Releases page](https://github.com/drhumphrey/helpers/releases) and run the installer. It installs for you only and doesn't need admin rights. The [README](../README.md#install) has the details.
+Download Unmuddle from the [Releases page](https://github.com/drhumphrey/unmuddle/releases) and run the installer. It installs for you only and doesn't need admin rights. The [README](../README.md#install) has the details.
 
-The first time Helpers starts, it asks three things:
+The first time Unmuddle starts, it asks three things:
 
 <img src="images/welcome.png" width="540" alt="The welcome screen: pick a voice, choose whether to show a Read button and start with Windows, and whether to check for updates">
 
 1. **Pick a voice.** Press **Hear it** to try one. The voice downloads the first time, about 350 MB, then works offline.
 2. **How to start reading.** The Read button and starting with Windows are both up to you.
-3. **Updates.** If you switch this on, Helpers asks GitHub once a day whether there's a newer version. Nothing else is ever sent.
+3. **Updates.** If you switch this on, Unmuddle asks GitHub once a day whether there's a newer version. Nothing else is ever sent.
 
-Press **Done**. Helpers now lives in the notification area by the clock. If you can't see its icon, click the small arrow there.
+Press **Done**. Unmuddle now lives in the notification area by the clock. If you can't see its icon, click the small arrow there.
 
-Click the icon to open the Helpers menu:
+Click the icon to open the Unmuddle menu:
 
-<img src="images/menu.png" width="220" alt="The Helpers menu: read clipboard, pause, stop, show player, Compose, watch clipboard, pause the Read button, Calm look, start with Windows, Settings, memory in use, exit">
+<img src="images/menu.png" width="220" alt="The Unmuddle menu: read clipboard, pause, stop, show player, Compose, watch clipboard, pause the Read button, Calm look, start with Windows, Settings, memory in use, exit">
 
 Right-click the icon for the same things in a plain menu.
 
@@ -56,7 +56,7 @@ Select text and press **Ctrl+Alt+Space**. Press it again with nothing selected t
 
 ### The player
 
-While Helpers reads, the player shows the sentence it's on and highlights each word as it's spoken.
+While Unmuddle reads, the player shows the sentence it's on and highlights each word as it's spoken.
 
 <img src="images/player-mini.png" width="610" alt="The small player: play or pause, back, forward, stop, the current sentence, speed, voice, reading view, settings and hide">
 
@@ -68,7 +68,7 @@ Open the reading view to see the whole text. The current sentence and word are h
 
 ### What gets read, and how
 
-Helpers understands the Markdown that AI chats write. It says "code block, 12 lines" instead of reading code out letter by letter. It doesn't read web addresses out in full. Years, prices, times and percentages are said the way people say them.
+Unmuddle understands the Markdown that AI chats write. It says "code block, 12 lines" instead of reading code out letter by letter. It doesn't read web addresses out in full. Years, prices, times and percentages are said the way people say them.
 
 If the voice says a word wrongly, teach it: go to **Settings**, then **Reading**, then **Pronunciations**. Type the word, type how to say it, and press **Add**.
 
@@ -78,7 +78,7 @@ Compose is a calm place to write. Open it in any of these ways:
 
 - Press **Ctrl+Alt+C** in the app you're writing in.
 - Press **Edit** on the Read button.
-- Choose **Compose** from the Helpers menu.
+- Choose **Compose** from the Unmuddle menu.
 
 <img src="images/compose.png" width="640" alt="Compose: a draft with spelling underlined, and a reader's notes beside it">
 
@@ -101,7 +101,7 @@ Use this to fix something you've half written in another app.
 
 ## Shape it
 
-Helpers can give you a reader's notes on your draft. This is optional, and off until you choose an AI helper.
+Unmuddle can give you a reader's notes on your draft. This is optional, and off until you choose an AI helper.
 
 ### Choose an AI helper
 
@@ -116,11 +116,11 @@ Go to **Settings**, then **AI**.
 | Speed | 10 to 20 seconds | A few seconds |
 | Download | 2.5 GB, once | None |
 
-For Claude, get a key from [console.anthropic.com](https://console.anthropic.com), paste it in and press **Save**. Helpers keeps it in Windows Credential Manager, never in a file. The first time you use Claude, Helpers shows you exactly what it will send.
+For Claude, get a key from [console.anthropic.com](https://console.anthropic.com), paste it in and press **Save**. Unmuddle keeps it in Windows Credential Manager, never in a file. The first time you use Claude, Unmuddle shows you exactly what it will send.
 
 ### The three buttons in Compose
 
-- **Check my thinking.** A careful reader's notes: where the logic jumps, what's missing, which "it" you mean. Each note is a question or a tiny fix, pinned to your words. Click a note to see the words it's about. A fix only happens if you press **Apply**. Helpers never rewrites your text.
+- **Check my thinking.** A careful reader's notes: where the logic jumps, what's missing, which "it" you mean. Each note is a question or a tiny fix, pinned to your words. Click a note to see the words it's about. A fix only happens if you press **Apply**. Unmuddle never rewrites your text.
 - **Tidy.** Spelling and grammar only. Every change is marked, and you apply them one at a time.
 - **Make a request.** Turns rough notes into a clear request for an AI coding assistant. Press **Use this** to put it in Compose, or **Copy** it.
 
@@ -146,7 +146,7 @@ The dictionary downloads the first time, about 10 MB. For names and new words, *
 
 ## Make it yours
 
-Everything is in **Settings**. Click the Helpers icon, then **Settings**. Changes apply straight away.
+Everything is in **Settings**. Click the Unmuddle icon, then **Settings**. Changes apply straight away.
 
 **Voice:** the voice, speed and volume, and which speakers to use.
 
@@ -168,40 +168,40 @@ Everything is in **Settings**. Click the Helpers icon, then **Settings**. Change
 
 <img src="images/settings-player.png" width="540" alt="The Player page: hide after reading, and where messages appear">
 
-**Start-up:** whether Helpers starts when you sign in.
+**Start-up:** whether Unmuddle starts when you sign in.
 
 <img src="images/settings-startup.png" width="540" alt="The Start-up page: start with Windows">
 
-**Privacy and licences:** what leaves your PC, the update check, and every part Helpers is built with, with its licence.
+**Privacy and licences:** what leaves your PC, the update check, and every part Unmuddle is built with, with its licence.
 
-<img src="images/settings-privacy.png" width="540" alt="The Privacy and licences page: this app, updates, what leaves your PC, and the parts Helpers is built with">
+<img src="images/settings-privacy.png" width="540" alt="The Privacy and licences page: this app, updates, what leaves your PC, and the parts Unmuddle is built with">
 
 ## Updates
 
-Helpers only looks for updates if you switch it on, on the welcome screen or under **Settings**, then **Privacy and licences**. Press **Check now** to look straight away.
+Unmuddle only looks for updates if you switch it on, on the welcome screen or under **Settings**, then **Privacy and licences**. Press **Check now** to look straight away.
 
 When there's a new version, a message offers it. Press **See what's new**, then:
 
-- **Update now** downloads it, checks it, installs it quietly and starts Helpers again. It takes about half a minute.
-- **Skip this version** stops Helpers offering this one.
+- **Update now** downloads it, checks it, installs it quietly and starts Unmuddle again. It takes about half a minute.
+- **Skip this version** stops Unmuddle offering this one.
 - **Not now** asks again another day.
 
-If you have version 0.1.0, install the next version by hand from the [Releases page](https://github.com/drhumphrey/helpers/releases). Update now doesn't work in 0.1.0.
+If you have version 0.1.0, install the next version by hand from the [Releases page](https://github.com/drhumphrey/unmuddle/releases). Update now doesn't work in 0.1.0.
 
 ## If something isn't working
 
-**Windows says "Windows protected your PC".** Helpers isn't code-signed yet. Choose **More info**, then **Run anyway**.
+**Windows says "Windows protected your PC".** Unmuddle isn't code-signed yet. Choose **More info**, then **Run anyway**.
 
-**Windows blocks Helpers and doesn't offer Run anyway.** That's Smart App Control, which blocks apps that aren't code-signed. We're working on signing. Until then the only way past it is to turn Smart App Control off in Windows Security, and on some versions of Windows it can't be turned back on.
+**Windows blocks Unmuddle and doesn't offer Run anyway.** That's Smart App Control, which blocks apps that aren't code-signed. We're working on signing. Until then the only way past it is to turn Smart App Control off in Windows Security, and on some versions of Windows it can't be turned back on.
 
-**A shortcut does nothing.** Only one copy of Helpers can use the shortcuts. Check there isn't a second copy running. If a shortcut types a character instead, choose another under **Settings**, then **Read button**.
+**A shortcut does nothing.** Only one copy of Unmuddle can use the shortcuts. Check there isn't a second copy running. If a shortcut types a character instead, choose another under **Settings**, then **Read button**.
 
 **No red underlines in Compose.** Windows' spell checker needs the English (United Kingdom) language. Add it in Windows Settings, under **Time & language**, then **Language & region**. The line at the bottom of Compose says whether spelling is on.
 
-**The Read button doesn't appear in an app.** Check it isn't on the list under **Settings**, then **Read button**. Helpers never reads password boxes. It also can't read from apps that run as administrator, and it tells you when that happens.
+**The Read button doesn't appear in an app.** Check it isn't on the list under **Settings**, then **Read button**. Unmuddle never reads password boxes. It also can't read from apps that run as administrator, and it tells you when that happens.
 
 **The AI takes a while the first time.** On this PC, the model loads first. After that, each press takes 10 to 20 seconds. Claude takes a few seconds.
 
-**Where Helpers keeps things.** Settings and your draft: `%APPDATA%\Helpers\settings.json`. The voice, the AI model and the dictionary: `%LOCALAPPDATA%\Helpers\models`. Uninstalling leaves both, so a reinstall keeps your settings.
+**Where Unmuddle keeps things.** Settings and your draft: `%APPDATA%\Unmuddle\settings.json`. The voice, the AI model and the dictionary: `%LOCALAPPDATA%\Unmuddle\models`. Uninstalling leaves both, so a reinstall keeps your settings. If you used Unmuddle when it was called Helpers, all of this moves across by itself the first time Unmuddle starts.
 
-Still stuck? Tell us in an [issue](https://github.com/drhumphrey/helpers/issues). Please make up an example rather than pasting private text.
+Still stuck? Tell us in an [issue](https://github.com/drhumphrey/unmuddle/issues). Please make up an example rather than pasting private text.

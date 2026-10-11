@@ -2,7 +2,7 @@
                         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                         xmlns:overlays="using:Helpers.App.Overlays"
                         x:Class="Helpers.App.Overlays.QuickMenuWindow"
-                        Title="Helpers menu"
+                        Title="Unmuddle menu"
                         SizeToContent="WidthAndHeight">
 
   <overlays:OverlayWindow.Styles>

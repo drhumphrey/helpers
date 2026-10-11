@@ -32,7 +32,7 @@ if (-not [Shot.Native]::IsWindowVisible($hwnd)) {
 $pid0 = 0
 [void][Shot.Native]::GetWindowThreadProcessId($hwnd, [ref]$pid0)
 $proc = Get-Process -Id $pid0 -ErrorAction SilentlyContinue
-if ($proc.ProcessName -ne 'Helpers.App') {
+if ($proc.ProcessName -ne 'Unmuddle') {
     Write-Output ("window '" + $Title + "' belongs to " + $proc.ProcessName + "; not capturing")
     exit 1
 }

@@ -67,9 +67,9 @@ public static class Vibes
     }
 
     private static ResourceInclude Include(string name) =>
-        new(new Uri("avares://Helpers.App/"))
+        new(new Uri("avares://Unmuddle/"))
         {
-            Source = new Uri($"avares://Helpers.App/Themes/{name}.axaml"),
+            Source = new Uri($"avares://Unmuddle/Themes/{name}.axaml"),
         };
 
     private static ResourceDictionary BuildGradientDictionary(IEnumerable<string> hexes)

@@ -362,8 +362,8 @@ public partial class App : Application
 
         var tray = new TrayIcon
         {
-            Icon = new WindowIcon(AssetLoader.Open(new Uri("avares://Helpers.App/Assets/app.ico"))),
-            ToolTipText = "Helpers",
+            Icon = new WindowIcon(AssetLoader.Open(new Uri("avares://Unmuddle/Assets/app.ico"))),
+            ToolTipText = "Unmuddle",
             Menu = menu,
             IsVisible = true,
         };
@@ -422,7 +422,7 @@ public partial class App : Application
         }
         else
         {
-            _toasts?.Info(now ? "Helpers will start with Windows" : "Helpers will no longer start with Windows");
+            _toasts?.Info(now ? "Unmuddle will start with Windows" : "Unmuddle will no longer start with Windows");
         }
 
         return ok;

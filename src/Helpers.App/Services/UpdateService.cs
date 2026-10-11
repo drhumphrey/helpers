@@ -126,7 +126,7 @@ public sealed class UpdateService : IDisposable
                 return;
             }
 
-            _toasts.Offer($"Helpers {info.Version} is available. You have {current}.", "See what's new", () => ShowWindow(info));
+            _toasts.Offer($"Unmuddle {info.Version} is available. You have {current}.", "See what's new", () => ShowWindow(info));
         }
         finally
         {
@@ -138,7 +138,7 @@ public sealed class UpdateService : IDisposable
     private static async Task<ReleaseInfo?> FetchAsync()
     {
         using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(15) };
-        http.DefaultRequestHeaders.UserAgent.ParseAdd($"Helpers/{CurrentVersion}");
+        http.DefaultRequestHeaders.UserAgent.ParseAdd($"Unmuddle/{CurrentVersion}");
         using var response = await http.GetAsync(UpdateCheck.VersionUrl);
         if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
         {
@@ -179,12 +179,12 @@ public sealed class UpdateService : IDisposable
         }
 
         _updating = true;
-        var toast = _toasts.Progress($"Downloading Helpers {release.Version}…");
-        var path = Path.Combine(Path.GetTempPath(), $"Helpers-{release.Version}-setup.exe");
+        var toast = _toasts.Progress($"Downloading Unmuddle {release.Version}…");
+        var path = Path.Combine(Path.GetTempPath(), $"Unmuddle-{release.Version}-setup.exe");
         try
         {
             using var http = new HttpClient { Timeout = Timeout.InfiniteTimeSpan };
-            http.DefaultRequestHeaders.UserAgent.ParseAdd($"Helpers/{CurrentVersion}");
+            http.DefaultRequestHeaders.UserAgent.ParseAdd($"Unmuddle/{CurrentVersion}");
             using var response = await http.GetAsync(release.Installer.Url, HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
             var total = response.Content.Headers.ContentLength ?? 0;

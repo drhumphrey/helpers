@@ -1,4 +1,4 @@
-# Takes the README screenshots from an installed or published copy of Helpers.
+# Takes the README screenshots from an installed or published copy of Unmuddle.
 #
 # It stops the app, backs up settings.json, plants a made-up draft, mutes the voice, opens each
 # window with a developer switch, captures only that window (shot.ps1), puts the settings back,
@@ -9,12 +9,12 @@
 # or Claude with a key). Without one, the Compose shot shows the draft and the greyed buttons.
 #
 #   powershell -NoProfile -File tools\screenshots\capture.ps1
-#   powershell -NoProfile -File tools\screenshots\capture.ps1 -Exe out\publish\win-x64\Helpers.App.exe
+#   powershell -NoProfile -File tools\screenshots\capture.ps1 -Exe out\publish\win-x64\Unmuddle.exe
 #
 # A list for -Only needs -Command: under -File, Windows PowerShell passes "pill,word" as one string.
 #   powershell -NoProfile -Command "& '.\tools\screenshots\capture.ps1' -Only pill,word"
 param(
-    [string] $Exe = (Join-Path $env:LOCALAPPDATA 'Programs\Helpers\Helpers.App.exe'),
+    [string] $Exe = (Join-Path $env:LOCALAPPDATA 'Programs\Unmuddle\Unmuddle.exe'),
     [string] $OutDir = (Join-Path $PSScriptRoot '..\..\docs\images'),
     [int] $AiWaitSeconds = 45,
     [string[]] $Only = @(
@@ -33,17 +33,17 @@ New-Item -ItemType Directory -Force -Path $work, $OutDir | Out-Null
 $shot = Join-Path $PSScriptRoot 'shot.ps1'
 $clean = Join-Path $PSScriptRoot 'clean.ps1'
 $reply = Join-Path $PSScriptRoot 'demo-reply.md'
-$settings = Join-Path $env:APPDATA 'Helpers\settings.json'
+$settings = Join-Path $env:APPDATA 'Unmuddle\settings.json'
 $backup = Join-Path $work 'settings.backup.json'
 
 $draft = 'can you chang the login page so it remmbers the user, also when the pasword is wrong it should say somthing and the the button is to small. it worked yesterday before the update so maybe its that'
 
-function Stop-Helpers {
-    Get-Process Helpers.App -ErrorAction SilentlyContinue | Stop-Process -Force
+function Stop-App {
+    Get-Process Unmuddle, Helpers.App -ErrorAction SilentlyContinue | Stop-Process -Force
     Start-Sleep -Seconds 2
 }
 
-function Start-Helpers([string[]] $Arguments) {
+function Start-App([string[]] $Arguments) {
     if (-not $Arguments -or $Arguments.Count -eq 0) {
         Start-Process -FilePath $Exe | Out-Null
         return
@@ -68,9 +68,9 @@ function Capture([string] $Title, [string] $Name, [int] $WaitSeconds, [string[]]
         return
     }
 
-    Stop-Helpers
+    Stop-App
     if ($Set.Count -gt 0) { Set-Planted $Set }
-    Start-Helpers $Arguments
+    Start-App $Arguments
     $raw = Join-Path $work ($Name + '.png')
     $deadline = (Get-Date).AddSeconds($WaitSeconds + 20)
     Start-Sleep -Seconds $WaitSeconds
@@ -85,7 +85,7 @@ function Capture([string] $Title, [string] $Name, [int] $WaitSeconds, [string[]]
     }
 }
 
-Stop-Helpers
+Stop-App
 $hadSettings = Test-Path $settings
 if ($hadSettings) { Copy-Item $settings $backup -Force }
 
@@ -98,6 +98,9 @@ try {
     # The Settings pages show these lists, so the shots use the app's defaults, not the user's own.
     $json | Add-Member -NotePropertyName ExcludedApps -NotePropertyValue @('1Password', 'Bitwarden', 'KeePass', 'KeePassXC', 'mstsc') -Force
     if ($json.Reading) { $json.Reading.PSObject.Properties.Remove('PronunciationEntries') }
+    # One look for every picture, whichever look the user has chosen.
+    $json | Add-Member -NotePropertyName Vibe -NotePropertyValue 'Custom' -Force
+    $json | Add-Member -NotePropertyName GradientColours -NotePropertyValue @('#8900FF', '#FF4800', '#00D3FF') -Force
     New-Item -ItemType Directory -Force -Path (Split-Path $settings) | Out-Null
     $json | ConvertTo-Json -Depth 20 | Set-Content $settings -Encoding UTF8
 
@@ -105,13 +108,13 @@ try {
     # Tidy isn't in the default list: on a slower PC the local model may not finish in time. Ask for it with -Only tidy.
     Capture 'Compose' 'compose' $AiWaitSeconds @('--compose-check')
     Capture 'Compose' 'tidy' $AiWaitSeconds @('--compose-tidy')
-    Capture 'Helpers player' 'player' 14 @('--read-file', $reply) @{ PlayerExpanded = $true }
-    Capture 'Helpers player' 'player-mini' 10 @('--read-file', $reply) @{ PlayerExpanded = $false }
+    Capture 'Unmuddle player' 'player' 14 @('--read-file', $reply) @{ PlayerExpanded = $true }
+    Capture 'Unmuddle player' 'player-mini' 10 @('--read-file', $reply) @{ PlayerExpanded = $false }
     Capture 'Word' 'word' 10 @('--lookup', 'necessary')
     # The Read button hides after three seconds, so start looking straight away.
-    Capture 'Helpers read button' 'pill' 0 @('--pill')
-    Capture 'Helpers menu' 'menu' 0 @('--menu')
-    Capture 'Welcome to Helpers' 'welcome' 8 @('--first-run')
+    Capture 'Unmuddle read button' 'pill' 0 @('--pill')
+    Capture 'Unmuddle menu' 'menu' 0 @('--menu')
+    Capture 'Welcome to Unmuddle' 'welcome' 8 @('--first-run')
 
     $pages = [ordered]@{
         'settings-voice' = 'Voice'; 'settings-reading' = 'Reading'; 'settings-readbutton' = 'Read button'; 'settings-look' = 'Look'
@@ -119,12 +122,12 @@ try {
     }
     foreach ($page in $pages.GetEnumerator()) {
         # Nothing plays on these pages, so the Voice page can show an ordinary volume rather than the muted one.
-        Capture 'Helpers settings' $page.Key 6 @('--settings', $page.Value) @{ Volume = 0.8 }
+        Capture 'Unmuddle settings' $page.Key 6 @('--settings', $page.Value) @{ Volume = 0.8 }
     }
 }
 finally {
-    Stop-Helpers
+    Stop-App
     if ($hadSettings) { Copy-Item $backup $settings -Force } else { Remove-Item $settings -ErrorAction SilentlyContinue }
     Write-Output 'settings put back'
-    Start-Helpers @()
+    Start-App @()
 }

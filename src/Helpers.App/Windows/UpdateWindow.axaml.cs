@@ -21,12 +21,12 @@ public partial class UpdateWindow : ShellWindow
     public void Show(ReleaseInfo release, string currentVersion, bool installed)
     {
         _release = release;
-        Headline.Text = $"Helpers {release.Version} is ready";
+        Headline.Text = $"Unmuddle {release.Version} is ready";
         Versions.Text = $"You have {currentVersion}.";
         Notes.Text = release.Notes.Length > 0 ? release.Notes : "See the release page for what changed.";
         UpdateButton.IsVisible = installed && release.Installer is not null;
         Method.Text = UpdateButton.IsVisible
-            ? "Update now downloads the installer, checks it, closes Helpers, installs the new version quietly, and starts it again. About half a minute."
+            ? "Update now downloads the installer, checks it, closes Unmuddle, installs the new version quietly, and starts it again. About half a minute."
             : "This copy wasn't put here by the installer, so download the new version from the page and unzip it over this one.";
 
         if (!IsVisible)

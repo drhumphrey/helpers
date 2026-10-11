@@ -5,7 +5,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Helpers should be easy for everyone. If something is hard to read, hard to find or hard to understand, we want to know.
+        Unmuddle should be easy for everyone. If something is hard to read, hard to find or hard to understand, we want to know.
   - type: textarea
     id: problem
     attributes:
@@ -22,6 +22,6 @@ body:
     id: principles
     attributes:
       label: The project's rules
-      description: Helpers stays free, offline first and private. Ideas that need a paid service or send text away by default won't fit.
+      description: Unmuddle stays free, offline first and private. Ideas that need a paid service or send text away by default won't fit.
       options:
         - label: I've read the principles in the README

@@ -1,6 +1,6 @@
 # Code of conduct
 
-Helpers is built for, and with, people who find reading and writing hard work. Everyone here should feel safe to ask, to suggest, and to get things wrong.
+Unmuddle is built for, and with, people who find reading and writing hard work. Everyone here should feel safe to ask, to suggest, and to get things wrong.
 
 ## What we expect
 

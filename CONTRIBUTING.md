@@ -1,4 +1,4 @@
-# Contributing to Helpers
+# Contributing to Unmuddle
 
 Thank you for helping. This project is for anyone who finds reading or writing hard work, so the most useful thing you can tell us is often "this bit was hard".
 

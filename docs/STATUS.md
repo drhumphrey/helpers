@@ -4,7 +4,7 @@ Where the project stands, what's been checked, what hasn't, and what comes next.
 
 ## In one line
 
-Version 0.1.0 is released on GitHub (10 October 2026) and works on the PC it was made on: reading aloud, the Read button, Compose, the AI helpers on the PC and on Claude, the word tools, settings, the installer and an opt-in update check. Some parts haven't been tried by a user yet.
+The app is now called **Unmuddle**, "making sense of what you read and write" (11 October 2026; it was Helpers). Version 0.1.0 is released on GitHub as Helpers (10 October 2026), and 0.2.0, the first as Unmuddle, is ready to release. It works on both PCs: reading aloud, the Read button, Compose, the AI helpers on the PC and on Claude, the word tools, settings, the installer and an opt-in update check. Some parts haven't been tried by a user yet.
 
 ## Built
 
@@ -41,7 +41,7 @@ Version 0.1.0 is released on GitHub (10 October 2026) and works on the PC it was
 - **Check my thinking** and **Tidy** on real writing, in daily use.
 - **Claude** in the cloud. No key has been entered yet.
 - **Word tools** in daily use.
-- **The update check** against a real release. The quiet install and restart were tried with two local installers on the second PC; the check and the download need 0.1.1 installed and a newer release published.
+- **The update check** against a real release. The quiet install and restart were tried with two local installers on the second PC; the check and the download need 0.2.0 installed and a newer release published.
 - **Start with Windows** after a real sign-in, from the installed location.
 - From the acceptance list: Word, PDFs in a browser and Acrobat, Notepad, Explorer renaming, Windows Terminal, the Claude desktop app.
 
@@ -52,7 +52,7 @@ Version 0.1.0 is released on GitHub (10 October 2026) and works on the PC it was
 - Output device names are cut at 31 characters.
 - Syllables come from hyphenation patterns, so a few split oddly ("in·form·a·tion").
 - The app isn't code-signed, so Windows SmartScreen warns on first run.
-- In 0.1.0, Update now can't start the installer, so it closes the app without updating. Fixed in 0.1.1.
+- In 0.1.0, Update now can't start the installer, so it closes the app without updating. Fixed in 0.2.0.
 - The v0.1.0 installer offers to install for all users. A copy installed that way never offers Update now. Fixed for the next release, which installs per-user only.
 - Code scanning lists 49 style notes, mostly broad catches and LINQ suggestions: a tidy-up list, not bugs.
 - On a PC with Smart App Control on, Windows may block the unsigned app outright rather than warn. Code signing would help. On the second PC it blocked development builds until it was turned off ([DEVELOPING.md](DEVELOPING.md)).
@@ -69,18 +69,17 @@ Version 0.1.0 is released on GitHub (10 October 2026) and works on the PC it was
 
 ## Next, in order
 
-1. **Release 0.1.1.** The version is set and the notes are written; the tag is Dave's call. Copies of 0.1.0 can't update themselves, so they need 0.1.1 installed by hand. Try the update check for real when the next version comes.
-2. **On GitHub:** add topics. Private vulnerability reporting, Dependabot alerts and secret scanning with push protection are on.
-3. **Try everything under "Not tried yet"**, fix what turns up, and log it.
-4. **Code signing.** Unsigned for now, with build attestations instead. Apply to SignPath once Helpers has visible use ([CODE-SIGNING.md](CODE-SIGNING.md)).
-5. **Summarise and Explain simply** buttons, and the player's result card.
-6. **A browser extension** for Chrome and Edge, to put Read and Edit on the right-click menu.
-7. **A product name.** "Helpers" is a working title.
+1. **Release 0.2.0,** the first as Unmuddle, with the update fix that was going to be 0.1.1. The version is set and the notes are written; the tag is Dave's call. Copies of 0.1.0 can't update themselves, so they need 0.2.0 installed by hand. Try the update check for real when the next version comes.
+2. **On GitHub:** add topics and a description for Unmuddle. Private vulnerability reporting, Dependabot alerts and secret scanning with push protection are on.
+3. **Promotion,** once 0.2.0 is out: a short demo animation in the README, then a few posts.
+4. **Try everything under "Not tried yet"**, fix what turns up, and log it.
+5. **Code signing.** Unsigned for now, with build attestations instead. Apply to SignPath once Unmuddle has visible use ([CODE-SIGNING.md](CODE-SIGNING.md)).
+6. **Summarise and Explain simply** buttons, and the player's result card.
+7. **A browser extension** for Chrome and Edge, to put Read and Edit on the right-click menu.
 8. **macOS.**
 
 ## Decisions still open
 
-- The product name.
-- How to promote it.
+- How to promote it, and where.
 
-Decided 11 October 2026: ship unsigned for now, with a build attestation on every release file from 0.1.1, and come back to SignPath once Helpers has visible use.
+Decided 11 October 2026: the name is Unmuddle, with "making sense of what you read and write" as its line. Ship unsigned for now, with a build attestation on every release file, and come back to SignPath once Unmuddle has visible use.

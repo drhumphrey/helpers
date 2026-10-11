@@ -1,4 +1,6 @@
-# Working on helpers
+# Working on Unmuddle
+
+Unmuddle was called Helpers until 11 October 2026. Everything a user sees says Unmuddle; the code keeps the working title in project and namespace names (`Helpers.Core` and so on).
 
 Start with `docs/STATUS.md` for where things stand and what comes next. Read `docs/BRIEF.md` before writing any code. Its "Decisions already made" table is binding. Ask before changing a decision there or adding a dependency it does not list. `docs/DEVELOPING.md` has the set-up, the developer switches, the release steps and the traps already found; `docs/MILESTONES.md` is the build log.
 
@@ -15,7 +17,7 @@ Start with `docs/STATUS.md` for where things stand and what comes next. Read `do
 
 - Never send synthetic mouse clicks or key presses to the desktop. To test the app's menus, post messages to the app's own windows only (`tools/screenshots/post-right-click.ps1`).
 - Never screenshot anything but the app's own windows. Use `tools/screenshots/shot.ps1`, which finds a window by its exact title and refuses anything else. Never commit a screenshot that shows anything private.
-- Before planting test data, back up `%APPDATA%\Helpers\settings.json`, mute the voice, and put the settings back afterwards. `tools/screenshots/capture.ps1` does all three.
+- Before planting test data, back up `%APPDATA%\Unmuddle\settings.json`, mute the voice, and put the settings back afterwards. `tools/screenshots/capture.ps1` does all three.
 - Stop the running app before building or publishing over it.
 
 ## Principles that must hold

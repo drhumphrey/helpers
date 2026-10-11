@@ -1,15 +1,17 @@
-# Developing Helpers
+# Developing Unmuddle
 
 Everything needed to pick the project up on a fresh PC and carry on: setting up, building, running, checking each part, releasing, and the traps found along the way. [CONTRIBUTING.md](../CONTRIBUTING.md) has the rules; [BRIEF.md](BRIEF.md) has the decisions; [STATUS.md](STATUS.md) says where things stand; [MILESTONES.md](MILESTONES.md) is the full build log.
+
+The app was called Helpers until 11 October 2026. Users see Unmuddle everywhere, and the program is `Unmuddle.exe`. The code keeps the working title in its solution, projects and namespaces (`Helpers.slnx`, `Helpers.Core` and so on), and `HelpersInfo` holds the name, the tagline and the repository address.
 
 ## Setting up a new PC
 
 1. Install [Git](https://git-scm.com/download/win), the [.NET 10 SDK](https://dotnet.microsoft.com/download), and [VS Code](https://code.visualstudio.com/) with the C# Dev Kit extension. Use the direct installers; `winget` has hung on one PC while refreshing its index.
-2. Clone somewhere that isn't synced by Dropbox, OneDrive or Google Drive, for example `C:\Code\helpers`:
+2. Clone somewhere that isn't synced by Dropbox, OneDrive or Google Drive, for example `C:\Code\unmuddle`:
 
    ```
-   git clone https://github.com/drhumphrey/helpers.git
-   cd helpers
+   git clone https://github.com/drhumphrey/unmuddle.git
+   cd unmuddle
    ```
 
 3. Make your commits use your private GitHub address, not a work one:
@@ -27,7 +29,7 @@ Everything needed to pick the project up on a fresh PC and carry on: setting up,
    dotnet run --project src/Helpers.App
    ```
 
-5. The first run downloads the voice (350 MB). The local AI model (2.5 GB) and the dictionary (10 MB) download when first used. They live under `%LOCALAPPDATA%\Helpers\models` and survive rebuilds.
+5. The first run downloads the voice (350 MB). The local AI model (2.5 GB) and the dictionary (10 MB) download when first used. They live under `%LOCALAPPDATA%\Unmuddle\models` and survive rebuilds.
 6. Optional: the [GitHub CLI](https://cli.github.com/) (`gh auth login`) for releases and pull requests from the terminal; [Inno Setup 6](https://jrsoftware.org/isdl.php) to build the installer locally.
 
 The Windows spell checker needs Windows' English (United Kingdom) language features. Without them the spelling tests do nothing and Compose says spelling is off.
@@ -55,16 +57,18 @@ The Windows spell checker needs Windows' English (United Kingdom) language featu
 
 | What | Where |
 |---|---|
-| Settings, including the unsent Compose draft | `%APPDATA%\Helpers\settings.json` |
-| The user's own spelling words | `%APPDATA%\Helpers\dictionary.txt` |
-| Voice, local AI model, dictionary data | `%LOCALAPPDATA%\Helpers\models` (`kokoro-multi-lang-v1_0`, `llm`, `wordnet`) |
-| Claude API key | Windows Credential Manager, generic credential `Helpers/anthropic-api-key` |
-| Start with Windows | `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`, value `Helpers` |
-| Installed app | `%LOCALAPPDATA%\Programs\Helpers` (where the installer puts it) |
+| Settings, including the unsent Compose draft | `%APPDATA%\Unmuddle\settings.json` |
+| The user's own spelling words | `%APPDATA%\Unmuddle\dictionary.txt` |
+| Voice, local AI model, dictionary data | `%LOCALAPPDATA%\Unmuddle\models` (`kokoro-multi-lang-v1_0`, `llm`, `wordnet`) |
+| Claude API key | Windows Credential Manager, generic credential `Unmuddle/anthropic-api-key` |
+| Start with Windows | `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`, value `Unmuddle` |
+| Installed app | `%LOCALAPPDATA%\Programs\Unmuddle` (where the installer puts it) |
+
+Copies from the Helpers days used the same places under the name Helpers. On every start, before anything reads its settings, `Program.Main` moves them across: both folders (only if the new one doesn't exist yet), the saved Claude key (the old one is removed once the new one is saved), and the start-up entry. The installer keeps the old AppId, so it replaces a Helpers install, and it removes the old program folder and Start menu folder.
 
 ## Developer switches
 
-Pass these to `Helpers.App.exe`, or after `--` with `dotnet run --project src/Helpers.App --`. They let you check a part without clicking through the app.
+Pass these to `Unmuddle.exe`, or after `--` with `dotnet run --project src/Helpers.App --`. They let you check a part without clicking through the app.
 
 | Switch | What it does |
 |---|---|
@@ -107,7 +111,7 @@ The full acceptance list, app by app, is in [BRIEF.md](BRIEF.md).
    git push origin v0.2.0
    ```
 
-3. The Release workflow tests, publishes a self-contained win-x64 build, drops debug symbols and other platforms' native libraries, zips it, builds the installer with Inno Setup, writes `version.json` with the SHA-256 of both files, records a build attestation for all three (anyone can check one with `gh attestation verify <file> --repo drhumphrey/helpers`), and attaches them to a GitHub release with the notes from `docs/releases`. About ten minutes.
+3. The Release workflow tests, publishes a self-contained win-x64 build, drops debug symbols and other platforms' native libraries, zips it, builds the installer with Inno Setup, writes `version.json` with the SHA-256 of both files, records a build attestation for all three (anyone can check one with `gh attestation verify <file> --repo drhumphrey/unmuddle`), and attaches them to a GitHub release with the notes from `docs/releases`. About ten minutes.
 4. Copies with the update check switched on see the new version within a day.
 
 To build the same thing locally:
@@ -120,7 +124,7 @@ Then delete `out/publish/win-x64/*.pdb`. With Inno Setup installed: `iscc instal
 
 **When a downloaded model changes**, its checksum in the code must change too, or the download is refused: the voice in `src/Helpers.Speech/KokoroEngine.cs`, the local models in `src/Helpers.Ai/LocalModels.cs`, the dictionary in `src/Helpers.Core/Words/WordNet.cs`. Take the SHA-256 from the publisher (GitHub release assets show a digest; Hugging Face shows it on the file page) and check it against your own download.
 
-**Trying an update without a release.** The quiet install and restart can be tried on one PC: publish as above, build two installers with different `/DVersion` values, install the first with `/VERYSILENT /MERGETASKS="!startup"`, start it, then run `cmd.exe` with the arguments `UpdateCheck.HandOverArguments` gives for the second installer and the installed exe, and close the app. The uninstall entry should then show the second version, and the app should start again within half a minute. Remove it with `unins000.exe /VERYSILENT` in the install folder. Stop the development copy first, because the uninstaller ends every `Helpers.App.exe`.
+**Trying an update without a release.** The quiet install and restart can be tried on one PC: publish as above, build two installers with different `/DVersion` values, install the first with `/VERYSILENT /MERGETASKS="!startup"`, start it, then run `cmd.exe` with the arguments `UpdateCheck.HandOverArguments` gives for the second installer and the installed exe, and close the app. The uninstall entry should then show the second version, and the app should start again within half a minute. Remove it with `unins000.exe /VERYSILENT` in the install folder. Stop the development copy first, because the uninstaller ends every `Unmuddle.exe`.
 
 ## Dependabot and code scanning
 
@@ -170,7 +174,7 @@ Then delete `out/publish/win-x64/*.pdb`. With Inno Setup installed: `iscc instal
 **Installer**
 
 - Inno Setup's install-mode dialog offered "Install for all users". That registers the app machine-wide while the files still go in one user's folder, and the update check only recognises a per-user install. The dialog is gone; every install is per-user.
-- The uninstaller ends every `Helpers.App.exe` by name, including a development copy run from `bin`.
+- The uninstaller ends every `Unmuddle.exe` by name, including a development copy run from `bin`.
 
 **AI**
 

@@ -1,18 +1,48 @@
 using System.Runtime.InteropServices;
+using Helpers.Core;
 using Helpers.Core.Ai;
 
 namespace Helpers.Windows;
 
 /// <summary>
-/// Secrets in Windows Credential Manager, under "Helpers/name". The API key
+/// Secrets in Windows Credential Manager, under "Unmuddle/name". The API key
 /// never touches the settings file. Generic credentials, per user, encrypted
 /// by Windows with the user's sign-in.
 /// </summary>
-public sealed class CredentialStore : ISecretStore
+public sealed class CredentialStore(string prefix = HelpersInfo.Name) : ISecretStore
 {
     private const uint CRED_TYPE_GENERIC = 1;
     private const uint CRED_PERSIST_LOCAL_MACHINE = 2;
     private const int ERROR_NOT_FOUND = 1168;
+
+    /// <summary>
+    /// Moves a secret saved under the working title ("Helpers/name") to the current name, unless one is
+    /// there already. The old one is removed only once the new one is saved. Safe to run at every start.
+    /// </summary>
+    public static void MovePrevious(string name)
+    {
+        var previous = new CredentialStore(HelpersInfo.PreviousName);
+        var current = new CredentialStore();
+        try
+        {
+            var value = previous.Get(name);
+            if (value is null)
+            {
+                return;
+            }
+
+            if (current.Get(name) is null)
+            {
+                current.Set(name, value);
+            }
+
+            previous.Remove(name);
+        }
+        catch (InvalidOperationException)
+        {
+            // Windows refused: leave the old one where it is and try again next start.
+        }
+    }
 
     public string? Get(string name)
     {
@@ -73,7 +103,7 @@ public sealed class CredentialStore : ISecretStore
         }
     }
 
-    private static string Target(string name) => "Helpers/" + name;
+    private string Target(string name) => prefix + "/" + name;
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
     private struct CREDENTIAL

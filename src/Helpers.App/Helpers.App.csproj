@@ -2,6 +2,9 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net10.0-windows</TargetFramework>
+    <!-- The program is Unmuddle.exe; the code keeps its working title in namespaces. -->
+    <AssemblyName>Unmuddle</AssemblyName>
+    <RootNamespace>Helpers.App</RootNamespace>
     <Nullable>enable</Nullable>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>Assets\app.ico</ApplicationIcon>

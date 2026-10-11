@@ -1,6 +1,6 @@
 # Third-party notices
 
-Helpers is free software under the GNU GPL v3 or later. It is built on, bundles, or downloads the following. The same list is on the Privacy and licences page in Settings, and lives in code in `src/Helpers.Core/ThirdPartyNotices.cs`; keep the three in step.
+Unmuddle is free software under the GNU GPL v3 or later. It is built on, bundles, or downloads the following. The same list is on the Privacy and licences page in Settings, and lives in code in `src/Helpers.Core/ThirdPartyNotices.cs`; keep the three in step.
 
 | Component | Version | Licence | Used for |
 |---|---|---|---|
@@ -21,6 +21,6 @@ Helpers is free software under the GNU GPL v3 or later. It is built on, bundles,
 
 Parts of Windows the app uses as installed: the spell checker, Credential Manager, UI Automation, the clipboard.
 
-The font licence files are bundled next to the fonts in `src/Helpers.App/Assets/Fonts`. The hyphenation patterns keep their licence header in `src/Helpers.Core/Resources/hyph-en-gb.tex`. The voice, model and dictionary packages keep their own licence files where they are downloaded, under `%LOCALAPPDATA%\Helpers\models`.
+The font licence files are bundled next to the fonts in `src/Helpers.App/Assets/Fonts`. The hyphenation patterns keep their licence header in `src/Helpers.Core/Resources/hyph-en-gb.tex`. The voice, model and dictionary packages keep their own licence files where they are downloaded, under `%LOCALAPPDATA%\Unmuddle\models`.
 
 Open English WordNet attribution: Open English WordNet 2025, Global WordNet Association, CC BY 4.0, https://github.com/globalwordnet/english-wordnet, derived from Princeton WordNet 3.0, Princeton University.
