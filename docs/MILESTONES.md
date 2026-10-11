@@ -303,3 +303,13 @@ Dave chose the name after looking at a few. Hark was the favourite until a searc
 - The program's name is the assembly name, and every `avares://` resource address uses it, so they all moved to `avares://Unmuddle/`.
 - The first scripted replacements in the docs and the capture script failed on the backslashes in paths, and were redone from a file.
 - The look on the second PC was Calm by the time of the rename (it was Custom earlier that night), so the retaken pictures came out blue beside the others. The capture script now sets the same Custom look for every picture.
+
+Afterwards the local checkout moved from `C:\Code\helpers` to `C:\Code\unmuddle`, to match; it rebuilt and passed every test from there.
+
+## v0.2.0 released (11 October 2026)
+
+Tagged at Dave's word, the first release as Unmuddle. The Release run passed first time, including the new attestation step: installer 51.9 MB, zip 77.8 MB, and `version.json`, marked as the latest release.
+
+**Checked from the second PC:** the app's update address returns 0.2.0, and so does the old Helpers address through GitHub's redirect, so a 0.1.0 copy with the check switched on will be offered it. The installer downloaded from the address in `version.json` matched its checksum. `gh attestation verify` passed: SLSA provenance from `.github/workflows/release.yml` at `refs/tags/v0.2.0` in `drhumphrey/unmuddle`. The repository's description and topics now say what Unmuddle is.
+
+**Not done, on purpose:** 0.2.0 isn't installed on the second PC, which runs the development copy; two copies would fight over the shortcuts. Install it there when the next version is ready to try the update for real.

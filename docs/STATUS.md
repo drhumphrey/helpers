@@ -4,7 +4,7 @@ Where the project stands, what's been checked, what hasn't, and what comes next.
 
 ## In one line
 
-The app is now called **Unmuddle**, "making sense of what you read and write" (11 October 2026; it was Helpers). Version 0.1.0 is released on GitHub as Helpers (10 October 2026), and 0.2.0, the first as Unmuddle, is ready to release. It works on both PCs: reading aloud, the Read button, Compose, the AI helpers on the PC and on Claude, the word tools, settings, the installer and an opt-in update check. Some parts haven't been tried by a user yet.
+The app is now called **Unmuddle**, "making sense of what you read and write" (11 October 2026; it was Helpers). Version 0.2.0, the first as Unmuddle, is released on GitHub (11 October 2026), after 0.1.0 as Helpers (10 October 2026). It works on both PCs: reading aloud, the Read button, Compose, the AI helpers on the PC and on Claude, the word tools, settings, the installer and an opt-in update check. Some parts haven't been tried by a user yet.
 
 ## Built
 
@@ -15,7 +15,7 @@ The app is now called **Unmuddle**, "making sense of what you read and write" (1
 | 4 | Selection capture and Ctrl+Alt+Space | Done, checked in Teams, VS Code, Chrome and Outlook |
 | 5 | Read button and styled quick menu | Done |
 | 6 | Tabbed Settings, pronunciations, readable text, Start with Windows | Done |
-| 7 | Packaging: installer, release workflow, welcome screen | Done. v0.1.0 released; the released installer was downloaded, checked against its published checksum, installed silently over an existing copy, registered with Windows, and started |
+| 7 | Packaging: installer, release workflow, welcome screen | Done. v0.1.0 released as Helpers, v0.2.0 as Unmuddle, each checked from the published release; from 0.2.0, every release file has a build attestation |
 | 8 | Compose: spelling, Read back, Send to chat, drafts, Edit and Put it back, Paste on the Read button | Done |
 | 9 | AI helpers: Check my thinking, Tidy, Make a request; on this PC (Qwen3 4B) and Claude | Done for those three actions |
 | 10 | Claude provider, key storage, cost shown, first-use confirmation | Built early, as part of 9 |
@@ -69,9 +69,9 @@ The app is now called **Unmuddle**, "making sense of what you read and write" (1
 
 ## Next, in order
 
-1. **Release 0.2.0,** the first as Unmuddle, with the update fix that was going to be 0.1.1. The version is set and the notes are written; the tag is Dave's call. Copies of 0.1.0 can't update themselves, so they need 0.2.0 installed by hand. Try the update check for real when the next version comes.
-2. **On GitHub:** add topics and a description for Unmuddle. Private vulnerability reporting, Dependabot alerts and secret scanning with push protection are on.
-3. **Promotion,** once 0.2.0 is out: a short demo animation in the README, then a few posts.
+1. **Promotion:** a short demo animation in the README, then a few posts.
+2. **Copies of Helpers 0.1.0** (the first PC, if it's still there) can't update themselves: install 0.2.0 by hand from the [Releases page](https://github.com/drhumphrey/unmuddle/releases).
+3. **Try the update check for real** when the next version comes: install 0.2.0 first (the second PC runs the development copy only), then let it update.
 4. **Try everything under "Not tried yet"**, fix what turns up, and log it.
 5. **Code signing.** Unsigned for now, with build attestations instead. Apply to SignPath once Unmuddle has visible use ([CODE-SIGNING.md](CODE-SIGNING.md)).
 6. **Summarise and Explain simply** buttons, and the player's result card.
