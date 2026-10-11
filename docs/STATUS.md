@@ -19,7 +19,7 @@ Version 0.1.0 is released on GitHub (10 October 2026) and works on the PC it was
 | 8 | Compose: spelling, Read back, Send to chat, drafts, Edit and Put it back, Paste on the Read button | Done |
 | 9 | AI helpers: Check my thinking, Tidy, Make a request; on this PC (Qwen3 4B) and Claude | Done for those three actions |
 | 10 | Claude provider, key storage, cost shown, first-use confirmation | Built early, as part of 9 |
-| Extras | Word tools, Privacy and licences page, opt-in update check, code scanning, Dependabot | Done |
+| Extras | Word tools, Privacy and licences page, opt-in update check, code scanning, Dependabot, a how-to guide with pictures ([GUIDE.md](GUIDE.md)) | Done |
 
 267 Core tests and 3 Windows tests pass, on both PCs. Every push builds and is scanned on GitHub.
 
@@ -72,7 +72,7 @@ Version 0.1.0 is released on GitHub (10 October 2026) and works on the PC it was
 1. **Release 0.1.1.** The version is set and the notes are written; the tag is Dave's call. Copies of 0.1.0 can't update themselves, so they need 0.1.1 installed by hand. Try the update check for real when the next version comes.
 2. **On GitHub:** add topics. Private vulnerability reporting, Dependabot alerts and secret scanning with push protection are on.
 3. **Try everything under "Not tried yet"**, fix what turns up, and log it.
-4. **Code signing.** SignPath's free open-source plan now that the repository is public, or Microsoft Trusted Signing.
+4. **Code signing.** No free route is open yet ([CODE-SIGNING.md](CODE-SIGNING.md)). Get ready now and apply to SignPath once Helpers has visible use, or buy a Certum certificate and sign each release by hand. Dave's call.
 5. **Summarise and Explain simply** buttons, and the player's result card.
 6. **A browser extension** for Chrome and Edge, to put Read and Edit on the right-click menu.
 7. **A product name.** "Helpers" is a working title.

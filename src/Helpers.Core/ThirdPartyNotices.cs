@@ -13,7 +13,7 @@ public static class ThirdPartyNotices
     public static readonly ThirdPartyComponent[] Components =
     [
         new(".NET runtime", "10", "MIT", "The platform the app runs on, bundled with the install.", "https://github.com/dotnet/runtime", false, "None."),
-        new("Avalonia", "12.1.3", "MIT", "The user interface, with its Fluent theme and colour picker.", "https://github.com/AvaloniaUI/Avalonia", false, "None."),
+        new("Avalonia", "12.1.4", "MIT", "The user interface, with its Fluent theme and colour picker.", "https://github.com/AvaloniaUI/Avalonia", false, "None."),
         new("sherpa-onnx", "1.13.8", "Apache-2.0", "Runs the voice on this PC. Includes ONNX Runtime (MIT) and espeak-ng's phoneme data (GPL-3.0).", "https://github.com/k2-fsa/sherpa-onnx", false, "None. The voice package is downloaded once from the sherpa-onnx GitHub release over HTTPS."),
         new("Kokoro voice", "v1.0", "Apache-2.0", "The voice itself, by hexgrad, with its British pronunciation list from misaki.", "https://huggingface.co/hexgrad/Kokoro-82M", false, "None once downloaded."),
         new("NAudio", "3.1.0", "MIT", "Plays the audio.", "https://github.com/naudio/NAudio", false, "None."),

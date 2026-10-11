@@ -125,7 +125,7 @@ Then delete `out/publish/win-x64/*.pdb`. With Inno Setup installed: `iscc instal
 ## Dependabot and code scanning
 
 - Dependabot proposes updates once a month, minor and patch versions grouped into one pull request per ecosystem; major versions come one at a time.
-- Library updates need the app run, not just the tests: start it, read something, open Compose, run `--ai-test`, then merge.
+- Library updates need the app run, not just the tests: start it, read something, open Compose, run `--ai-test`, then merge. Change the library's version in `ThirdPartyNotices` and `docs/THIRD-PARTY-NOTICES.md` too: the Privacy and licences page shows it.
 - Test-tool updates need the build log checked: it must still say 261 and 3 tests ran, because a test runner that finds no tests still passes.
 - CodeQL results are under the repository's Security tab. `.github/codeql/codeql-config.yml` leaves out three checks that flag the design rather than problems: calls into Windows (two checks) and every `Path.Combine`.
 - Dependabot alerts, secret scanning with push protection, and private vulnerability reporting are on. Push protection refuses a push that contains a key.

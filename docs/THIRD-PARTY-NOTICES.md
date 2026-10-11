@@ -5,7 +5,7 @@ Helpers is free software under the GNU GPL v3 or later. It is built on, bundles,
 | Component | Version | Licence | Used for |
 |---|---|---|---|
 | .NET runtime | 10 | MIT | The platform, bundled with the install |
-| Avalonia, with its Fluent theme and colour picker | 12.1.3 | MIT | The user interface |
+| Avalonia, with its Fluent theme and colour picker | 12.1.4 | MIT | The user interface |
 | sherpa-onnx (includes ONNX Runtime, MIT, and espeak-ng phoneme data, GPL-3.0) | 1.13.8 | Apache-2.0 | Running the voice on this PC |
 | Kokoro voice, by hexgrad, with misaki's British pronunciation list | v1.0 | Apache-2.0 | The voice; the word tools' pronunciations |
 | NAudio | 3.1.0 | MIT | Playing audio |

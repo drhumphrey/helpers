@@ -8,6 +8,8 @@
 
 ![The reading view: an AI reply read aloud, with the current sentence and word highlighted](docs/images/player.png)
 
+**New to Helpers?** The [how-to guide](docs/GUIDE.md) shows every part, step by step, with pictures.
+
 ## Why
 
 AI assistants are brilliant. Working with them means reading a lot of long text and typing a lot of careful requests. That's hard work when you're tired, short on time, not a natural typist, writing in a second language, or simply better at thinking out loud than putting thoughts in order on the page.

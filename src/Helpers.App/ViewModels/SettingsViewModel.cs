@@ -233,7 +233,7 @@ public sealed class SettingsViewModel : ObservableObject
 
     public ObservableCollection<PronunciationEntry> Pronunciations { get; }
 
-    public string SettingsFile => _store.FilePath;
+    public string SettingsFile => FriendlyPath(_store.FilePath);
 
     /// <summary>Set by the app so a change here reaches the toast window.</summary>
     public Action<bool>? MessagesFollowFocusChanged { get; set; }
@@ -1002,11 +1002,17 @@ public sealed class SettingsViewModel : ObservableObject
     /// <summary>Download shows only when there is something to download.</summary>
     public bool CanDownload => !_isDownloading && !_assistant.LocalModelDownloaded;
 
-    /// <summary>"%LOCALAPPDATA%\Helpers\models\llm" rather than a path with the user's name in it.</summary>
+    /// <summary>"%LOCALAPPDATA%\Helpers\models\llm" or "%APPDATA%\Helpers\settings.json" rather than a path with the user's name in it.</summary>
     private static string FriendlyPath(string path)
     {
         var local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-        return path.StartsWith(local, StringComparison.OrdinalIgnoreCase) ? "%LOCALAPPDATA%" + path[local.Length..] : path;
+        var roaming = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        if (path.StartsWith(local, StringComparison.OrdinalIgnoreCase))
+        {
+            return "%LOCALAPPDATA%" + path[local.Length..];
+        }
+
+        return path.StartsWith(roaming, StringComparison.OrdinalIgnoreCase) ? "%APPDATA%" + path[roaming.Length..] : path;
     }
 
     public async Task DownloadLocalModelAsync()

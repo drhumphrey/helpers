@@ -6,7 +6,7 @@ They only ever capture or message the app's own windows, found by exact title an
 
 | Script | What it does |
 |---|---|
-| `capture.ps1` | The whole run: backs up your settings, plants a made-up draft, mutes the voice, opens Compose (with Check my thinking), the player, the word tools, the Read button and the welcome screen in turn, captures each, puts your settings back, and writes cleaned images to `docs/images`. |
+| `capture.ps1` | The whole run: backs up your settings, plants a made-up draft and the app's default lists, mutes the voice, opens Compose (with Check my thinking), the player large and small, the word tools, the Read button, the menu, the welcome screen and each Settings page in turn, captures each, puts your settings back, and writes cleaned images to `docs/images` for the README and the how-to guide. Compose shows the app that was in front as "Sending to": check it before committing. |
 | `shot.ps1` | Captures one of the app's windows by its exact title, through `PrintWindow`, so it works even with other windows in front. |
 | `clean.ps1` | Makes the near-black margin around a capture transparent, so the image sits well on light and dark pages. |
 | `post-right-click.ps1` | Posts a right-click to one of the app's own windows at a point, lists any window that opens (such as a context menu), captures it, then closes it. For checking menus. |

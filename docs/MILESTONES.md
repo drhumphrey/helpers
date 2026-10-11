@@ -266,3 +266,18 @@ Tagged and released at Dave's word. Before the tag: the release workflow was giv
 **Tried on the second PC:** a Release publish, and two installers built from it with Inno Setup, labelled 0.1.1 and 0.1.2. 0.1.1 installed quietly for the user only: a per-user uninstall entry, nothing machine-wide, and no start-up entry with the task left out, which confirms yesterday's installer fix. With 0.1.1 running, the exact hand-over line ran the 0.1.2 installer while the app closed. Windows recorded 0.1.2, and the app started again 23 seconds after the hand-over. The test copy was uninstalled afterwards; settings unchanged, downloads kept.
 
 **Not tried:** the check and the download against a real GitHub release. That needs 0.1.1 installed and a newer version published.
+
+## A how-to guide, and code signing looked into (11 October 2026)
+
+Dave: "so far everything works well", and asked for more of a summary and a how-to guide with pictures, and for code signing.
+
+**The guide** is `docs/GUIDE.md`, linked from the top of the README. It starts with a table of what you want and what to do, then takes each part in turn: getting started, hearing text, the player, Compose, Edit and Put it back, the AI helpers, the word tools, every Settings page, updates, and what to do when something isn't working. It has 15 pictures. The capture script now also takes the small player, the menu and every Settings page. It plants the app's default lists of pronunciations and left-out apps instead of the user's own, and shows an ordinary volume on the Voice page.
+
+**Found while taking them:**
+
+- The Start-up page showed the settings file's full path, Windows user name included. It now shows `%APPDATA%\Helpers\settings.json`, as the AI page already did for the model folder.
+- The Privacy and licences page still said Avalonia 12.1.3. It says 12.1.4 now, in the notices file too, and the handbook says to change both with each library update.
+- The new Compose picture named the app that happened to be in front, and the local model hadn't finished after a minute, so the README keeps its Compose picture. The script now warns to check that line.
+- The menu came out hidden until it was captured at once. Tidy is left out of the default run, because the local model may not finish in time.
+
+**Code signing,** researched: no free route is open yet. SignPath's free plan wants visible use first, and has turned down projects with far more downloads; Microsoft's service takes individuals only in the US and Canada; a Certum certificate works now but signs by hand. Two catches for any route: Inno Setup's temporary installer file needs signing too, and about 70 of the libraries Helpers ships are unsigned, which Smart App Control may block whatever the installer carries. The options, sources and plan are in `docs/CODE-SIGNING.md`; the choice is Dave's.

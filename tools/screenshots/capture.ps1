@@ -10,13 +10,18 @@
 #
 #   powershell -NoProfile -File tools\screenshots\capture.ps1
 #   powershell -NoProfile -File tools\screenshots\capture.ps1 -Exe out\publish\win-x64\Helpers.App.exe
-
-#   powershell -NoProfile -File tools\screenshots\capture.ps1 -Only pill,word
+#
+# A list for -Only needs -Command: under -File, Windows PowerShell passes "pill,word" as one string.
+#   powershell -NoProfile -Command "& '.\tools\screenshots\capture.ps1' -Only pill,word"
 param(
     [string] $Exe = (Join-Path $env:LOCALAPPDATA 'Programs\Helpers\Helpers.App.exe'),
     [string] $OutDir = (Join-Path $PSScriptRoot '..\..\docs\images'),
     [int] $AiWaitSeconds = 45,
-    [string[]] $Only = @('compose', 'player', 'word', 'pill', 'welcome')
+    [string[]] $Only = @(
+        'compose', 'player', 'word', 'pill', 'welcome',
+        'player-mini', 'menu',
+        'settings-voice', 'settings-reading', 'settings-readbutton', 'settings-look',
+        'settings-player', 'settings-ai', 'settings-startup', 'settings-privacy')
 )
 
 $ErrorActionPreference = 'Stop'
@@ -49,12 +54,22 @@ function Start-Helpers([string[]] $Arguments) {
     Start-Process -FilePath $Exe -ArgumentList $quoted | Out-Null
 }
 
-function Capture([string] $Title, [string] $Name, [int] $WaitSeconds, [string[]] $Arguments) {
+function Set-Planted([hashtable] $Values) {
+    $planted = Get-Content $settings -Raw | ConvertFrom-Json
+    foreach ($key in $Values.Keys) {
+        $planted | Add-Member -NotePropertyName $key -NotePropertyValue $Values[$key] -Force
+    }
+
+    $planted | ConvertTo-Json -Depth 20 | Set-Content $settings -Encoding UTF8
+}
+
+function Capture([string] $Title, [string] $Name, [int] $WaitSeconds, [string[]] $Arguments, [hashtable] $Set = @{}) {
     if ($Only -notcontains $Name) {
         return
     }
 
     Stop-Helpers
+    if ($Set.Count -gt 0) { Set-Planted $Set }
     Start-Helpers $Arguments
     $raw = Join-Path $work ($Name + '.png')
     $deadline = (Get-Date).AddSeconds($WaitSeconds + 20)
@@ -80,15 +95,32 @@ try {
     $json | Add-Member -NotePropertyName Volume -NotePropertyValue 0.0 -Force
     $json | Add-Member -NotePropertyName FirstRunDone -NotePropertyValue $true -Force
     $json | Add-Member -NotePropertyName PlayerExpanded -NotePropertyValue $true -Force
+    # The Settings pages show these lists, so the shots use the app's defaults, not the user's own.
+    $json | Add-Member -NotePropertyName ExcludedApps -NotePropertyValue @('1Password', 'Bitwarden', 'KeePass', 'KeePassXC', 'mstsc') -Force
+    if ($json.Reading) { $json.Reading.PSObject.Properties.Remove('PronunciationEntries') }
     New-Item -ItemType Directory -Force -Path (Split-Path $settings) | Out-Null
     $json | ConvertTo-Json -Depth 20 | Set-Content $settings -Encoding UTF8
 
+    # Compose names the app that was in front as "Sending to". Check it shows nothing private before committing.
+    # Tidy isn't in the default list: on a slower PC the local model may not finish in time. Ask for it with -Only tidy.
     Capture 'Compose' 'compose' $AiWaitSeconds @('--compose-check')
-    Capture 'Helpers player' 'player' 14 @('--read-file', $reply)
+    Capture 'Compose' 'tidy' $AiWaitSeconds @('--compose-tidy')
+    Capture 'Helpers player' 'player' 14 @('--read-file', $reply) @{ PlayerExpanded = $true }
+    Capture 'Helpers player' 'player-mini' 10 @('--read-file', $reply) @{ PlayerExpanded = $false }
     Capture 'Word' 'word' 10 @('--lookup', 'necessary')
     # The Read button hides after three seconds, so start looking straight away.
     Capture 'Helpers read button' 'pill' 0 @('--pill')
+    Capture 'Helpers menu' 'menu' 0 @('--menu')
     Capture 'Welcome to Helpers' 'welcome' 8 @('--first-run')
+
+    $pages = [ordered]@{
+        'settings-voice' = 'Voice'; 'settings-reading' = 'Reading'; 'settings-readbutton' = 'Read button'; 'settings-look' = 'Look'
+        'settings-player' = 'Player'; 'settings-ai' = 'AI'; 'settings-startup' = 'Start-up'; 'settings-privacy' = 'Privacy and licences'
+    }
+    foreach ($page in $pages.GetEnumerator()) {
+        # Nothing plays on these pages, so the Voice page can show an ordinary volume rather than the muted one.
+        Capture 'Helpers settings' $page.Key 6 @('--settings', $page.Value) @{ Volume = 0.8 }
+    }
 }
 finally {
     Stop-Helpers
